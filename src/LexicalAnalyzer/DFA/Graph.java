@@ -185,13 +185,13 @@ public class Graph {
 
             Lexicon reStr = this.getLexicon(str);
             if(reStr == null && ((int) c != 65535)) {
-                throw new UnrecognizedCharacterException(pos);
+                throw new UnrecognizedCharacterException(pos, token);
             }
             Integer nextState = tst.get(state).get(reStr);
             if(nextState == null || nextState == -1) {
                 // Are we done or at error
                 if(!nodes.get(state).isLeaf()) {
-                    throw new InvalidCharacterException(pos);
+                    throw new InvalidCharacterException(pos, token);
                 } else {
                     POS partOfSpeech = new POS(token, nodes.get(state).getType());
 
