@@ -20,13 +20,22 @@ public class Graph {
 
     HashMap<Integer, HashMap<Lexicon, Integer>> tst;
 
+    HashMap<Lexicon, Integer> header;
+
 
     public Graph(Node n){
         nodes = new HashMap<>();
         edges = new HashMap<>();
         this.root = n;
         this.addNode(n);
+
+        header = new HashMap<>();
+
+        for(Lexicon lex : Lexicon.values()) {
+            header.put(lex, -1);
+        }
     }
+
 
     public void addNode(Node n) {
         nodes.put(n.getID(), n);
@@ -42,21 +51,14 @@ public class Graph {
         edges.get(s.getID()).add(new Edge(s, d, t));
     }
 
-    public void addEdge(int s, int d, Lexicon t) throws Exception {
+    public void addEdge(int s, int d, Lexicon t) {
         Node source = nodes.get(s);
         Node dest = nodes.get(d);
-
-        if(source == null || dest == null) {
-            throw new Exception();
-        } else {
-            this.addEdge(source, dest, t);
-
-
-        }
+        this.addEdge(source, dest, t);
     }
 
 
-    public void buildTST(HashMap<Lexicon, Integer> row) {
+    public void buildTST() {
         ArrayList<Integer> visited = new ArrayList<>();
         Stack<Node> s = new Stack<>();
         s.push(nodes.get(0));
@@ -71,7 +73,7 @@ public class Graph {
 
             HashMap<Lexicon, Integer> uRow = tst.get(u.getID());
             if(uRow == null) {
-                uRow = new HashMap<>(row);
+                uRow = new HashMap<>(header);
             }
 
             ArrayList<Edge> es = edges.get(u.getID());
@@ -81,7 +83,7 @@ public class Graph {
                 tst.put(u.getID(), uRow);
 
                 if(tst.get(v.getID()) == null) {
-                    tst.put(v.getID(), new HashMap<>(row));
+                    tst.put(v.getID(), new HashMap<>(header));
                 }
 
                 s.push(v);
@@ -91,7 +93,15 @@ public class Graph {
 
 
     public String toString() {
+        if(tst == null) {
+            buildTST();
+        }
+
         String output = "";
+        if(tst.get(0) == null) {
+            return output;
+        }
+
 
         output += String.format("%s\t\t", "IS");
         output += String.format("%s\t\t", "Fin");
@@ -124,13 +134,17 @@ public class Graph {
     public Lexicon getLexicon(String s) {
 
         String l = "[a-zA-Z]";
-        String d = "[0-9]";
+        String z = "[0]";
+        String nz = "[1-9]";
 
         if(s.matches(l)) {
             return Lexicon.LETTER;
         }
-        if(s.matches(d)) {
-            return Lexicon.DIGIT;
+        if(s.matches(z)) {
+            return Lexicon.ZERO;
+        }
+        if(s.matches(nz)) {
+            return Lexicon.NZERO;
         }
         for(Lexicon val :Lexicon.values()) {
             if(val.toString().equals(s)) {
@@ -141,43 +155,26 @@ public class Graph {
 
     }
 
-    public String changeRange(Lexicon s) {
-
-        String l = "[a-zA-Z]";
-        String d = "[0-9]";
-        String cr = "\r";
-        String lf = "\n";
-        String tab = "\t";
-        String sp = " ";
-
-        if(s == Lexicon.LETTER) {
-            return "l";
-        }
-        if(s == Lexicon.DIGIT) {
-            return "d";
-        }
-        if(s == Lexicon.CR) {
-            return "cr";
-        }
-        if(s == Lexicon.LF) {
-            return "lf";
-        }
-        if(s == Lexicon.TAB) {
-            return "tb";
-        }
-        if(s == Lexicon.SPACE) {
-            return "sp";
-        }
-        return s.toString();
-
-    }
 
     public POS getNextToken(RandomAccessFile filePointer, Position pos) throws Exception {
+
+        if(tst == null) {
+            buildTST();
+        }
+
+
+
         Integer state = 0;
 
         String str = "";
         String token = "";
+
+        if(tst.get(0) == null) {
+            throw new InvalidCharacterException(pos, token);
+        }
+
         while(true) {
+
 
             char c = (char) filePointer.read();
             pos.incChar();

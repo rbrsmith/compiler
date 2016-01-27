@@ -10,24 +10,14 @@ public class Position {
         this.character = 0;
     }
 
-    public int getLineNumber() {
-        return lineNumber;
-    }
-
-    public int getCharacter() {
-        return character;
-    }
-
-    public void incLine() {
-        this.lineNumber +=1;
-    }
-
     public void incChar() {
         this.character += 1;
     }
 
     public void decChar() {
-        this.character -= 1;
+        if(getChar() > 0) {
+            this.character -= 1;
+        }
     }
 
     public void newLine() {
@@ -35,8 +25,16 @@ public class Position {
         this.lineNumber +=1;
     }
 
+    public int getLine() {
+        return this.lineNumber;
+    }
+
+    public int getChar() {
+        return this.character;
+    }
+
     public String toString() {
-        return "Line: " + this.lineNumber + ", Character: " + this.character;
+        return "Line: " + getLine() + ", Character: " + getChar();
     }
 
 }

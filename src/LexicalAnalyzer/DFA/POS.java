@@ -3,9 +3,9 @@ package LexicalAnalyzer.DFA;
 public class POS {
 
     private String token;
-    private String type;
+    private Token type;
 
-    public POS(String token, String type) {
+    public POS(String token, Token type) {
         this.token = token;
         this.type = type;
     }
@@ -14,7 +14,7 @@ public class POS {
         return this.token;
     }
 
-    public String getType() {
+    public Token getType() {
         return this.type;
     }
 
