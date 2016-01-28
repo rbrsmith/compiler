@@ -11,7 +11,8 @@ import org.junit.runners.Suite;
         PositionTest.class,
         GraphTest.class,
         IDTest.class,
-        NumberTest.class
+        NumberTest.class,
+        OperatorTest.class
 
 })
 

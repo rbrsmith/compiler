@@ -27,6 +27,7 @@ public class DFA {
         g.addNode(new Node(11));
         g.addNode(new Node(12, true, Token.FLOAT));
 
+
         g.addEdge(0,1,Lexicon.LETTER);
         g.addEdge(0,2,Lexicon.NZERO);
         g.addEdge(0,3,Lexicon.ZERO);
@@ -73,6 +74,19 @@ public class DFA {
         g.addEdge(12,12,Lexicon.NZERO);
 
 
+        g.addNode(new Node(13));
+        g.addNode(new Node(14, true, Token.EQUALS));
+
+        g.addEdge(0,13, Lexicon.EQUALS);
+        g.addEdge(13,14,Lexicon.EQUALS);
+
+        g.addNode(new Node(15, true, Token.LESS_THAN));
+        g.addNode(new Node(16, true, Token.NOT_EQUALS)); // or should it be greater than
+
+        g.addEdge(0,15,Lexicon.LESS_THAN);
+        g.addEdge(15,16,Lexicon.GREATER_THAN);
+
+        g.addEdge(0,16,Lexicon.GREATER_THAN);
 
 
 
@@ -99,6 +113,7 @@ public class DFA {
             }
             buffer.close();
         } catch(IOException e) {
+            System.out.println(e);
             System.out.println("Error reading file.");
         }
         return tags;
