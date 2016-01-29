@@ -5,20 +5,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Random;
-
 import static junit.framework.TestCase.assertTrue;
 
-public class IDTest {
+public class BracketTest {
 
-
-    HelperTest ht;
     File file;
     DFA dfa;
+    HelperTest ht;
 
 
     @Before
@@ -29,47 +23,49 @@ public class IDTest {
 
     @After
     public void tearDown() throws Exception {
-
     }
 
+
     @Test
-    public void simpleID() throws Exception {
-        String test = "TeSt";
+    public void curleyBracketsTest() throws Exception {
+        String test = "{";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
         assertTrue(tags.size() == 1);
         assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.ID);
+        assertTrue(tags.get(0).getType() == Token.OCB);
         ht.removeFile(file);
 
-        test = "supercalifragilisticexpialidocious";
+        test = "}";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
         assertTrue(tags.size() == 1);
         assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.ID);
+        assertTrue(tags.get(0).getType() == Token.CCB);
+        ht.removeFile(file);
+    }
+
+
+    @Test
+    public void squareBracketsTest() throws Exception {
+        String test = "[";
+        file = ht.makeFile(test);
+        ArrayList<POS> tags = dfa.getTags(file);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals(test));
+        assertTrue(tags.get(0).getType() == Token.OSB);
         ht.removeFile(file);
 
-        test = "cat7";
+        test = "]";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
         assertTrue(tags.size() == 1);
         assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.ID);
-        ht.removeFile(file);
-
-        String str1, str2;
-        str1 = "dog";
-        str2 = "}";
-        test = str1 + str2;
-        file = ht.makeFile(test);
-        tags = dfa.getTags(file);
-        assertTrue(tags.size() == 2);
-        assertTrue(tags.get(0).getToken().equals(str1));
-        assertTrue(tags.get(0).getType() == Token.ID);
+        assertTrue(tags.get(0).getType() == Token.CSB);
         ht.removeFile(file);
     }
 
 
 
 }
+

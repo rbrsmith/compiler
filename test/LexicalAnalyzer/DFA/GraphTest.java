@@ -15,29 +15,27 @@ public class GraphTest {
 
     Graph g;
     POS pos;
-    final String path = "test" + File.separator + "LexicalAnalyzer" + File.separator + "DFA" + File.separator + "test.txt";
     File file;
+    HelperTest ht;
 
     @Before
     public void setUp() throws Exception {
         g = new Graph(new Node(0));
+        ht = new HelperTest();
+        file = ht.makeFile("The first line");
 
-        PrintWriter writer = new PrintWriter(path, "UTF-8");
-        writer.println("The first line");
-        writer.close();
-        file = new File(path);
     }
 
     @After
     public void tearDown() throws Exception {
         g = null;
+        ht.removeFile(file);
     }
 
 
     @Test
     public void testSimpleCharacters() throws Exception {
         g.addNode(new Node(1, true, Token.ID));
-        assertTrue(file.canRead());
 
         RandomAccessFile buffer = new RandomAccessFile(file, "r");
         try {
@@ -60,6 +58,7 @@ public class GraphTest {
 
         try {
             g.getNextToken(buffer, new Position());
+            buffer.close();
             fail();
         } catch(InvalidCharacterException e){
             assertTrue(true);
@@ -75,6 +74,7 @@ public class GraphTest {
         g.getNextToken(buffer, position); // first
         g.getNextToken(buffer, position); // space
         assertTrue(g.getNextToken(buffer, position).getToken().equals("line"));
+        buffer.close();
     }
 
 }

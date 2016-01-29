@@ -45,7 +45,7 @@
             assertTrue(tags.get(0).getType() == Token.INTEGER);
             ht.removeFile(file);
 
-            test = "123.0";
+            test = "123.00";
             file = ht.makeFile(test);
             tags = dfa.getTags(file);
             assertTrue(tags.size() == 0);
@@ -55,7 +55,9 @@
             test = "0";
             file = ht.makeFile(test);
             tags = dfa.getTags(file);
-            assertTrue(tags.size() == 0);
+            assertTrue(tags.size() == 1);
+            assertTrue(tags.get(0).getToken().equals(test));
+            assertTrue(tags.get(0).getType() == Token.INTEGER);
             ht.removeFile(file);
 
         }
@@ -88,6 +90,15 @@
             ht.removeFile(file);
 
             test = "12345678987654321.1234567898764321";
+            file = ht.makeFile(test);
+            tags = dfa.getTags(file);
+            assertTrue(tags.size() == 1);
+            assertTrue(tags.get(0).getToken().equals(test));
+            assertTrue(tags.get(0).getType() == Token.FLOAT);
+            ht.removeFile(file);
+
+
+            test = "123.0";
             file = ht.makeFile(test);
             tags = dfa.getTags(file);
             assertTrue(tags.size() == 1);

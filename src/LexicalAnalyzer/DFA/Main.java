@@ -11,7 +11,10 @@ public class Main {
         } else {
             DFA dfa = new DFA();
             ArrayList<POS> tags = dfa.getTags(new File(args[0]));
-            System.out.println(tags);
+            dfa.cleanTags(tags);
+            for(POS t : tags) {
+                System.out.println(t);
+            }
         }
     }
 

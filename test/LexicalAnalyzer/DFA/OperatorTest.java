@@ -45,8 +45,6 @@ public class OperatorTest {
         assertTrue(tags.get(0).getToken().equals(test));
         assertTrue(tags.get(0).getType() == Token.EQUALS);
         ht.removeFile(file);
-
-
     }
 
     @Test
@@ -59,22 +57,29 @@ public class OperatorTest {
         assertTrue(tags.get(0).getType() == Token.NOT_EQUALS);
         ht.removeFile(file);
 
-        // TODO
-//        test = " >< ";
-//        file = ht.makeFile(test);
-//        tags = dfa.getTags(file);
-//        System.out.println(tags);
-//        assertTrue(tags.size() == 0);
+
+        test = " >< ";
+        file = ht.makeFile(test);
+        tags = dfa.getTags(file);
+        assertTrue(tags.size() == 4);
+        assertTrue(tags.get(1).getToken().equals(">"));
+        assertTrue(tags.get(1).getType().equals(Token.GREATER_THAN));
+
+
+        assertTrue(tags.get(2).getToken().equals("<"));
+        assertTrue(tags.get(2).getType().equals(Token.LESS_THAN));
+
     }
+
 
     @Test
     public void lessThanTest() throws Exception {
         String test = " < ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 1);
-        assertTrue(tags.get(0).getToken().equals("<"));
-        assertTrue(tags.get(0).getType() == Token.LESS_THAN);
+        assertTrue(tags.size() == 3);
+        assertTrue(tags.get(1).getToken().equals("<"));
+        assertTrue(tags.get(1).getType() == Token.LESS_THAN);
         ht.removeFile(file);
     }
 
@@ -83,14 +88,106 @@ public class OperatorTest {
         String test = " > ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
+        assertTrue(tags.size() == 3);
+        assertTrue(tags.get(1).getToken().equals(">"));
+        assertTrue(tags.get(1).getType() == Token.GREATER_THAN);
+        ht.removeFile(file);
+    }
+
+    @Test
+    public void lessThanEqualTest() throws Exception {
+        String test = "<=";
+        file = ht.makeFile(test);
+        ArrayList<POS> tags = dfa.getTags(file);
         assertTrue(tags.size() == 1);
-        assertTrue(tags.get(0).getToken().equals(">"));
-        // TODO
-//        assertTrue(tags.get(0).getType() == Token.NOT_EQUALS);
+        assertTrue(tags.get(0).getToken().equals("<="));
+        assertTrue(tags.get(0).getType() == Token.LESS_THAN_EQUALS);
+        ht.removeFile(file);
+    }
+
+    @Test
+    public void greaterThanEqualTest() throws Exception {
+        String test = ">=";
+        file = ht.makeFile(test);
+        ArrayList<POS> tags = dfa.getTags(file);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals(">="));
+        assertTrue(tags.get(0).getType() == Token.GREATER_THAN_EQUALS);
         ht.removeFile(file);
     }
 
 
+
+    @Test
+    public void subtractionTest() throws Exception {
+        String test = " - ";
+        file = ht.makeFile(test);
+        ArrayList<POS> tags = dfa.getTags(file);
+        assertTrue(tags.size() == 3);
+        assertTrue(tags.get(1).getToken().equals("-"));
+        assertTrue(tags.get(1).getType() == Token.SUBTRACTION);
+        ht.removeFile(file);
+    }
+
+    @Test
+    public void multiplyTest() throws Exception {
+        String test = " * ";
+        file = ht.makeFile(test);
+        ArrayList<POS> tags = dfa.getTags(file);
+        assertTrue(tags.size() == 3);
+        assertTrue(tags.get(1).getToken().equals("*"));
+        assertTrue(tags.get(1).getType() == Token.MULTIPLICATION);
+        ht.removeFile(file);
+    }
+
+    @Test
+    public void divideTest() throws Exception {
+        String test = " / ";
+        file = ht.makeFile(test);
+        ArrayList<POS> tags = dfa.getTags(file);
+        assertTrue(tags.size() == 3);
+        assertTrue(tags.get(1).getToken().equals("/"));
+        assertTrue(tags.get(1).getType() == Token.DIVISION);
+        ht.removeFile(file);
+    }
+
+    @Test
+    public void assignTest() throws Exception {
+        String test = "=";
+        file = ht.makeFile(test);
+        ArrayList<POS> tags = dfa.getTags(file);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals(test));
+        assertTrue(tags.get(0).getType() == Token.ASSIGNMENT);
+        ht.removeFile(file);
+
+    }
+
+
+    @Test
+    public void andTest() throws Exception {
+        String test = "&&";
+        file = ht.makeFile(test);
+        ArrayList<POS> tags = dfa.getTags(file);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals(test));
+        assertTrue(tags.get(0).getType() == Token.AND);
+        ht.removeFile(file);
+
+    }
+
+
+    @Test
+    public void orTest() throws Exception {
+        String test = "||";
+        file = ht.makeFile(test);
+        ArrayList<POS> tags = dfa.getTags(file);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals(test));
+        assertTrue(tags.get(0).getType() == Token.OR);
+        ht.removeFile(file);
+
+    }
 
 }
 

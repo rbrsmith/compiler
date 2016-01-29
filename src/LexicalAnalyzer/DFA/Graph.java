@@ -162,8 +162,6 @@ public class Graph {
             buildTST();
         }
 
-
-
         Integer state = 0;
 
         String str = "";
@@ -192,11 +190,13 @@ public class Graph {
                 } else {
                     POS partOfSpeech = new POS(token, nodes.get(state).getType());
 
-                    if(nodes.get(state).getType().equals("lf")) {
+                    if(nodes.get(state).getType() == Token.LINE_FEED) {
                         pos.newLine();
                     }
 
-                    filePointer.seek(filePointer.getFilePointer() - 1);
+                    if((int) c != 65535) {
+                        filePointer.seek(filePointer.getFilePointer() - 1);
+                    }
                     pos.decChar();
                     return partOfSpeech;
                 }

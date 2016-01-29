@@ -12,7 +12,11 @@ import org.junit.runners.Suite;
         GraphTest.class,
         IDTest.class,
         NumberTest.class,
-        OperatorTest.class
+        OperatorTest.class,
+        PunctuationTest.class,
+        BracketTest.class,
+        CommentTest.class,
+        SampleSourceTest.class
 
 })
 

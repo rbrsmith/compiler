@@ -1,24 +1,28 @@
 package LexicalAnalyzer.DFA;
 
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
 
 import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
 
-public class IDTest {
+public class CommentTest {
 
-
-    HelperTest ht;
     File file;
     DFA dfa;
+    HelperTest ht;
 
 
     @Before
@@ -29,47 +33,40 @@ public class IDTest {
 
     @After
     public void tearDown() throws Exception {
-
     }
 
+
     @Test
-    public void simpleID() throws Exception {
-        String test = "TeSt";
+    public void commentTest() throws Exception {
+        String test = "/*";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
         assertTrue(tags.size() == 1);
         assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.ID);
+        assertTrue(tags.get(0).getType() == Token.OPEN_COMMENT);
         ht.removeFile(file);
 
-        test = "supercalifragilisticexpialidocious";
+        test = "*/";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
         assertTrue(tags.size() == 1);
         assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.ID);
+        assertTrue(tags.get(0).getType() == Token.CLOSE_COMMENT);
         ht.removeFile(file);
 
-        test = "cat7";
+
+        test = "//";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
         assertTrue(tags.size() == 1);
         assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.ID);
-        ht.removeFile(file);
-
-        String str1, str2;
-        str1 = "dog";
-        str2 = "}";
-        test = str1 + str2;
-        file = ht.makeFile(test);
-        tags = dfa.getTags(file);
-        assertTrue(tags.size() == 2);
-        assertTrue(tags.get(0).getToken().equals(str1));
-        assertTrue(tags.get(0).getType() == Token.ID);
+        assertTrue(tags.get(0).getType() == Token.INLINE_COMMENT);
         ht.removeFile(file);
     }
 
 
 
+
+
 }
+
