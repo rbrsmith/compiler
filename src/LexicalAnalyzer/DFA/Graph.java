@@ -1,47 +1,66 @@
 package LexicalAnalyzer.DFA;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
-import java.io.BufferedReader;
 import java.io.RandomAccessFile;
 import java.util.*;
 
+
+/**
+ * Di-Graph object that represents a series of states
+ * and the character edges between them
+ */
 public class Graph {
 
-    private Node root;
-
+    // Nodes indexed by their ID
     HashMap<Integer, Node> nodes;
+    // Edges indexed by source node ID
     HashMap<Integer, ArrayList<Edge>> edges;
 
+    // Transition State Table
     HashMap<Integer, HashMap<Lexicon, Integer>> tst;
 
+    // Sample row of Transition State Table - each Leixcon points to a new state (Integer)
     HashMap<Lexicon, Integer> header;
 
 
+    /**
+     *
+     * @param n Node which will be used as root
+     */
     public Graph(Node n){
         nodes = new HashMap<>();
         edges = new HashMap<>();
-        this.root = n;
         this.addNode(n);
 
         header = new HashMap<>();
 
+        // Set default row of TST to point to -1 for every possible character edge
         for(Lexicon lex : Lexicon.values()) {
             header.put(lex, -1);
         }
     }
 
-
+    /**
+     *
+     * @param n Node to be added to graph
+     */
     public void addNode(Node n) {
+        // Do not add node if it already exists
+        Node root = nodes.get(n.getID());
+        if(root != null){
+            return;
+        }
         nodes.put(n.getID(), n);
         edges.put(n.getID(), new ArrayList<>());
     }
 
+    /**
+     *
+     * @param s Node that is source of the edge path
+     * @param d Node that is destination of the source path
+     * @param t The Lexicon character that is traversed on this edge
+     */
     public void addEdge(Node s, Node d, Lexicon t){
         ArrayList<Edge> e = edges.get(s.getID());
         if(e == null) {
@@ -51,6 +70,12 @@ public class Graph {
         edges.get(s.getID()).add(new Edge(s, d, t));
     }
 
+    /**
+     *
+     * @param s Node ID that is source of the edge path
+     * @param d Node ID that is destination of the source path
+     * @param t The Lexicon character that is traversed on this edge
+     */
     public void addEdge(int s, int d, Lexicon t) {
         Node source = nodes.get(s);
         Node dest = nodes.get(d);
@@ -58,6 +83,9 @@ public class Graph {
     }
 
 
+    /**
+     * Constructs a Transition State Table from the existing graph
+     */
     public void buildTST() {
         ArrayList<Integer> visited = new ArrayList<>();
         Stack<Node> s = new Stack<>();
@@ -71,11 +99,13 @@ public class Graph {
             }
             visited.add(u.getID());
 
+            // Get or build this states row
             HashMap<Lexicon, Integer> uRow = tst.get(u.getID());
             if(uRow == null) {
                 uRow = new HashMap<>(header);
             }
 
+            // Set all the possible state destinations based on character edge
             ArrayList<Edge> es = edges.get(u.getID());
             for(Edge e: es) {
                 Node v = e.getDest();
@@ -92,6 +122,10 @@ public class Graph {
     }
 
 
+    /**
+     *
+     * @return String representation of the TST
+     */
     public String toString() {
         if(tst == null) {
             buildTST();
@@ -101,7 +135,6 @@ public class Graph {
         if(tst.get(0) == null) {
             return output;
         }
-
 
         output += String.format("%s\t\t", "IS");
         output += String.format("%s\t\t", "Fin");
@@ -122,17 +155,17 @@ public class Graph {
             }
 
             output += String.format("%s", "\n");
-
         }
-
         return output;
-
-
     }
 
-
+    /**
+     *
+     * @param s String to be turned into it's Lexicon value
+     * @return Lexicon representing s
+     */
     public Lexicon getLexicon(String s) {
-
+        // To simplify the regex we use some base regex for the character
         String l = "[a-zA-Z]";
         String z = "[0]";
         String nz = "[1-9]";
@@ -152,19 +185,33 @@ public class Graph {
             }
         }
         return null;
-
     }
 
 
-    public POS getNextToken(RandomAccessFile filePointer, Position pos) throws Exception {
+    /**
+     * Get the next full token in the file
+     *
+     * @param filePointer RandomAccessFile pointing to the next character to be read
+     * @param pos Position object representing place in file
+     * @return POS object containing the unclean tag and token
+     * @throws InvalidCharacterException when a character is read that leads to an invalid state, and the current state isn't a terminal
+     * @throws UnrecognizedCharacterException when a character that is not part of the TST is encountered
+     * @throws IOException when the file cannot be read
+     */
+    public POS getNextToken(RandomAccessFile filePointer, Position pos)
+            throws InvalidCharacterException, UnrecognizedCharacterException, IOException {
 
         if(tst == null) {
             buildTST();
         }
 
+        // Start at root
         Integer state = 0;
 
-        String str = "";
+        // Input
+        String str;
+
+        // Aim to build token
         String token = "";
 
         if(tst.get(0) == null) {
@@ -172,38 +219,44 @@ public class Graph {
         }
 
         while(true) {
-
-
+            // Get next character
             char c = (char) filePointer.read();
             pos.incChar();
             str = "" + c;
-
             Lexicon reStr = this.getLexicon(str);
+
+            // Is the token valid
             if(reStr == null && ((int) c != 65535)) {
                 throw new UnrecognizedCharacterException(pos, token);
             }
+
+            // Is there another state we can go to?
             Integer nextState = tst.get(state).get(reStr);
             if(nextState == null || nextState == -1) {
-                // Are we done or at error
+
+                // No next state.
                 if(!nodes.get(state).isLeaf()) {
                     throw new InvalidCharacterException(pos, token);
                 } else {
-                    POS partOfSpeech = new POS(token, nodes.get(state).getType());
+                    // If we are at a terminal we have a valid token
 
+                    POS partOfSpeech = new POS(token, nodes.get(state).getType());
+                    // Update our position in the file
                     if(nodes.get(state).getType() == Token.LINE_FEED) {
                         pos.newLine();
                     }
-
+                    // Back track one
                     if((int) c != 65535) {
                         filePointer.seek(filePointer.getFilePointer() - 1);
                     }
                     pos.decChar();
+
                     return partOfSpeech;
                 }
             } else {
+                // Append to token and move to the next state
                 token += str;
                 state = nextState;
-                continue;
             }
         }
     }

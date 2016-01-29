@@ -1,16 +1,20 @@
 package LexicalAnalyzer.DFA;
 
+/**
+ * Edge class to hold a graph's edge
+ * Edges represent an input character
+ */
 public class Edge {
 
     private Node source;
     private Node dest;
-    private Lexicon token;
-
+    // Lexicon that represents that edges path
+    private Lexicon character;
 
     public Edge(Node s, Node d, Lexicon t){
         this.source = s;
         this.dest = d;
-        this.token = t;
+        this.character = t;
     }
 
     public Node getDest(){
@@ -22,7 +26,7 @@ public class Edge {
     }
 
     public Lexicon getToken() {
-        return this.token;
+        return this.character;
     }
 
 

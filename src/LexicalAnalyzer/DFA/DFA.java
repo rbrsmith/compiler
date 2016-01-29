@@ -2,14 +2,20 @@ package LexicalAnalyzer.DFA;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
+/**
+ * Builds a DFA and Transition State Table
+ * Majority of lexical analyzer happens in this class
+ */
 public class DFA {
 
     private Graph g;
     private ArrayList<Token> remove;
 
+    /**
+     * Build the DFA from custom rules
+     */
     public DFA() {
         remove = new ArrayList<Token>(){{
              add(Token.SPACE);
@@ -19,7 +25,7 @@ public class DFA {
         }};
         Node root = new Node(0);
 
-        String regex = "(l(l|d|_)*)|(([nz]d*)|0)|((([nz]d*)|0)(.d*[nz])|.0)";
+    //    String regex = "(l(l|d|_)*)|(([nz]d*)|0)|((([nz]d*)|0)(.d*[nz])|.0)";
 
 
         g = new Graph(root);
@@ -37,6 +43,7 @@ public class DFA {
         g.addNode(new Node(12));
 
 
+        // ID
         g.addEdge(0,1,Lexicon.LETTER);
         g.addEdge(0,2,Lexicon.NZERO);
         g.addEdge(0,3,Lexicon.ZERO);
@@ -80,8 +87,6 @@ public class DFA {
 
         g.addEdge(12, 12, Lexicon.ZERO);
         g.addEdge(12, 11, Lexicon.NZERO);
-
-
 
 
         // Comparison
@@ -180,15 +185,18 @@ public class DFA {
 
         g.addEdge(0,41,Lexicon.AMP);
         g.addEdge(41,42,Lexicon.AMP);
-
-
-
     }
 
 
+    /**
+     *
+     * @param file File of source code to be read and tagged
+     * @return ArrayList of POS tags
+     */
     public ArrayList<POS> getTags(File file) {
         ArrayList<POS> tags = new ArrayList<>();
         try {
+            // Use RandomAccessFile as we will commonly go backtrack one in the file
             RandomAccessFile buffer = new RandomAccessFile(file, "r");
             POS partOfSpeech;
             Position pos = new Position();
@@ -197,19 +205,17 @@ public class DFA {
                     partOfSpeech = g.getNextToken(buffer, pos);
                     tags.add(partOfSpeech);
                 } catch (Exception e) {
-                    System.out.println(e);
+                    // Any error that occurs during token reading
+                    System.err.println(e.getMessage());
                 }
             }
             buffer.close();
         } catch(IOException e) {
-            System.out.println(e);
+            // File reading errors
+            System.out.println(e.getMessage());
             System.out.println("Error reading file.");
         }
         return tags;
-    }
-
-    public Graph getGraph() {
-        return g;
     }
 
     @Override
@@ -217,16 +223,22 @@ public class DFA {
         return g.toString();
     }
 
-
+    /**
+     * Remove unwanted tags from tag list
+     * As well as lookup reserved words
+     *
+     * @param tags ArrayList of POS tags cleaned out
+     */
     public void cleanTags(ArrayList<POS> tags) {
         for (Iterator<POS> iterator = tags.iterator(); iterator.hasNext();) {
             POS tag = iterator.next();
+            // Change reserved words
             if(tag.getType() == Token.ID) {
                 Reserved reserved = Reserved.get(tag.getToken());
                 if(reserved != null) {
                     tag.setWord(reserved);
                 }
-
+            // Remove unwated tags
             } else if(remove.contains(tag.getType())) {
                 iterator.remove();
             }
