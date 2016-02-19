@@ -2,6 +2,7 @@ package SyntacticAnalyzer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class Rule {
 
@@ -44,4 +45,7 @@ public class Rule {
     public String getLast() {
         return RHS.get(RHS.size() - 1);
     }
+
+
+
 }

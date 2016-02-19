@@ -185,6 +185,9 @@ public class DFA {
 
         g.addEdge(0,41,Lexicon.AMP);
         g.addEdge(41,42,Lexicon.AMP);
+
+        g.addNode(new Node(43, true, Token.EOF));
+        g.addEdge(0,43, Lexicon.EOF);
     }
 
 

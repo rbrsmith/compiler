@@ -1,0 +1,10 @@
+E -> ID ADDITION $
+E' -> + T E'
+E' -> - T E'
+E' -> EPSILON
+T -> F T'
+T' -> * F T'
+T' -> / F T'
+T' -> EPSILON
+F -> num
+F -> id

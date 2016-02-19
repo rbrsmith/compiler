@@ -24,6 +24,10 @@ public class Table {
         }
     }
 
+    public Integer get(String row, String col) {
+        return this.data.get(row).get(col);
+    }
+
     public String toString() {
         String rtn = "\t";
 
