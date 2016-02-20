@@ -38,23 +38,45 @@ public class Grammar {
         return rtn;
     }
 
+//    public void buildParseTable() {
+//        table = new Table();
+//        for(Rule rule: rules) {
+//            String firstSmbl = rule.getFirst();
+//            ArrayList<String> first = firstSet.get(firstSmbl);
+//            if(!firstSmbl.equals(EPSILON) && first != null) {
+//                for(String f : first) {
+//                   table.add(rule.getLHS(), f, rule.getID());
+//                }
+//            } else {
+//                ArrayList<String> follow = followSet.get(rule.getLHS());
+//                for(String f : follow) {
+//                    table.add(rule.getLHS(), f, rule.getID());
+//                }
+//            }
+//        }
+//    }
+
     public void buildParseTable() {
         table = new Table();
         for(Rule rule: rules) {
-            String firstSmbl = rule.getFirst();
-            ArrayList<String> first = firstSet.get(firstSmbl);
-            if(!firstSmbl.equals(EPSILON) && first != null) {
-                for(String f : first) {
-                   table.add(rule.getLHS(), f, rule.getID());
+            for(String smbl : rule.getRHS()) {
+                ArrayList<String> first = firstSet.get(smbl);
+                if(!smbl.equals(EPSILON) && first != null) {
+                    for(String f : first) {
+                        table.add(rule.getLHS(), f, rule.getID());
+                    }
+                } else {
+                    ArrayList<String> follow = followSet.get(rule.getLHS());
+                    for(String f : follow) {
+                        table.add(rule.getLHS(), f, rule.getID());
+                    }
                 }
-            } else {
-                ArrayList<String> follow = followSet.get(rule.getLHS());
-                for(String f : follow) {
-                    table.add(rule.getLHS(), f, rule.getID());
-                }
+
             }
+
         }
     }
+
 
 
 
@@ -115,7 +137,7 @@ public class Grammar {
 
 
     public void getFollows() {
-        followSet = new FollowSet(rules, "E", "$");
+        followSet = new FollowSet(rules, "prog", "$");
         boolean change = true;
         while(true) {
             for(Rule rule: rules) {
@@ -171,7 +193,7 @@ public class Grammar {
 
     public void LL() {
         DFA dfa = new DFA();
-        ArrayList<POS> tags = dfa.getTags(new File("C:\\Users\\b0467851\\IdeaProjects\\compilers\\src\\test.txt"));
+        ArrayList<POS> tags = dfa.getTags(new File("/home/ross/Dropbox/IdeaProjects/CompilerDesign/src/test.txt"));
         dfa.cleanTags(tags);
         for(POS t : tags) {
             System.out.println(t);
@@ -183,23 +205,50 @@ public class Grammar {
 
         Stack<String> stack = new Stack<>();
         stack.push("$");
-        stack.push("E");
+     //   stack.push("E");
+        stack.push("prog");
         POS token = tags.get(i);
+        String tkn;
+        if(token.getType() == Token.RESERVED) {
+            tkn = token.getWord().toString();
+        } else if(token.getType() == Token.ID) {
+            tkn = token.getType().toString();
+        } else {
+            tkn = token.getToken().toString();
+        }
+
         i++;
 
         while(true) {
             String X = stack.get(stack.size()-1);
-            if(followSet.isTerminal(X) && !X.equals("$")) {
-                if(X.equals(token.getType().toString())) {
+
+
+            if(X.equals("$") && tkn.equals("$")) {
+                break;
+            }
+
+            if(followSet.isTerminal(X)) {
+                if(X.equals(tkn)) {
                     stack.pop();
-                    token = tags.get(i);
+                    if(tags.size() == i) {
+                        token = null;
+                    } else {
+                        token = tags.get(i);
+                        if(token.getType() == Token.RESERVED) {
+                            tkn = token.getWord().toString();
+                        } else if(token.getType() == Token.ID) {
+                            tkn = token.getType().toString();
+                        } else {
+                            tkn = token.getToken().toString();
+                        }
+                    }
                     i++;
                 } else {
                     System.out.println("ERROR");
                     break;
                 }
             } else {
-                Integer rule = table.get(X, token.getType().toString());
+                Integer rule = table.get(X, tkn);
                 if(rule == -1) {
                     System.out.println("ERROR");
                     break;
@@ -209,15 +258,13 @@ public class Grammar {
                         stack.pop();
                         ArrayList<String> RHS = r.getRHS();
                         for(int k = RHS.size() - 1; k > -1; --k){
-                            stack.push(RHS.get(k));
-                            System.out.println(RHS.get(k));
+                            if(!RHS.get(k).equals(EPSILON)) {
+                                stack.push(RHS.get(k));
+                            }
                         }
                         break;
                     }
                 }
-            }
-            if(X.equals("$")) {
-                break;
             }
         }
 

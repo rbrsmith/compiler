@@ -4,7 +4,9 @@ package LexicalAnalyzer.DFA;
  *  Enum representing al reserved words in the lexicon
  */
 public enum Reserved {
-    IF("if"),THEN("then"),ELSE("else"),FOR("for"),CLASS("class"),INT("int"),FLOAT("float"),GET("get"),PUT("put"),RETURN("return");
+    IF("if"),THEN("then"),ELSE("else"),FOR("for"),CLASS("class"),
+    INT("int"),FLOAT("float"),GET("get"),PUT("put"),RETURN("return"),
+    PROGRAM("program");
 
     private String word;
 

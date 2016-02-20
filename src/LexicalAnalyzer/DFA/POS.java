@@ -53,5 +53,9 @@ public class POS {
         }
     }
 
+    public Reserved getWord() {
+        return this.word;
+    }
+
 
 }

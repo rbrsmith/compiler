@@ -9,7 +9,7 @@ CD2 -> arraySizeR ; CD1
 CD2 -> ( fParams ) funcBody ; CD3
 CD3 -> funcDefR
 
-progBody -> program funcBody ; funcDefR
+progBody -> PROGRAM funcBody ; funcDefR
 
 funcDefR -> funcDef funcDefR
 funcDefR -> EPSILON
