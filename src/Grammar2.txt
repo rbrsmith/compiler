@@ -2,129 +2,16 @@ prog -> classDeclR progBody
 classDeclR -> classDecl classDeclR
 classDeclR -> EPSILON
 
-classDecl -> class id { CD1 } ;
+classDecl -> CLASS id { CD1 } ;
 CD1 -> type id CD2
 CD1 -> EPSILON
 CD2 -> arraySizeR ; CD1
 CD2 -> ( fParams ) funcBody ; CD3
 CD3 -> funcDefR
 
-progBody -> program funcBody ; funcDefR
+progBody -> PROGRAM funcBody ; funcDefR
 
 funcDefR -> funcDef funcDefR
 funcDefR -> EPSILON
 
 funcHead -> type id ( fParams )
-
-funcDef -> funcHead funcBody ;
-
-funcBody -> { FB1 }
-FB1 -> id FB2
-FB1 -> int FB3
-FB1 -> long FB3
-FB1 -> EPSILON
-FB2 -> V1 assignOp expr statementR
-FB3 -> id arraySizeR FB1
-
-
-
-varDeclR -> varDecl varDeclR
-varDeclR -> EPSILON
-
-varDecl -> type id arraySizeR ;
-
-statement -> assignStat ;
-statement -> if ( expr ) then statBlock else statBlock ;
-statement -> for ( type id assignOp expr ; relExpr ; assignStat ) statBlock ;
-statement -> get ( variable ) ;
-statement -> put ( expr ) ;
-statement -> return ( expr ) ;
-
-
-assignStat -> variable assignOp expr
-
-statBlock -> { statementR }
-statBlock -> statement
-statBlock -> EPSILON
-statementR -> statement statementR
-statementR -> EPSILON
-
-expr -> arithExpr E1
-E1 -> relOp arithExpr
-E1 -> EPSILON
-
-relExpr -> arithExpr relOp arithExpr
-
-arithExpr -> term arithExprRight
-arithExprRight -> EPSILON
-arithExprRight -> addOp term arithExprRight
-
-sign -> +
-sign -> -
-
-term -> factor termRight
-termRight -> EPSILON
-termRight -> multOp factor termRight
-
-factor -> id F1
-F1 -> indiceR F2
-F1 -> ( aParams )
-F2 -> . F3
-F3 -> id F4
-F4 -> indiceR F2
-
-factor -> num
-factor -> ( arithExpr )
-factor -> not factor
-factor -> sign factor
-
-variable -> id V1
-V1 -> indiceR V2
-V2 -> . variable
-V2 -> EPSILON
-
-idnestR -> idnest idnestR
-idnestR -> EPSILON
-
-idnest -> id indiceR .
-indiceR -> indice indiceR
-indiceR -> EPSILON
-
-indice -> [ arithExpr ]
-
-arraySize -> [ integer ]
-
-type -> int
-type -> float
-type -> id
-
-fParams -> type id arraySizeR fParamsTailR
-fParams -> EPSILON
-fParamsTailR -> fParamsTail fParamsTailR
-fParamsTailR -> EPSILON
-
-aParams -> expr aParamsTailR
-aParams -> EPSILON
-aParamsTailR -> aParamsTail aParamsTailR
-aParamsTailR -> EPSILON
-
-fParamsTail -> , type id arraySizeR
-arraySizeR -> arraySize arraySizeR
-arraySizeR -> EPSILON
-aParamsTail -> , expr
-
-assignOp -> =
-relOp -> ==
-relOp -> <>
-relOp -> <
-relOp -> >
-relOp -> <=
-relOp -> >=
-
-addOp -> +
-addOp -> -
-addOp -> or
-
-multOp -> *
-multiOp -> /
-multiOp -> and

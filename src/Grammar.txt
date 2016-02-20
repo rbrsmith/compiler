@@ -2,7 +2,7 @@ prog -> classDeclR progBody
 classDeclR -> classDecl classDeclR
 classDeclR -> EPSILON
 
-classDecl -> class id { CD1 } ;
+classDecl -> CLASS id { CD1 } ;
 CD1 -> type id CD2
 CD1 -> EPSILON
 CD2 -> arraySizeR ; CD1

@@ -5,6 +5,7 @@ import LexicalAnalyzer.DFA.POS;
 import LexicalAnalyzer.DFA.Token;
 
 import java.io.File;
+import java.io.SerializablePermission;
 import java.util.*;
 
 public class Grammar {
@@ -38,44 +39,52 @@ public class Grammar {
         return rtn;
     }
 
-//    public void buildParseTable() {
-//        table = new Table();
-//        for(Rule rule: rules) {
-//            String firstSmbl = rule.getFirst();
-//            ArrayList<String> first = firstSet.get(firstSmbl);
-//            if(!firstSmbl.equals(EPSILON) && first != null) {
-//                for(String f : first) {
-//                   table.add(rule.getLHS(), f, rule.getID());
-//                }
-//            } else {
-//                ArrayList<String> follow = followSet.get(rule.getLHS());
-//                for(String f : follow) {
-//                    table.add(rule.getLHS(), f, rule.getID());
-//                }
-//            }
-//        }
-//    }
-
-    public void buildParseTable() {
+    public void buildParseTable() throws Exception {
         table = new Table();
         for(Rule rule: rules) {
-            for(String smbl : rule.getRHS()) {
-                ArrayList<String> first = firstSet.get(smbl);
-                if(!smbl.equals(EPSILON) && first != null) {
-                    for(String f : first) {
-                        table.add(rule.getLHS(), f, rule.getID());
-                    }
-                } else {
-                    ArrayList<String> follow = followSet.get(rule.getLHS());
-                    for(String f : follow) {
-                        table.add(rule.getLHS(), f, rule.getID());
-                    }
+            String firstSmbl = rule.getFirst();
+            ArrayList<String> first = firstSet.get(firstSmbl);
+            if(!firstSmbl.equals(EPSILON) && first != null) {
+                for(String f : first) {
+                       table.add(rule.getLHS(), f, rule.getID());
                 }
-
+            } else {
+                ArrayList<String> follow = followSet.get(rule.getLHS());
+                for(String f : follow) {
+                        table.add(rule.getLHS(), f, rule.getID());
+                }
             }
-
         }
     }
+
+//    public void buildParseTable() throws Exception{
+//        table = new Table();
+//        for(Rule rule: rules) {
+//            for(String smbl : rule.getRHS()) {
+//                ArrayList<String> first = firstSet.get(smbl);
+//                if(!smbl.equals(EPSILON) && first != null) {
+//                    for(String f : first) {
+//                        try {
+//                            table.add(rule.getLHS(), f, rule.getID());
+//                        } catch(Exception e){
+//                            System.out.println(e.getMessage());
+//                        }
+//                    }
+//                } else {
+//                    ArrayList<String> follow = followSet.get(rule.getLHS());
+//                    for(String f : follow) {
+//                        try {
+//                            table.add(rule.getLHS(), f, rule.getID());
+//                        } catch(Exception e){
+//                            System.out.println(e.getMessage());
+//                        }
+//                    }
+//                }
+//
+//            }
+//
+//        }
+//    }
 
 
 
@@ -85,11 +94,12 @@ public class Grammar {
         while(true) {
             int j = 0;
             for (Rule rule : rules) {
-                String X = rule.getLHS();
+              String X = rule.getLHS();
               if (rule.getRHS().contains(EPSILON)) {
                      if(firstSet.addFirst(X, EPSILON)) j += 1;
                 } else {
-                     if(firstSet.addFirst(X, MultiFirst(rule.getRHS()))) j += 1;
+                      ArrayList<String> restOfFirst = MultiFirst(rule.getRHS());
+                     if(firstSet.addFirst(X, restOfFirst)) j += 1;
               }
             }
             if(j == 0) {
@@ -114,7 +124,7 @@ public class Grammar {
             for (int i = 1; i < Ys.size(); i++) {
                 tmp.add(Ys.get(i));
             }
-            ArrayList<String> Y2 = MultiFirst(tmp);
+            ArrayList<String> Y2 = new ArrayList<>(MultiFirst(tmp));
             for (String s : firstY1) {
                 if (!s.equals(EPSILON) && !Y2.contains(s)) {
                     Y2.add(s);
@@ -145,6 +155,9 @@ public class Grammar {
                 ArrayList<String> RHS = rule.getRHS();
                 for(int j=0;j<RHS.size();++j){
                     String nonTerminal = RHS.get(j);
+
+//                    if(nonTerminal.equals(EPSILON)) continue;
+
                     if(followSet.isTerminal(nonTerminal)) continue;
                     if(j + 1 != RHS.size()) {
                         change = applyRule(RHS, j, nonTerminal, rule);

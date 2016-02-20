@@ -13,13 +13,17 @@ public class Table {
         data = new HashMap<String, HashMap<String, Integer>>();
     }
 
-    public void add(String row, String col, Integer data) {
+    public void add(String row, String col, Integer data) throws Exception{
         HashMap<String, Integer> cols = this.data.get(row);
         if(cols == null) {
             cols = new HashMap<String, Integer>();
             cols.put(col, data);
             this.data.put(row, cols);
         } else {
+            if(cols.get(col) != null && cols.get(col) != data) {
+
+                throw new Exception("Inproper grammar at rule: "+data+".  Trying to set {" + row+", "+col+", "+ data+"} but found {"+row+", "+col+", "+cols.get(col) + "}");
+            }
             cols.put(col, data);
         }
     }
