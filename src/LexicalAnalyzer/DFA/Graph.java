@@ -215,7 +215,7 @@ public class Graph {
         String token = "";
 
         if(tst.get(0) == null) {
-            throw new InvalidCharacterException(pos, token);
+            throw new InvalidCharacterException(pos, token, "");
         }
 
         while(true) {
@@ -227,7 +227,10 @@ public class Graph {
 
             // Is the token valid
             if(reStr == null && ((int) c != 65535)) {
-                throw new UnrecognizedCharacterException(pos, token);
+                if(nodes.get(state).getType() == Token.LINE_FEED) {
+                    pos.newLine();
+                }
+                throw new UnrecognizedCharacterException(pos, token, str);
             }
 
             // Is there another state we can go to?
@@ -236,7 +239,7 @@ public class Graph {
 
                 // No next state.
                 if(!nodes.get(state).isLeaf()) {
-                    throw new InvalidCharacterException(pos, token);
+                    throw new InvalidCharacterException(pos, token, str);
                 } else {
                     // If we are at a terminal we have a valid token
 

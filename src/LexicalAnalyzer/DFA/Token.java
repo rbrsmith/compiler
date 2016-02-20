@@ -1,5 +1,8 @@
 package LexicalAnalyzer.DFA;
 
+/**
+ * Enum of all possible delimited tokens in the lexicon
+ */
 public enum Token {
     ID, CCB, OCB, AND, OR, SPACE, TAB,
     INTEGER, FLOAT, EQUALS, NOT_EQUALS, LESS_THAN, GREATER_THAN,

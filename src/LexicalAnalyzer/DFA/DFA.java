@@ -3,6 +3,7 @@ package LexicalAnalyzer.DFA;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.Exchanger;
 
 /**
  * Builds a DFA and Transition State Table
@@ -191,9 +192,10 @@ public class DFA {
     /**
      *
      * @param file File of source code to be read and tagged
+     * @param errors ArrayList used to capture any exceptions
      * @return ArrayList of POS tags
      */
-    public ArrayList<POS> getTags(File file) {
+    public ArrayList<POS> getTags(File file, ArrayList<Exception> errors) {
         ArrayList<POS> tags = new ArrayList<>();
         try {
             // Use RandomAccessFile as we will commonly go backtrack one in the file
@@ -206,7 +208,7 @@ public class DFA {
                     tags.add(partOfSpeech);
                 } catch (Exception e) {
                     // Any error that occurs during token reading
-                    System.err.println(e.getMessage());
+                    errors.add(e);
                 }
             }
             buffer.close();
@@ -216,6 +218,15 @@ public class DFA {
             System.out.println("Error reading file.");
         }
         return tags;
+    }
+
+    /**
+     *
+     * @param file File of source code to be read and tagged
+     * @return ArrayList of POS tags
+     */
+    public ArrayList<POS> getTags(File file) {
+        return getTags(file, new ArrayList<>());
     }
 
     @Override
