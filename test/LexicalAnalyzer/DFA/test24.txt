@@ -1,5 +1,5 @@
 class ross{
-    bob rman[5];
+int rman[5];
 };
 class amb{};
 PROGRAM{};

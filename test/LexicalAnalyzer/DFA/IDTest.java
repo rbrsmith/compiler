@@ -13,6 +13,9 @@ import java.util.Random;
 
 import static junit.framework.TestCase.assertTrue;
 
+/**
+ * Class to test the ID token
+ */
 public class IDTest {
 
 

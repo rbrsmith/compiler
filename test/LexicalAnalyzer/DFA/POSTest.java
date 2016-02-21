@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+/**
+ * Class to test the Part of Speech object
+ */
 public class POSTest {
 
     private POS pos;

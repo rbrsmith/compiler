@@ -11,6 +11,9 @@ import java.io.RandomAccessFile;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Class to test the creation of the graph
+ */
 public class GraphTest {
 
     Graph g;

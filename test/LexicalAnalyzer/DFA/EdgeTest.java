@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+/**
+ * Class to test graphs edges
+ */
 public class EdgeTest {
 
     Edge edge;

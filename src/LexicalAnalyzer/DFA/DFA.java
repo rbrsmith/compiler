@@ -1,5 +1,7 @@
 package LexicalAnalyzer.DFA;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -207,7 +209,10 @@ public class DFA {
             Position pos = new Position();
             while (buffer.getFilePointer() < buffer.length()) {
                 try {
-                    partOfSpeech = g.getNextToken(buffer, pos);
+                    partOfSpeech = getNextToken(buffer, pos);
+                    if(partOfSpeech == null) {
+                        continue;
+                    }
                     tags.add(partOfSpeech);
                 } catch (Exception e) {
                     // Any error that occurs during token reading
@@ -221,6 +226,17 @@ public class DFA {
             System.out.println("Error reading file.");
         }
         return tags;
+    }
+
+    public POS getNextToken(RandomAccessFile buffer, Position pos) throws InvalidCharacterException,
+                UnrecognizedCharacterException, IOException{
+        POS token;
+        POS cleaned = null;
+        while(cleaned == null) {
+            token = g.getNextToken(buffer, pos);
+            cleaned = cleanTag(token);
+        }
+        return cleaned;
     }
 
     /**
@@ -247,16 +263,36 @@ public class DFA {
         for (Iterator<POS> iterator = tags.iterator(); iterator.hasNext();) {
             POS tag = iterator.next();
             // Change reserved words
-            if(tag.getType() == Token.ID) {
-                Reserved reserved = Reserved.get(tag.getToken());
-                if(reserved != null) {
-                    tag.setWord(reserved);
-                }
-            // Remove unwated tags
-            } else if(remove.contains(tag.getType())) {
+//            if(tag.getType() == Token.ID) {
+//                Reserved reserved = Reserved.get(tag.getToken());
+//                if(reserved != null) {
+//                    tag.setWord(reserved);
+//                }
+//            // Remove unwated tags
+//            } else if(remove.contains(tag.getType())) {
+//                iterator.remove();
+//            }
+            tag = cleanTag(tag);
+            if(tag == null) {
                 iterator.remove();
             }
         }
 
     }
+
+    public POS cleanTag(POS tag) {
+        if(tag.getType() == Token.ID) {
+            Reserved reserved = Reserved.get(tag.getToken());
+            if(reserved != null) {
+                tag.setWord(reserved);
+                return tag;
+            }
+            // Remove unwated tags
+        } else if(remove.contains(tag.getType())) {
+            return null;
+        }
+        return tag;
+
+    }
+
 }

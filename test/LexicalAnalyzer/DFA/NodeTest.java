@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+/**
+ * Class to test a graphs Node
+ */
 public class NodeTest  {
 
     private Node node;

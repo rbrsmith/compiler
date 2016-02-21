@@ -1,22 +1,17 @@
 package LexicalAnalyzer.DFA;
 
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
 
+/**
+ * Class to test sample source code
+ */
 public class SampleSourceTest {
 
     File file;
@@ -64,13 +59,11 @@ public class SampleSourceTest {
         String all = "cat}{&&|| 6\t==6.0001<>+<->*./=()[/*]*/.//\r\n";
         int size = 29;
 
-
         String test = all;
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
         assertTrue(tags.size() == size);
         ht.removeFile(file);
-
     }
 
 

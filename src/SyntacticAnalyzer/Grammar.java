@@ -2,9 +2,12 @@ package SyntacticAnalyzer;
 
 import LexicalAnalyzer.DFA.DFA;
 import LexicalAnalyzer.DFA.POS;
+import LexicalAnalyzer.DFA.Position;
 import LexicalAnalyzer.DFA.Token;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.io.SerializablePermission;
 import java.util.*;
 
@@ -18,6 +21,11 @@ public class Grammar {
     private FollowSet followSet;
 
     final static String EPSILON = "EPSILON";
+    final String START = "prog";
+    final String END = "$";
+
+    final private DFA tokenizer = new DFA();
+
 
 
     public String toString() {
@@ -147,7 +155,7 @@ public class Grammar {
 
 
     public void getFollows() {
-        followSet = new FollowSet(rules, "prog", "$");
+        followSet = new FollowSet(rules, START, END);
         boolean change = true;
         while(true) {
             for(Rule rule: rules) {
@@ -189,85 +197,83 @@ public class Grammar {
         return change;
     }
 
-    public void parse(String filePath) throws Exception {
-        Scanner input = new Scanner(new File(filePath));
+    public void parse(File file) throws Exception {
+        if(rules != null ){
+            return ;
+        }
+        Scanner input = new Scanner(file);
         String line;
         String[] tokens;
         rules = new ArrayList<>();
         while(input.hasNext()) {
             line = input.nextLine();
             if(line.equals("")) continue;
-            System.out.println("line: " + line);
             tokens = line.split(" ",3);
             rules.add(new Rule(tokens[0], tokens[2]));
         }
 
+        getFirsts();
+        getFollows();
+        buildParseTable();
+
     }
 
-    public void LL() {
+    public void LL(File file) throws SyntacticError, IOException {
         DFA dfa = new DFA();
-        ArrayList<POS> tags = dfa.getTags(new File("/home/ross/Dropbox/IdeaProjects/CompilerDesign/src/test.txt"));
+        ArrayList<POS> tags = dfa.getTags(file);
         dfa.cleanTags(tags);
-        for(POS t : tags) {
-            System.out.println(t);
-        }
-
-        int i = 0;
 
 
 
+        RandomAccessFile buffer = new RandomAccessFile(file, "r");
+
+
+
+
+        Integer i = 0;
         Stack<String> stack = new Stack<>();
-        stack.push("$");
-     //   stack.push("E");
-        stack.push("prog");
-        POS token = tags.get(i);
-        String tkn;
-        if(token.getType() == Token.RESERVED) {
-            tkn = token.getWord().toString();
-        } else if(token.getType() == Token.ID) {
-            tkn = token.getType().toString();
-        } else {
-            tkn = token.getToken().toString();
-        }
+        stack.push(END);
+        stack.push(START);
+
+
+        String tkn = getNextToken(buffer);
+
+
 
         i++;
+
 
         while(true) {
             String X = stack.get(stack.size()-1);
 
-
-            if(X.equals("$") && tkn.equals("$")) {
+            if(X.equals(END) && tkn.equals(END)) {
                 break;
             }
 
             if(followSet.isTerminal(X)) {
-                if(X.equals(tkn)) {
+                if(X.equals(tkn.toLowerCase()) || X.equals(tkn.toUpperCase())) {
                     stack.pop();
                     if(tags.size() == i) {
-                        token = null;
+                        tkn = null;
                     } else {
-                        token = tags.get(i);
-                        if(token.getType() == Token.RESERVED) {
-                            tkn = token.getWord().toString();
-                        } else if(token.getType() == Token.ID) {
-                            tkn = token.getType().toString();
-                        } else {
-                            tkn = token.getToken().toString();
-                        }
+                        tkn = getNextToken(buffer);
+                        i++;
                     }
-                    i++;
                 } else {
-                    System.out.println("ERROR");
-                    break;
+
+                    buffer.close();
+                    throw new SyntacticError();
                 }
             } else {
-                Integer rule = table.get(X, tkn);
-                if(rule == -1) {
-                    System.out.println("ERROR");
-                    break;
+                Integer rule = table.get(X, tkn.toLowerCase());
+                if(rule == null) rule = table.get(X, tkn.toUpperCase());
+                if(rule == -1 || rule == null) {
+
+                    buffer.close();
+                    throw new SyntacticError();
                 }
                 for(Rule r: rules) {
-                    if(r.getID() == rule) {
+                    if(rule.compareTo(r.getID()) == 0) {
                         stack.pop();
                         ArrayList<String> RHS = r.getRHS();
                         for(int k = RHS.size() - 1; k > -1; --k){
@@ -281,7 +287,43 @@ public class Grammar {
             }
         }
 
+        buffer.close();
 
+
+
+    }
+
+    public String getNextToken(RandomAccessFile buffer) {
+        POS token = null;
+        String tkn = "";
+            try {
+            // Use RandomAccessFile as we will commonly go backtrack one in the file
+                if (buffer.getFilePointer() == buffer.length()) {
+                    // EOF
+                    return null;
+                }
+                try {
+                    Position pos = new Position();
+                    token = tokenizer.getNextToken(buffer, pos);
+                    if (token.getType() == Token.RESERVED) {
+                        tkn = token.getWord().toString();
+                    } else if (token.getType() == Token.EOF) {
+                        tkn = END;
+                    } else {
+                        tkn = token.getType().toString();
+                    }
+                } catch (Exception e) {
+                    // Any error that occurs during token reading
+                    System.out.println("Lexical Error");
+                    return null;
+                }
+            }catch(IOException e){
+                // File reading errors
+                System.out.println(e.getMessage());
+                System.out.println("Error reading file.");
+                return null;
+            }
+        return tkn;
 
     }
 

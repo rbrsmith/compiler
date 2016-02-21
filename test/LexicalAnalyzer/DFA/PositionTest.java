@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+/**
+ * Class to test the Position Object
+ */
 public class PositionTest {
 
     Position pos;

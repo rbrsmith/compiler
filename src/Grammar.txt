@@ -2,23 +2,23 @@ prog -> classDeclR progBody
 classDeclR -> classDecl classDeclR
 classDeclR -> EPSILON
 
-classDecl -> CLASS id { CD1 } ;
+classDecl -> CLASS id OCB CD1 CCB SEMICOLON
 CD1 -> type id CD2
 CD1 -> EPSILON
-CD2 -> arraySizeR ; CD1
-CD2 -> ( fParams ) funcBody ; CD3
+CD2 -> arraySizeR SEMICOLON CD1
+CD2 -> ORB fParams CRB funcBody SEMICOLON CD3
 CD3 -> funcDefR
 
-progBody -> PROGRAM funcBody ; funcDefR
+progBody -> PROGRAM funcBody SEMICOLON funcDefR
 
 funcDefR -> funcDef funcDefR
 funcDefR -> EPSILON
 
-funcHead -> type id ( fParams )
+funcHead -> type id ORB fParams CRB
 
-funcDef -> funcHead funcBody ;
+funcDef -> funcHead funcBody SEMICOLON
 
-funcBody -> { FB1 }
+funcBody -> OCB FB1 CCB
 FB1 -> id FB2
 FB1 -> int FB3
 FB1 -> long FB3
@@ -31,19 +31,19 @@ FB3 -> id arraySizeR FB1
 varDeclR -> varDecl varDeclR
 varDeclR -> EPSILON
 
-varDecl -> type id arraySizeR ;
+varDecl -> type id arraySizeR SEMICOLON
 
-statement -> assignStat ;
-statement -> if ( expr ) then statBlock else statBlock ;
-statement -> for ( type id assignOp expr ; relExpr ; assignStat ) statBlock ;
-statement -> get ( variable ) ;
-statement -> put ( expr ) ;
-statement -> return ( expr ) ;
+statement -> assignStat SEMICOLON
+statement -> if ORB expr CRB then statBlock else statBlock SEMICOLON
+statement -> for ORB type id assignOp expr SEMICOLON relExpr SEMICOLON assignStat CRB statBlock SEMICOLON
+statement -> get ORB variable CRB SEMICOLON
+statement -> put ORB expr CRB SEMICOLON
+statement -> return ORB expr CRB SEMICOLON
 
 
 assignStat -> variable assignOp expr
 
-statBlock -> { statementR }
+statBlock -> OCB statementR CCB
 statBlock -> statement
 statBlock -> EPSILON
 statementR -> statement statementR
@@ -59,8 +59,8 @@ arithExpr -> term arithExprRight
 arithExprRight -> EPSILON
 arithExprRight -> addOp term arithExprRight
 
-sign -> +
-sign -> -
+sign -> ADDITION
+sign -> SUBTRACTION
 
 term -> factor termRight
 termRight -> EPSILON
@@ -68,13 +68,13 @@ termRight -> multOp factor termRight
 
 factor -> id F1
 F1 -> indiceR F2
-F1 -> ( aParams )
-F2 -> . F3
+F1 -> ORB aParams CRB
+F2 -> DOT F3
 F3 -> id F4
 F4 -> indiceR F2
 
 factor -> num
-factor -> ( arithExpr )
+factor -> ORB arithExpr CRB
 factor -> not factor
 factor -> sign factor
 
@@ -86,17 +86,17 @@ V2 -> EPSILON
 idnestR -> idnest idnestR
 idnestR -> EPSILON
 
-idnest -> id indiceR .
+idnest -> id indiceR DOT
 indiceR -> indice indiceR
 indiceR -> EPSILON
 
-indice -> [ arithExpr ]
+indice -> OSB arithExpr CSB
 
-arraySize -> [ integer ]
+arraySize -> OSB integer CSB
 
 type -> int
 type -> float
-type -> id
+type -> ID
 
 fParams -> type id arraySizeR fParamsTailR
 fParams -> EPSILON
@@ -108,18 +108,18 @@ aParams -> EPSILON
 aParamsTailR -> aParamsTail aParamsTailR
 aParamsTailR -> EPSILON
 
-fParamsTail -> , type id arraySizeR
+fParamsTail -> COMMA type id arraySizeR
 arraySizeR -> arraySize arraySizeR
 arraySizeR -> EPSILON
-aParamsTail -> , expr
+aParamsTail -> COMMA expr
 
-assignOp -> =
-relOp -> ==
-relOp -> <>
-relOp -> <
-relOp -> >
-relOp -> <=
-relOp -> >=
+assignOp -> ASSIGNMENT
+relOp -> EQUALS
+relOp -> NOT_EQUALS
+relOp -> LESS_THAN
+relOp -> GREATER_THAN
+relOp -> LESS_THAN_EQUALS
+relOp -> GREATER_THAN_EQUALS
 
 addOp -> +
 addOp -> -

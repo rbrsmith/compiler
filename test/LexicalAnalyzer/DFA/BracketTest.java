@@ -8,6 +8,9 @@ import java.io.File;
 import java.util.ArrayList;
 import static junit.framework.TestCase.assertTrue;
 
+/**
+ * Test class to test the bracket characters
+ */
 public class BracketTest {
 
     File file;
