@@ -1,2 +1,0 @@
-class test test {    type test2 [ 95 ] ; } ; 
-program {    int test3 } ; long test4 ( int test5 , int test6 ) { } ;$

@@ -1,6 +1,0 @@
-class ross{
-int rman[5];
-};
-class amb{};
-PROGRAM{};
-$
