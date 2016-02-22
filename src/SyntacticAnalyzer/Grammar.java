@@ -47,23 +47,23 @@ public class Grammar {
         return rtn;
     }
 
-    public void buildParseTable() throws Exception {
-        table = new Table();
-        for(Rule rule: rules) {
-            String firstSmbl = rule.getFirst();
-            ArrayList<String> first = firstSet.get(firstSmbl);
-            if(!firstSmbl.equals(EPSILON) && first != null) {
-                for(String f : first) {
-                       table.add(rule.getLHS(), f, rule.getID());
-                }
-            } else {
-                ArrayList<String> follow = followSet.get(rule.getLHS());
-                for(String f : follow) {
-                        table.add(rule.getLHS(), f, rule.getID());
-                }
-            }
-        }
-    }
+//    public void buildParseTable() throws Exception {
+//        table = new Table();
+//        for(Rule rule: rules) {
+//            String firstSmbl = rule.getFirst();
+//            ArrayList<String> first = firstSet.get(firstSmbl);
+//            if(!firstSmbl.equals(EPSILON) && first != null) {
+//                for(String f : first) {
+//                       table.add(rule.getLHS(), f, rule.getID());
+//                }
+//            } else {
+//                ArrayList<String> follow = followSet.get(rule.getLHS());
+//                for(String f : follow) {
+//                        table.add(rule.getLHS(), f, rule.getID());
+//                }
+//            }
+//        }
+//    }
 
 //    public void buildParseTable() throws Exception{
 //        table = new Table();
@@ -86,24 +86,23 @@ public class Grammar {
 //        }
 //    }
 
-//    public void buildParseTable() throws Exception {
-//        table = new Table();
-//        for (Rule rule : rules) {
-//            String firstSmbl = rule.getFirst();
-//            ArrayList<String> first = firstSet.get(firstSmbl);
-//            if (first != null) {
-//                for (String f : first) {
-//                    table.add(rule.getLHS(), f, rule.getID());
-//                }
-//            }
-//            if (first != null && first.contains(EPSILON)) {
-//                ArrayList<String> follow = followSet.get(rule.getLHS());
-//                for (String f : follow) {
-//                    table.add(rule.getLHS(), f, rule.getID());
-//                }
-//            }
-//        }
-//    }
+    public void buildParseTable() throws Exception {
+        table = new Table();
+        for (Rule rule : rules) {
+            ArrayList<String> first = MultiFirst(rule.getRHS());
+            if (first != null && !first.isEmpty()) {
+                for (String f : first) {
+                    table.add(rule.getLHS(), f, rule.getID());
+                }
+            }
+            if (first != null && first.contains(EPSILON)) {
+                ArrayList<String> follow = followSet.get(rule.getLHS());
+                for (String f : follow) {
+                    table.add(rule.getLHS(), f, rule.getID());
+                }
+            }
+        }
+    }
 
 
 
@@ -169,6 +168,8 @@ public class Grammar {
         followSet = new FollowSet(rules, START, END);
         boolean change = true;
         while(true) {
+
+            int l = 0;
             for(Rule rule: rules) {
                 // work our way through the terminals
                 ArrayList<String> RHS = rule.getRHS();
@@ -179,33 +180,64 @@ public class Grammar {
 
                     if(followSet.isTerminal(nonTerminal)) continue;
                     if(j + 1 != RHS.size()) {
-                        change = applyRule(RHS, j, nonTerminal, rule);
+                        if(applyRule(RHS, j, nonTerminal, rule)) {
+                            l+=1;
+                        }
                     } else {
-                       change = followSet.addFollow(nonTerminal, followSet.get(rule.getLHS()));
+                       if(followSet.addFollow(nonTerminal, followSet.get(rule.getLHS()))){
+                           l+=1;
+                       }
                     }
                 }
             }
-            if(!change){
+            if(l == 0){
                 break;
             }
         }
     }
 
+//    public boolean applyRule(ArrayList<String> RHS, int j, String nonTerminal, Rule rule) {
+//        boolean change = true;
+//        String next = RHS.get(j+1);
+//        // follow of nonTerminal is fist of j + 1
+//        ArrayList<String> firstNext = firstSet.get(next);
+//        for(String s: firstNext) {
+//            if(!s.equals(EPSILON)) {
+//                change = followSet.addFollow(nonTerminal, s);
+//            }
+//        }
+//        if(firstNext.contains(EPSILON)) {
+//            // follow of non temrinal equals follow of LHS
+//            change = followSet.addFollow(nonTerminal, followSet.get(rule.getLHS()));
+//        }
+//        return change;
+//    }
+
     public boolean applyRule(ArrayList<String> RHS, int j, String nonTerminal, Rule rule) {
         boolean change = true;
-        String next = RHS.get(j+1);
+        int l = 0;
+      //  String next = RHS.get(j+1);
         // follow of nonTerminal is fist of j + 1
-        ArrayList<String> firstNext = firstSet.get(next);
+        ArrayList<String> remRHS = new ArrayList<>();
+        for(int k=j+1;k<RHS.size();k++){
+            remRHS.add(RHS.get(k));
+        }
+
+        ArrayList<String> firstNext = MultiFirst(remRHS);
         for(String s: firstNext) {
             if(!s.equals(EPSILON)) {
-                change = followSet.addFollow(nonTerminal, s);
+                if(followSet.addFollow(nonTerminal, s)) {
+                 l += 1;
+                }
             }
         }
         if(firstNext.contains(EPSILON)) {
             // follow of non temrinal equals follow of LHS
-            change = followSet.addFollow(nonTerminal, followSet.get(rule.getLHS()));
+            if(followSet.addFollow(nonTerminal, followSet.get(rule.getLHS()))) {
+                l += 1;
+            }
         }
-        return change;
+        return (l != 0);
     }
 
     public void parse(File file) throws Exception {

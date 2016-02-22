@@ -19,7 +19,8 @@ public class GrammarTest {
     @Before
     public void setUp() throws Exception {
         g = new Grammar();
-        g.parse(new File("/home/ross/Dropbox/IdeaProjects/CompilerDesign/src/Grammar.txt"));
+    //    g.parse(new File("/home/ross/Dropbox/IdeaProjects/CompilerDesign/src/Grammar.txt"));
+        g.parse(new File("C:\\Users\\b0467851\\IdeaProjects\\compilers\\src\\Grammar.txt"));
         ht = new HelperTest();
     }
 
@@ -35,7 +36,7 @@ public class GrammarTest {
         ht.removeFile(file);
     }
 
- //   @Test
+//    @Test
     public void testGrammarOne() throws Exception {
         String test = "class ross{\n" +
                 "    bob rman[5];\n" +
@@ -60,14 +61,14 @@ public class GrammarTest {
         run(test);
     }
 
- //   @Test
+    @Test
     public void testGrammarTwo() throws Exception {
         String test = "" +
                 "class test { " +
                 "   type test2 [ 95 ] ; " +
                 "} ; \n" +
                 "program { " +
-                "   int test3 " +
+                "   int test3 ; " +
                 "} ; " +
                 "long test4 ( int test5 , int test6 )" +
                 " { } ;" +
@@ -78,13 +79,70 @@ public class GrammarTest {
 
     @Test
     public void testGrammarThree() throws Exception {
-        String test = "class test0 { } ; " +
+        String test = "" +
                 "program " +
-                "{ int test1 } " +
+                "{ } " +
                 "; " +
-                "int test2 ( int test3 ) { test4 [ 55 ] + num } ;" +
+                "int test2 ( ) { test4 [ 55 ] = 65 } ;" +
                 "$";
         run(test);
     }
+
+    @Test
+    public void testGrammarFour() throws Exception {
+        String test = "program { } ; $";
+        run(test);
+    }
+
+    @Test
+    public void testGrammarFive() throws Exception {
+        String test = "PROGRAM { " +
+                "        test1 . test2 = + 6.5 " +
+                "        return (" +
+                "            id ( 6.5 ) ) ;" +
+                "       put ( 6.5 <> 6.5 + 6.5 ) ;" +
+                "       }" +
+                " ; $";
+        run(test);
+    }
+
+    @Test
+    public void testGrammarSix() throws Exception {
+        String test = "PROGRAM { " +
+                "           float test1 [ 4 ] [ 5 ]; test2 = 4" +
+                "       } ; $";
+        run(test);
+    }
+
+    @Test
+    public void testGrammarSeven() throws  Exception {
+        String test = "class Utility {};" +
+                "       program {};" +
+                "       float randomize() {};" +
+                "$";
+
+        run(test);
+    }
+
+
+    @Test
+    public void testGrammarEight() throws  Exception {
+        String test = "class Utility {" +
+                "           int var1[4][5][6][7][8][9][1][0]; " +
+                "           float var2;" +
+                "           int findMax(int array[100]) {" +
+                "               int maxValue ;" +
+                "               int idx ;" +
+                "               maxValue = array[100] ;" +
+                "               for(int idx = 99; idx > 0; idx = idx - 1) {};" +
+                "           };  " +
+                "       };" +
+                "       program {};" +
+                "       float randomize() {};" +
+                "$";
+
+        run(test);
+    }
+
 
 }

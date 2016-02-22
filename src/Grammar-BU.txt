@@ -20,11 +20,11 @@ funcDef -> funcHead funcBody SEMICOLON
 
 funcBody -> OCB FB1 CCB
 FB1 -> id FB2
-FB1 -> int FB3 
-FB1 -> float FB3 
+FB1 -> int FB3
+FB1 -> long FB3
 FB1 -> EPSILON
-FB2 -> V1 assignOp expr SEMICOLON statementR
-FB3 -> id arraySizeR SEMICOLON FB1 
+FB2 -> V1 assignOp expr statementR
+FB3 -> id arraySizeR FB1
 
 
 
@@ -66,13 +66,12 @@ term -> factor termRight
 termRight -> EPSILON
 termRight -> multOp factor termRight
 
-factor -> id F8
-F8 -> indiceR F9
-F9 -> DOT id F12
-F9 -> EPSILON
-F12 -> F8
-F12 -> ORB aParams CRB
-
+factor -> id F1
+F1 -> indiceR F2
+F1 -> ORB aParams CRB
+F2 -> DOT F3
+F3 -> id F4
+F4 -> indiceR F2
 
 factor -> num
 factor -> ORB arithExpr CRB
@@ -81,7 +80,7 @@ factor -> sign factor
 
 variable -> id V1
 V1 -> indiceR V2
-V2 -> DOT variable
+V2 -> . variable
 V2 -> EPSILON
 
 idnestR -> idnest idnestR
@@ -122,13 +121,13 @@ relOp -> GREATER_THAN
 relOp -> LESS_THAN_EQUALS
 relOp -> GREATER_THAN_EQUALS
 
-addOp -> ADDITION
-addOp -> SUBTRACTION
+addOp -> +
+addOp -> -
 addOp -> or
 
-multOp -> MULTIPLICATION
-multOp -> DIVISION
-multOp -> and
+multOp -> *
+multiOp -> /
+multiOp -> and
 
 num -> integer
 num -> float

@@ -22,6 +22,7 @@ public class FirstSet extends FF {
                 }
             }
         }
+        map.put(Grammar.EPSILON, new ArrayList<String>(){{ add(Grammar.EPSILON);}});
     }
 
     public boolean addFirst(String key, ArrayList<String> vals) {
