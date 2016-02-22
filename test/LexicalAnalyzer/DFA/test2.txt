@@ -1,1 +1,0 @@
-PROGRAM {         test1 . test2 = + 6       } ; $

@@ -83,7 +83,7 @@ public class GrammarTest {
                 "program " +
                 "{ } " +
                 "; " +
-                "int test2 ( ) { test4 [ 55 ] = 65 } ;" +
+                "int test2 ( ) { test4 [ 55 ] = 65 ; } ;" +
                 "$";
         run(test);
     }
@@ -97,9 +97,9 @@ public class GrammarTest {
     @Test
     public void testGrammarFive() throws Exception {
         String test = "PROGRAM { " +
-                "        test1 . test2 = + 6.5 " +
+                "        test1 . test2 = + 6.5 ;" +
                 "        return (" +
-                "            id ( 6.5 ) ) ;" +
+                "            id  ) ;" +
                 "       put ( 6.5 <> 6.5 + 6.5 ) ;" +
                 "       }" +
                 " ; $";
@@ -109,7 +109,7 @@ public class GrammarTest {
     @Test
     public void testGrammarSix() throws Exception {
         String test = "PROGRAM { " +
-                "           float test1 [ 4 ] [ 5 ]; test2 = 4" +
+                "           float test1 [ 4 ] [ 5 ]; test2 = 4;" +
                 "       } ; $";
         run(test);
     }
@@ -134,7 +134,12 @@ public class GrammarTest {
                 "               int maxValue ;" +
                 "               int idx ;" +
                 "               maxValue = array[100] ;" +
-                "               for(int idx = 99; idx > 0; idx = idx - 1) {};" +
+                "               for(int idx = 99; idx > 0; idx = idx - 1) {" +
+                "                   if ( array [idx] > maxValue) then {" +
+                "                       maxValue = array[idx] ;" +
+                "                    } else { };" +
+                "               };" +
+                "               return ( maxValue );" +
                 "           };  " +
                 "       };" +
                 "       program {};" +

@@ -1,1 +1,0 @@
-PROGRAM {            float test1 [ 4 ] [ 5 ] test2 = 4;       } ; $
