@@ -19,8 +19,8 @@ funcHead -> type id ORB fParams CRB
 funcDef -> funcHead funcBody SEMICOLON
 
 funcBody -> OCB FB1 CCB
-FB1 -> id FB4
-FB1 -> int FB3
+FB1 -> id FB2
+FB1 -> int FB4
 FB1 -> float FB3 
 FB1 -> EPSILON
 
