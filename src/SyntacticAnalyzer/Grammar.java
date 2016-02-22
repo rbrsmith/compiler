@@ -72,25 +72,36 @@ public class Grammar {
 //                ArrayList<String> first = firstSet.get(smbl);
 //                if(!smbl.equals(EPSILON) && first != null) {
 //                    for(String f : first) {
-//                        try {
-//                            table.add(rule.getLHS(), f, rule.getID());
-//                        } catch(Exception e){
-//                            System.out.println(e.getMessage());
-//                        }
+//                        table.add(rule.getLHS(), f, rule.getID());
 //                    }
 //                } else {
 //                    ArrayList<String> follow = followSet.get(rule.getLHS());
 //                    for(String f : follow) {
-//                        try {
-//                            table.add(rule.getLHS(), f, rule.getID());
-//                        } catch(Exception e){
-//                            System.out.println(e.getMessage());
-//                        }
+//                        table.add(rule.getLHS(), f, rule.getID());
 //                    }
 //                }
 //
 //            }
 //
+//        }
+//    }
+
+//    public void buildParseTable() throws Exception {
+//        table = new Table();
+//        for (Rule rule : rules) {
+//            String firstSmbl = rule.getFirst();
+//            ArrayList<String> first = firstSet.get(firstSmbl);
+//            if (first != null) {
+//                for (String f : first) {
+//                    table.add(rule.getLHS(), f, rule.getID());
+//                }
+//            }
+//            if (first != null && first.contains(EPSILON)) {
+//                ArrayList<String> follow = followSet.get(rule.getLHS());
+//                for (String f : follow) {
+//                    table.add(rule.getLHS(), f, rule.getID());
+//                }
+//            }
 //        }
 //    }
 

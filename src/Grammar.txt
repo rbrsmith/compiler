@@ -128,3 +128,6 @@ addOp -> or
 multOp -> *
 multiOp -> /
 multiOp -> and
+
+num -> integer
+num -> float

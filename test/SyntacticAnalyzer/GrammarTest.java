@@ -35,7 +35,7 @@ public class GrammarTest {
         ht.removeFile(file);
     }
 
-    @Test
+ //   @Test
     public void testGrammarOne() throws Exception {
         String test = "class ross{\n" +
                 "    bob rman[5];\n" +
@@ -60,7 +60,7 @@ public class GrammarTest {
         run(test);
     }
 
-    @Test
+ //   @Test
     public void testGrammarTwo() throws Exception {
         String test = "" +
                 "class test { " +
@@ -70,7 +70,19 @@ public class GrammarTest {
                 "   int test3 " +
                 "} ; " +
                 "long test4 ( int test5 , int test6 )" +
-                " { } ;" +  
+                " { } ;" +
+                "$";
+        run(test);
+    }
+
+
+    @Test
+    public void testGrammarThree() throws Exception {
+        String test = "class test0 { } ; " +
+                "program " +
+                "{ int test1 } " +
+                "; " +
+                "int test2 ( int test3 ) { test4 [ 55 ] + num } ;" +
                 "$";
         run(test);
     }
