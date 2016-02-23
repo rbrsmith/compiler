@@ -1,9 +1,6 @@
 package SyntacticAnalyzer;
 
-import LexicalAnalyzer.DFA.DFA;
-import LexicalAnalyzer.DFA.POS;
-import LexicalAnalyzer.DFA.Position;
-import LexicalAnalyzer.DFA.Token;
+import LexicalAnalyzer.DFA.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -261,7 +258,7 @@ public class Grammar {
 
     }
 
-    public void LL(File file) throws SyntacticError, IOException {
+    public void LL(File file) throws Exception {
         DFA dfa = new DFA();
         ArrayList<POS> tags = dfa.getTags(file);
         dfa.cleanTags(tags);
@@ -336,7 +333,7 @@ public class Grammar {
 
     }
 
-    public String getNextToken(RandomAccessFile buffer) {
+    public String getNextToken(RandomAccessFile buffer) throws Exception {
         POS token = null;
         String tkn = "";
             try {
@@ -357,8 +354,7 @@ public class Grammar {
                     }
                 } catch (Exception e) {
                     // Any error that occurs during token reading
-                    System.out.println("Lexical Error");
-                    return null;
+                    throw e;
                 }
             }catch(IOException e){
                 // File reading errors

@@ -88,6 +88,7 @@ F8 -> indiceR F9
 F8 -> F12
 F9 -> DOT factor
 F9 -> EPSILON
+F12 -> F8
 F12 -> ORB aParams CRB
 
 
