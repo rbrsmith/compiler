@@ -19,13 +19,19 @@ funcHead -> type id ORB fParams CRB
 funcDef -> funcHead funcBody SEMICOLON
 
 funcBody -> OCB FB1 CCB
-FB1 -> id FB2
-FB1 -> int FB4
+FB1 -> id FB4
+FB1 -> int FB3
 FB1 -> float FB3 
-FB1 -> EPSILON
+FB1 -> EPSILON 
 
 FB4 -> FB2
-FB4 -> FB3
+FB4 -> FB3 
+
+FB1 -> S2 statementR
+FB1 -> S3 statementR
+FB1 -> S4 statementR
+FB1 -> S5 statementR
+FB1 -> S6 statementR
 
 FB2 -> V1 assignOp expr SEMICOLON statementR
 FB3 -> id arraySizeR SEMICOLON FB1 
@@ -37,12 +43,19 @@ varDeclR -> EPSILON
 
 varDecl -> type id arraySizeR SEMICOLON
 
-statement -> assignStat SEMICOLON
-statement -> if ORB expr CRB then statBlock else statBlock SEMICOLON
-statement -> for ORB type id assignOp expr SEMICOLON relExpr SEMICOLON assignStat CRB statBlock SEMICOLON
-statement -> get ORB variable CRB SEMICOLON
-statement -> put ORB expr CRB SEMICOLON
-statement -> return ORB expr CRB SEMICOLON
+statement -> S1
+statement -> S2
+statement -> S3
+statement -> S4
+statement -> S5
+statement -> S6
+
+S1 -> assignStat SEMICOLON
+S2 -> if ORB expr CRB then statBlock else statBlock SEMICOLON
+S3 -> for ORB type id assignOp expr SEMICOLON relExpr SEMICOLON assignStat CRB statBlock SEMICOLON
+S4 -> get ORB variable CRB SEMICOLON
+S5 -> put ORB expr CRB SEMICOLON
+S6 -> return ORB expr CRB SEMICOLON
 
 
 assignStat -> variable assignOp expr
