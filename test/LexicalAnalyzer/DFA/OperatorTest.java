@@ -55,13 +55,13 @@ public class OperatorTest {
         test = " >< ";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
-        assertTrue(tags.size() == 4);
-        assertTrue(tags.get(1).getToken().equals(">"));
-        assertTrue(tags.get(1).getType().equals(Token.GREATER_THAN));
+        assertTrue(tags.size() == 2);
+        assertTrue(tags.get(0).getToken().equals(">"));
+        assertTrue(tags.get(0).getType().equals(Token.GREATER_THAN));
 
 
-        assertTrue(tags.get(2).getToken().equals("<"));
-        assertTrue(tags.get(2).getType().equals(Token.LESS_THAN));
+        assertTrue(tags.get(1).getToken().equals("<"));
+        assertTrue(tags.get(1).getType().equals(Token.LESS_THAN));
 
     }
 
@@ -71,9 +71,9 @@ public class OperatorTest {
         String test = " < ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 3);
-        assertTrue(tags.get(1).getToken().equals("<"));
-        assertTrue(tags.get(1).getType() == Token.LESS_THAN);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals("<"));
+        assertTrue(tags.get(0).getType() == Token.LESS_THAN);
         ht.removeFile(file);
     }
 
@@ -82,9 +82,9 @@ public class OperatorTest {
         String test = " > ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 3);
-        assertTrue(tags.get(1).getToken().equals(">"));
-        assertTrue(tags.get(1).getType() == Token.GREATER_THAN);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals(">"));
+        assertTrue(tags.get(0).getType() == Token.GREATER_THAN);
         ht.removeFile(file);
     }
 
@@ -117,9 +117,9 @@ public class OperatorTest {
         String test = " - ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 3);
-        assertTrue(tags.get(1).getToken().equals("-"));
-        assertTrue(tags.get(1).getType() == Token.SUBTRACTION);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals("-"));
+        assertTrue(tags.get(0).getType() == Token.SUBTRACTION);
         ht.removeFile(file);
     }
 
@@ -128,9 +128,9 @@ public class OperatorTest {
         String test = " * ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 3);
-        assertTrue(tags.get(1).getToken().equals("*"));
-        assertTrue(tags.get(1).getType() == Token.MULTIPLICATION);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals("*"));
+        assertTrue(tags.get(0).getType() == Token.MULTIPLICATION);
         ht.removeFile(file);
     }
 
@@ -139,9 +139,9 @@ public class OperatorTest {
         String test = " / ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 3);
-        assertTrue(tags.get(1).getToken().equals("/"));
-        assertTrue(tags.get(1).getType() == Token.DIVISION);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals("/"));
+        assertTrue(tags.get(0).getType() == Token.DIVISION);
         ht.removeFile(file);
     }
 

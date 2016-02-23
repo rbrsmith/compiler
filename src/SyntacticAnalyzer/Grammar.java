@@ -2,11 +2,9 @@ package SyntacticAnalyzer;
 
 import LexicalAnalyzer.DFA.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.SerializablePermission;
+import java.io.*;
 import java.util.*;
+import java.util.concurrent.Exchanger;
 
 public class Grammar {
 
@@ -83,7 +81,7 @@ public class Grammar {
 //        }
 //    }
 
-    public void buildParseTable() throws Exception {
+    public void buildParseTable() throws AmbiguousGrammarException {
         table = new Table();
         for (Rule rule : rules) {
             ArrayList<String> first = MultiFirst(rule.getRHS());
@@ -237,7 +235,7 @@ public class Grammar {
         return (l != 0);
     }
 
-    public void parse(File file) throws Exception {
+    public void parse(File file) throws FileNotFoundException, AmbiguousGrammarException {
         if(rules != null ){
             return ;
         }
@@ -258,7 +256,8 @@ public class Grammar {
 
     }
 
-    public void LL(File file) throws Exception {
+    public Tuple LL(File file) throws IOException {
+        // TODO not factor
         DFA dfa = new DFA();
         ArrayList<POS> tags = dfa.getTags(file);
         dfa.cleanTags(tags);
@@ -275,52 +274,108 @@ public class Grammar {
         stack.push(END);
         stack.push(START);
 
+        ArrayList<String> derivation = new ArrayList<>();
+        int dIndex = 0;
+        derivation.add(dIndex, START);
+        ArrayList<ArrayList<String>> allDerivations = new ArrayList<>();
 
-        String tkn = getNextToken(buffer);
 
+        Position pos = new Position();
+        ArrayList<Exception> errors = new ArrayList<>();
+//        String tkn = getNextToken(buffer);
+        Tuple<String, String> tknTup = getNextToken(buffer, pos, errors);
 
 
         i++;
 
 
+
+
+
         while(true) {
             String X = stack.get(stack.size()-1);
 
-            if(X.equals(END) && tkn.equals(END)) {
+            // TODO token is null from bad file?
+            // TODO error if no end symbol?
+            if(X.equals(END) && tknTup.getX().equals(END)) {
                 break;
             }
 
             if(followSet.isTerminal(X)) {
-                if(X.equals(tkn.toLowerCase()) || X.equals(tkn.toUpperCase())) {
+                if(X.equals(tknTup.getX().toLowerCase()) || X.equals(tknTup.getX().toUpperCase())) {
                     stack.pop();
-                    if(tags.size() == i) {
-                        tkn = null;
-                    } else {
-                        tkn = getNextToken(buffer);
-                        i++;
+                    derivation.set(dIndex, tknTup.getY());
+                    allDerivations.add(new ArrayList<>(derivation));
+                    dIndex++;
+
+                    tknTup = getNextToken(buffer, pos, errors);
+                    if(tknTup == null){
+                        // TODO throw new error
+                        errors.add(new SyntacticError(pos));
+                        buffer.close();
+                        break;
                     }
+                    i++;
                 } else {
 
-                    buffer.close();
-                    throw new SyntacticError();
+//                    errors.add(new SyntacticError(pos));
+                    tknTup = getNextToken(buffer, pos, errors);
+                    if(tknTup == null){
+                        // TODO throw new error
+                        errors.add(new SyntacticError(pos));
+                        buffer.close();
+                        break;
+                    }
                 }
             } else {
-                Integer rule = table.get(X, tkn.toLowerCase());
-                if(rule == null) rule = table.get(X, tkn.toUpperCase());
-                if(rule == -1 || rule == null) {
+                Integer rule = table.get(X, tknTup.getX().toLowerCase());
+                if(rule == null) rule = table.get(X, tknTup.getX().toUpperCase());
+                if(rule == null || rule == -1) {
 
-                    buffer.close();
-                    throw new SyntacticError();
+    //                buffer.close();
+    //                throw new SyntacticError();
+                    errors.add(new SyntacticError(pos, table.get(X), tknTup.getY()));
+                    tknTup = getNextToken(buffer, pos, errors);
+                    if(tknTup == null) {
+                        // TODO throw new error
+                        errors.add(new SyntacticError(pos));
+                        break;
+                    }
+                    continue;
                 }
                 for(Rule r: rules) {
                     if(rule.compareTo(r.getID()) == 0) {
                         stack.pop();
+
+                        derivation.remove(dIndex);
+                        ArrayList<String> tmp = new ArrayList<>();
+
                         ArrayList<String> RHS = r.getRHS();
                         for(int k = RHS.size() - 1; k > -1; --k){
                             if(!RHS.get(k).equals(EPSILON)) {
                                 stack.push(RHS.get(k));
                             }
                         }
+
+
+
+                        for(int k=0; k<dIndex; k++){
+                            tmp.add(derivation.get(k));
+                        }
+
+                        for(int k=0;k<RHS.size();k++){
+                            if(!RHS.get(k).equals(EPSILON)) {
+                                tmp.add(RHS.get(k));
+                            }
+                        }
+                        for(int k=dIndex; k < derivation.size(); k++){
+                            tmp.add(derivation.get(k));
+                        }
+
+                        derivation = tmp;
+
+                        allDerivations.add(new ArrayList<>(derivation));
+
                         break;
                     }
                 }
@@ -329,13 +384,21 @@ public class Grammar {
 
         buffer.close();
 
+        Tuple rtnTuple = new Tuple();
+        rtnTuple.setX(errors);
+        rtnTuple.setY(allDerivations);
+
+        return rtnTuple;
 
 
     }
 
-    public String getNextToken(RandomAccessFile buffer) throws Exception {
+
+    public Tuple getNextToken(RandomAccessFile buffer, Position pos,
+                              ArrayList<Exception> errors)  {
         POS token = null;
         String tkn = "";
+        Tuple<String, String> tuple = new Tuple<>();
             try {
             // Use RandomAccessFile as we will commonly go backtrack one in the file
                 if (buffer.getFilePointer() == buffer.length()) {
@@ -343,18 +406,24 @@ public class Grammar {
                     return null;
                 }
                 try {
-                    Position pos = new Position();
                     token = tokenizer.getNextToken(buffer, pos);
                     if (token.getType() == Token.RESERVED) {
                         tkn = token.getWord().toString();
+                        tuple.setX(token.getWord().toString());
+                        tuple.setY(Reserved.valueOf(token.getWord().toString()).getWord());
                     } else if (token.getType() == Token.EOF) {
                         tkn = END;
+                        tuple.setX(END);
+                        tuple.setY(token.getToken());
                     } else {
                         tkn = token.getType().toString();
+                        tuple.setX(token.getType().toString());
+                        tuple.setY(token.getToken());
                     }
                 } catch (Exception e) {
                     // Any error that occurs during token reading
-                    throw e;
+                    errors.add(e);
+                    return getNextToken(buffer, pos, errors);
                 }
             }catch(IOException e){
                 // File reading errors
@@ -362,7 +431,7 @@ public class Grammar {
                 System.out.println("Error reading file.");
                 return null;
             }
-        return tkn;
+        return tuple;
 
     }
 

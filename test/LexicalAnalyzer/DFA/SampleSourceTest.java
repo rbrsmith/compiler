@@ -35,21 +35,21 @@ public class SampleSourceTest {
         String test = "\tmaxValue = utility.findMax(sample);";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 12);
+        assertTrue(tags.size() == 9);
         ht.removeFile(file);
 
 
         test = "\n\tminValue = utility.findMin(sample);";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
-        assertTrue(tags.size() == 13);
+        assertTrue(tags.size() == 9);
         ht.removeFile(file);
 
 
         test = "value = 100 * (2 + 3.0 / 7.0006);";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
-        assertTrue(tags.size() == 20);
+        assertTrue(tags.size() == 12);
         ht.removeFile(file);
 
     }
@@ -57,7 +57,7 @@ public class SampleSourceTest {
     @Test
     public void randomTest() throws Exception {
         String all = "cat}{&&|| 6\t==6.0001<>+<->*./=()[/*]*/.//\r\n";
-        int size = 29;
+        int size = 25;
 
         String test = all;
         file = ht.makeFile(test);

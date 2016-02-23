@@ -1,5 +1,6 @@
-package LexicalAnalyzer.DFA;
-
+import LexicalAnalyzer.DFA.*;
+import SyntacticAnalyzer.Grammar;
+import SyntacticAnalyzer.GrammarTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -16,7 +17,8 @@ import org.junit.runners.Suite;
         PunctuationTest.class,
         BracketTest.class,
         CommentTest.class,
-        SampleSourceTest.class
+        SampleSourceTest.class,
+        GrammarTest.class
 
 })
 

@@ -37,9 +37,9 @@ public class PunctuationTest {
         String test = " ; ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 3);
-        assertTrue(tags.get(1).getToken().equals(";"));
-        assertTrue(tags.get(1).getType() == Token.SEMICOLON);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals(";"));
+        assertTrue(tags.get(0).getType() == Token.SEMICOLON);
         ht.removeFile(file);
 
 
@@ -51,9 +51,9 @@ public class PunctuationTest {
         String test = " , ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 3);
-        assertTrue(tags.get(1).getToken().equals(","));
-        assertTrue(tags.get(1).getType() == Token.COMMA);
+        assertTrue(tags.size() == 1);
+        assertTrue(tags.get(0).getToken().equals(","));
+        assertTrue(tags.get(0).getType() == Token.COMMA);
         ht.removeFile(file);
 
     }
@@ -64,9 +64,7 @@ public class PunctuationTest {
         String test = "   ";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 3);
-        assertTrue(tags.get(0).getToken().equals(" "));
-        assertTrue(tags.get(0).getType() == Token.SPACE);
+        assertTrue(tags.size() == 0);
         ht.removeFile(file);
 
     }
@@ -76,17 +74,13 @@ public class PunctuationTest {
         String test = "\n";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 1);
-        assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.LINE_FEED);
+        assertTrue(tags.size() == 0);
         ht.removeFile(file);
 
         test = "\r";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
-        assertTrue(tags.size() == 1);
-        assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.CARRIAGE_RETURN);
+        assertTrue(tags.size() == 0);
         ht.removeFile(file);
 
     }
@@ -96,9 +90,7 @@ public class PunctuationTest {
         String test = "\t";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 1);
-        assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.TAB);
+        assertTrue(tags.size() == 0);
         ht.removeFile(file);
     }
 

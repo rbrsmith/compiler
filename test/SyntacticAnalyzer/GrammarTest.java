@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 
@@ -14,13 +15,13 @@ public class GrammarTest {
     Grammar g;
     File file;
     HelperTest ht;
+    Tuple<ArrayList<Exception>, ArrayList<ArrayList<String>>> tuple;
 
 
     @Before
     public void setUp() throws Exception {
         g = new Grammar();
-        g.parse(new File("/home/ross/Dropbox/IdeaProjects/CompilerDesign/src/Grammar.txt"));
-     //   g.parse(new File("C:\\Users\\b0467851\\IdeaProjects\\compilers\\src\\Grammar.txt"));
+        g.parse(new File(System.getProperty("user.dir") + File.separator + "src" + File.separator + "Grammar.txt"));
         ht = new HelperTest();
     }
 
@@ -30,21 +31,24 @@ public class GrammarTest {
         ht = null;
     }
 
-    public void run(String test) throws Exception {
+    public Tuple run(String test) throws Exception {
         file = ht.makeFile(test);
-        g.LL(file);
+        Tuple rtn = g.LL(file);
         ht.removeFile(file);
+        return rtn;
     }
 
-//    @Test
+    @Test
     public void testGrammarOne() throws Exception {
-        String test = "class ross{\n" +
+        String test = "class ross {\n" +
                 "    bob rman[5];\n" +
                 "};\n" +
                 "class amb{};\n" +
                 "PROGRAM{};\n" +
                 "$";
         run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
         test = "class ross{\n" +
                 "    int rman[5];\n" +
                 "};\n" +
@@ -52,13 +56,16 @@ public class GrammarTest {
                 "PROGRAM{};\n" +
                 "$";
         run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
         test = "class ross{\n" +
                 "    long rman[5];\n" +
                 "};\n" +
                 "class amb{};\n" +
                 "PROGRAM{};\n" +
                 "$";
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
     @Test
@@ -73,7 +80,8 @@ public class GrammarTest {
                 "long test4 ( int test5 , int test6 )" +
                 " { } ;" +
                 "$";
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
 
@@ -85,13 +93,15 @@ public class GrammarTest {
                 "; " +
                 "int test2 ( ) { test4 [ 55 ] = 65 ; } ;" +
                 "$";
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
     @Test
     public void testGrammarFour() throws Exception {
         String test = "program { } ; $";
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
     @Test
@@ -103,7 +113,8 @@ public class GrammarTest {
                 "       put ( 6.5 <> 6.5 + 6.5 ) ;" +
                 "       }" +
                 " ; $";
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
     @Test
@@ -111,7 +122,8 @@ public class GrammarTest {
         String test = "PROGRAM { " +
                 "           float test1 [ 4 ] [ 5 ]; test2 = 4;" +
                 "       } ; $";
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
     @Test
@@ -120,8 +132,8 @@ public class GrammarTest {
                 "       program {};" +
                 "       float randomize() {};" +
                 "$";
-
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
 
@@ -147,7 +159,8 @@ public class GrammarTest {
                 "       float randomize() {};" +
                 "$";
 
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
     @Test
@@ -167,7 +180,8 @@ public class GrammarTest {
                 "           };" +
                     "}; program {};" +
                 "$";
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
     @Test
@@ -190,7 +204,8 @@ public class GrammarTest {
                 "       put(minValue);"+
                 "}; $";
 
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
     @Test
@@ -202,7 +217,8 @@ public class GrammarTest {
                 "           value = 1.05 + ((2.04*2.47) - 3.0) + 7.006;" +
                 "       };" +
                 "$";
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
     @Test
@@ -267,7 +283,8 @@ public class GrammarTest {
                 "return (value);\n" +
                 "};"+
                   "$";
-        run(test);
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
     }
 
 

@@ -25,6 +25,9 @@ public class DFA {
              add(Token.TAB);
              add(Token.CARRIAGE_RETURN);
              add(Token.LINE_FEED);
+            add(Token.INLINE_COMMENT);
+            add(Token.OPEN_COMMENT);
+            add(Token.CLOSE_COMMENT);
         }};
         Node root = new Node(0);
 
@@ -232,8 +235,25 @@ public class DFA {
                 UnrecognizedCharacterException, IOException{
         POS token;
         POS cleaned = null;
+        boolean inlineComments = false;
+        boolean multiLineComments = false;
         while(cleaned == null) {
             token = g.getNextToken(buffer, pos);
+            if(token.getType() == Token.INLINE_COMMENT) {
+                inlineComments = true;
+            } else if(token.getType() == Token.OPEN_COMMENT) {
+                multiLineComments = true;
+            } else if(token.getType() == Token.LINE_FEED && inlineComments) {
+                inlineComments = false;
+            } else if(token.getType() == Token.CLOSE_COMMENT && multiLineComments) {
+                multiLineComments = false;
+            }
+
+            if(inlineComments || multiLineComments) {
+                continue;
+            }
+
+
             cleaned = cleanTag(token);
         }
         return cleaned;
