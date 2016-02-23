@@ -141,6 +141,7 @@ public class GrammarTest {
                 "               };" +
                 "               return ( maxValue );" +
                 "           };  " +
+                "" +
                 "       };" +
                 "       program {};" +
                 "       float randomize() {};" +
