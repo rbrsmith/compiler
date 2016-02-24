@@ -4,7 +4,6 @@ import LexicalAnalyzer.DFA.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Class responsble for building and LL parsing a source code
@@ -12,7 +11,7 @@ import java.util.concurrent.ExecutionException;
 public class Grammar {
 
     // Holds all production rules in the grammar
-    ArrayList<Rule> rules;
+    HashMap<Integer ,Rule> rules;
 
     // Holds the parse table
     private Table table;
@@ -40,7 +39,7 @@ public class Grammar {
     public String toString() {
         String rtn = "";
         rtn += "Rules:\n";
-        for(Rule r: rules) {
+        for(Rule r: rules.values()) {
             rtn += r + "\n";
         }
         rtn += "\n\n";
@@ -62,9 +61,9 @@ public class Grammar {
      * will say which rule to follow
      * @throws AmbiguousGrammarException if the grammar is malformed
      */
-    public void buildParseTable() throws AmbiguousGrammarException {
+    private void buildParseTable() throws AmbiguousGrammarException {
         table = new Table();
-        for (Rule rule : rules) {
+        for (Rule rule : rules.values()) {
             // Get the first of the Right Hand Side
             ArrayList<String> first = multiFirst(rule.getRHS());
             // Add T[LHS, f] = ruleID - for each first
@@ -93,7 +92,7 @@ public class Grammar {
         firstSet = new FirstSet(rules);
         while(true) {
             int j = 0;
-            for (Rule rule : rules) {
+            for (Rule rule : rules.values()) {
               String LHS = rule.getLHS();
               // Add EPSILON if needed
               if (rule.getRHS().contains(EPSILON)) {
@@ -176,7 +175,7 @@ public class Grammar {
         while(true) {
 
             int l = 0;
-            for(Rule rule: rules) {
+            for(Rule rule: rules.values()) {
                 // Work our way through the terminals in the Right Hand Side
                 ArrayList<String> RHS = rule.getRHS();
                 for(int j=0;j<RHS.size();++j){
@@ -257,12 +256,13 @@ public class Grammar {
         // Split the Right Hand Side of A -> b C d
         String line;
         String[] tokens;
-        rules = new ArrayList<>();
+        rules = new HashMap<>();
         while(input.hasNext()) {
             line = input.nextLine();
             if(line.equals("")) continue;
             tokens = line.split(" ",3);
-            rules.add(new Rule(tokens[0], tokens[2]));
+            Rule r = new Rule(tokens[0], tokens[2]);
+            rules.put(r.getID(), r);
         }
 
         // Construct the parse table
@@ -278,8 +278,6 @@ public class Grammar {
      * @throws IOException thrown if there was an issue readying the source code
      */
     public Tuple LL(File file) throws IOException {
-        // TODO not factor
-
         // Access source code
         RandomAccessFile buffer = new RandomAccessFile(file, "r");
 
@@ -294,6 +292,7 @@ public class Grammar {
         ArrayList<String> derivation = new ArrayList<>();
         int dIndex = 0;
         derivation.add(dIndex, START);
+        allDerivations.add(new ArrayList<>(derivation));
 
 
         // Keep track of where we are in the file for error reporting
@@ -318,8 +317,9 @@ public class Grammar {
                 if(X.equals(tknTup.getX().toLowerCase()) || X.equals(tknTup.getX().toUpperCase())) {
                     stack.pop();
 
+
                     // Add derivation rule
-                    derivation.set(dIndex, tknTup.getY());
+                    derivation = createDerivation(dIndex, derivation, tknTup.getY());
                     allDerivations.add(new ArrayList<>(derivation));
                     dIndex++;
 
@@ -329,19 +329,20 @@ public class Grammar {
                         // Unable to recover
                         // Could be an unexpected end of file
                         // Impossible to parse
-                        errors.add(new SyntacticError(pos));
+                        errors.add(new SyntacticException(pos));
                         buffer.close();
                         break;
                     }
                 } else {
                     // We have an error - we encountered a terminal
+                    errors.add(new SyntacticException(pos,tknTup.getY()));
                     // but not the one we want - get next token and keep moving
                     tknTup = getNextToken(buffer, pos, errors);
                     if(tknTup == null){
                         // Unable to recover
                         // Could be an unexpected end of file
                         // Impossible to parse
-                        errors.add(new SyntacticError(pos));
+                        errors.add(new SyntacticException(pos));
                         buffer.close();
                         break;
                     }
@@ -351,63 +352,44 @@ public class Grammar {
                 // We must replace it on the stack with its Right Hand Side
                 Integer rule = table.get(X, tknTup.getX().toLowerCase());
                 if(rule == null) rule = table.get(X, tknTup.getX().toUpperCase());
-                if(rule == null) {
+                if(rule == null || rules.get(rule) == null) {
                     // We have an error
                     // Capture the error and move on in the hopes we find the correct
                     // symbol to provide a rule soon
-                    errors.add(new SyntacticError(pos, table.get(X), tknTup.getY()));
+                    errors.add(new SyntacticException(pos, table.get(X), tknTup.getY()));
                     tknTup = getNextToken(buffer, pos, errors);
                     if(tknTup == null) {
                         // Unable to recover
                         // Could be an unexpected end of file
                         // Impossible to parse
-                        errors.add(new SyntacticError(pos));
+                        errors.add(new SyntacticException(pos));
                         break;
                     }
                     continue;
                 }
 
                 // We have a rule to replace with on the stack
-                // Find the rule, and replace the top of the stack with each Right Hand Side token
-                for(Rule r: rules) {
-                    if(rule.compareTo(r.getID()) == 0) {
+
+                Rule r = rules.get(rule);
                         stack.pop();
 
-                        derivation.remove(dIndex);
-                        ArrayList<String> tmp = new ArrayList<>();
 
                         ArrayList<String> RHS = r.getRHS();
-                        for(int k = RHS.size() - 1; k > -1; --k){
-                            if(!RHS.get(k).equals(EPSILON)) {
+                        for (int k = RHS.size() - 1; k > -1; --k) {
+                            if (!RHS.get(k).equals(EPSILON)) {
                                 stack.push(RHS.get(k));
                             }
                         }
 
 
-                        // Create a derivation
-                        // Keep all derived so far
-                        for(int k=0; k<dIndex; k++){
-                            tmp.add(derivation.get(k));
-                        }
-                        // Then add the new rule
-                        for(int k=0;k<RHS.size();k++){
-                            if(!RHS.get(k).equals(EPSILON)) {
-                                tmp.add(RHS.get(k));
-                            }
-                        }
-                        // Now keep the remaining derivation to be done
-                        for(int k=dIndex; k < derivation.size(); k++){
-                            tmp.add(derivation.get(k));
-                        }
-
-                        // Store the derivation
-                        derivation = tmp;
+                        // new line to derivations
+                        derivation = createDerivation(dIndex, derivation, RHS);
                         allDerivations.add(new ArrayList<>(derivation));
 
+
                         // We found our rule so we can move on
-                        break;
-                    }
-                }
+                        //break;
+
             }
         }
 
@@ -418,8 +400,51 @@ public class Grammar {
         rtnTuple.setY(allDerivations);
 
         return rtnTuple;
+    }
 
+    /**
+     *
+     * @param dIndex int current location in derivation
+     * @param derivation ArrayList of currents derivation
+     * @param token String token we are replacing in derivation
+     * @return
+     */
+    private ArrayList<String> createDerivation(int dIndex, ArrayList<String> derivation, String token) {
 
+        derivation.set(dIndex, token);
+        return derivation;
+    }
+
+    /**
+     *
+     * @param dIndex int current location in derivation
+     * @param derivation ArrayList of currents derivation
+     * @param RHS String of tokens to be added to derivation
+     * @return
+     */
+    private ArrayList<String> createDerivation(int dIndex, ArrayList<String> derivation,
+                                  ArrayList<String> RHS) {
+
+        ArrayList<String> tmp = new ArrayList<>();
+
+        derivation.remove(dIndex);
+        // Create a derivation
+        // Keep all derived so far
+        for(int k=0; k<dIndex; k++){
+            tmp.add(derivation.get(k));
+        }
+        // Then add the new rule
+        for(int k=0;k<RHS.size();k++){
+            if(!RHS.get(k).equals(EPSILON)) {
+                tmp.add(RHS.get(k));
+            }
+        }
+        // Now keep the remaining derivation to be done
+        for(int k=dIndex; k < derivation.size(); k++){
+            tmp.add(derivation.get(k));
+        }
+
+        return tmp;
     }
 
 
@@ -430,7 +455,7 @@ public class Grammar {
      * @param errors List of current errors found
      * @return Tuple contains token type and token value
      */
-    public Tuple getNextToken(RandomAccessFile buffer, Position pos,
+    private Tuple getNextToken(RandomAccessFile buffer, Position pos,
                               ArrayList<Exception> errors) throws IOException   {
         POS token;
         Tuple<String, String> tuple = new Tuple<>();

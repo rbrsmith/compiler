@@ -6,7 +6,7 @@ package LexicalAnalyzer.DFA;
 public enum Reserved {
     IF("if"),THEN("then"),ELSE("else"),FOR("for"),CLASS("class"),
     INT("int"),FLOAT("float"),GET("get"),PUT("put"),RETURN("return"),
-    PROGRAM("program");
+    PROGRAM("program"), AND("and"), OR("or"), NOT("not");
 
     private String word;
 

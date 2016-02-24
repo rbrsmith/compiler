@@ -8,8 +8,8 @@ package SyntacticAnalyzer;
  */
 public class Tuple<X, Y> {
 
-    public X x;
-    public Y y;
+    private X x;
+    private Y y;
 
     public Tuple() {}
 

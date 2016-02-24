@@ -1,6 +1,7 @@
 package SyntacticAnalyzer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Class holds all the Follows of the grammar
@@ -13,7 +14,7 @@ public class FollowSet extends FF {
      * @param startSmbl String starting symbol of grammar
      * @param endSmbl Ending symbol of the grammar
      */
-    public FollowSet(ArrayList<Rule> rules, String startSmbl, String endSmbl) {
+    public FollowSet(HashMap<Integer, Rule> rules, String startSmbl, String endSmbl) {
         super(rules);
 
         // Follow(Start) -> End

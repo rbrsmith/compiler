@@ -286,5 +286,118 @@ public class GrammarTest {
         assertTrue(tuple.getX().size() == 0);
     }
 
+    @Test
+    public void grammarTest13() throws Exception{
+        String test = "class id {" +
+                "           float id; " +
+                "           int id( ) { " +
+                "               if(  6.5 - id [8]. id ()  ==  id ) " +
+                "               then { put(not 5); } " +
+                "               else ; " +
+                "           } ;" +
+                "       };" +
+                "program{};" +
+                "$ ";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
+    }
+
+
+    @Test
+    public void grammarTest14() throws Exception{
+        String test = "class id {\n" +
+                "           float id [ 5 ] ; \n" +
+                "           int id [6];\n" +
+                "           id id (long id [5][6][6] ,int id [5],long id  ) {\n" +
+                "               int id [1][2];\n" +
+                "               for(long id = (5) <> (not 5);\n" +
+                "                   8 == 8;\n" +
+                "                   id = 5\n" +
+                "               ){\n" +
+                "                   return (7);\n" +
+                "               }\n;" +
+                "               return( id [5][4].  id [not 5] . id() or + 5 );\n" +
+                "           }\n;" +
+                "           int id() {}\n;" +
+                "}\n;" +
+                "class id {};\n" +
+                "program{};\n" +
+                "$ \n";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
+    }
+
+    @Test
+    public void grammarTest15() throws Exception{
+        String test = "program{}\n;" +
+                "       long id( )\n" +
+                        "{" +
+                "           id id[5][4][3];" +
+                "           int id[2][3][4];" +
+                "           id[ +5 + not 5 + 5 ].id[5][4][3].id[4] = id[5][3].id( )\n== 5;" +
+                "" +
+                "" +
+                "           if(5) then  else ;\n" +
+                "           for(int id = 6;id < 7; id = id + 1);\n" +
+                "            get(id[5][5].id[4]);\n" +
+                "           put(5);" +
+                "           return(5 + 5 + 5 <> 5);" +
+                "       }\n;" +
+                "int id(){}; $ ";
+
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
+    }
+
+    @Test
+    public void failedGrammarTest1() throws Exception {
+        String test = "program class {} ; $";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 1);
+    }
+
+
+    @Test
+    public void failedGrammarTest2() throws Exception {
+        String test = "program class { class } ; $";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 2);
+    }
+
+    @Test
+    public void failedGrammarTest3() throws Exception {
+        String test = "class id {};";
+        tuple = run(test);
+        // Impossible to parse as we are missing file end
+        System.out.println(tuple.getX());
+        assertTrue(tuple.getX().size() == 1);
+        assertTrue(tuple.getX().get(0).getMessage().contains("Unrecoverable"));
+    }
+
+    @Test
+    public void failedGrammarTest4() throws Exception {
+        String test = "class id {" +
+                "       int idx" +
+                "       int y;    " +
+                "       };program{};$ ";
+        tuple = run(test);
+        // We reover on the third token - so 2 errors
+        assertTrue(tuple.getX().size() == 2);
+    }
+
+    @Test
+    public void failedGrammarTest5() throws Exception {
+        String test = "class id {" +
+                "           int idx[0][3][2][4][5][5" +
+                "           int y;" +
+                "           int x;" +
+                "           int z;" +
+                "           ];" +
+                "}; program {};$ ";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 9);
+
+    }
+
 
 }

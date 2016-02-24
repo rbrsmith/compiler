@@ -16,12 +16,12 @@ public class FF {
      *
      * @param rules ArrayList of Rules in the grammar
      */
-    public FF(ArrayList<Rule> rules) {
+    public FF(HashMap<Integer, Rule> rules) {
         // Add all left hand sides to the set
         map = new HashMap<>();
         String LHS;
         ArrayList<String> RHS;
-        for(Rule rule : rules) {
+        for(Rule rule : rules.values()) {
             LHS = rule.getLHS();
             map.put(LHS, new ArrayList<>());
         }
