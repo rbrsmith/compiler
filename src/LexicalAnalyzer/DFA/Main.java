@@ -31,12 +31,16 @@ public class Main {
             DFA dfa = new DFA();
             ArrayList<POS> tags;
             ArrayList<Exception> errors = new ArrayList<>();
+
             tags = dfa.getTags(new File(args[0]), errors);
             dfa.cleanTags(tags);
+
             for(POS t : tags) {
                 tagWriter.write(t.toString() + "\n");
             }
+
             tagWriter.close();
+
             for(Exception e: errors) {
                 errorWriter.write(e.toString() + "\n");
             }

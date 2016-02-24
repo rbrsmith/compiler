@@ -57,7 +57,8 @@ public class SampleSourceTest {
     @Test
     public void randomTest() throws Exception {
         String all = "cat}{&&|| 6\t==6.0001<>+<->*./=()[/*]*/.//\r\n";
-        int size = 25;
+        int size = 21;
+
 
         String test = all;
         file = ht.makeFile(test);

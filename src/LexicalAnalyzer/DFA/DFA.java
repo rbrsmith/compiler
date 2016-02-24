@@ -1,11 +1,8 @@
 package LexicalAnalyzer.DFA;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.Exchanger;
 
 /**
  * Builds a DFA and Transition State Table
@@ -231,14 +228,33 @@ public class DFA {
         return tags;
     }
 
+
+    /**
+     * Get the next sanitized token, will not return spaces, linefeeds etc.
+     * Comments and everything in between them will be removed
+     *
+     * @param buffer RandomAccessFile pointing to source code
+     * @param pos Position object representing where we are in the file
+     * @return  POS partOfSpeech representing the next token
+     * @throws InvalidCharacterException thrown if we encounter an unexpected character in the token
+     * @throws UnrecognizedCharacterException thrown if we encounter an unrecognized character in the token
+     * @throws IOException thrown if we have trouble reading the file
+     */
     public POS getNextToken(RandomAccessFile buffer, Position pos) throws InvalidCharacterException,
                 UnrecognizedCharacterException, IOException{
         POS token;
+        // Cleaned version of the token
         POS cleaned = null;
+
+        // Track if we are current pursuing a comment
         boolean inlineComments = false;
         boolean multiLineComments = false;
+
         while(cleaned == null) {
+
             token = g.getNextToken(buffer, pos);
+
+            // Start & finish of comment
             if(token.getType() == Token.INLINE_COMMENT) {
                 inlineComments = true;
             } else if(token.getType() == Token.OPEN_COMMENT) {
@@ -282,16 +298,6 @@ public class DFA {
     public void cleanTags(ArrayList<POS> tags) {
         for (Iterator<POS> iterator = tags.iterator(); iterator.hasNext();) {
             POS tag = iterator.next();
-            // Change reserved words
-//            if(tag.getType() == Token.ID) {
-//                Reserved reserved = Reserved.get(tag.getToken());
-//                if(reserved != null) {
-//                    tag.setWord(reserved);
-//                }
-//            // Remove unwated tags
-//            } else if(remove.contains(tag.getType())) {
-//                iterator.remove();
-//            }
             tag = cleanTag(tag);
             if(tag == null) {
                 iterator.remove();
@@ -300,15 +306,21 @@ public class DFA {
 
     }
 
+    /**
+     * @param tag POS PartOfSpeech tag to be cleaned
+     * @return POS of cleaned tag, word if token is reserved or null if it is not used in the parsing
+     */
     public POS cleanTag(POS tag) {
+        // Change if tag is a reserved word
         if(tag.getType() == Token.ID) {
             Reserved reserved = Reserved.get(tag.getToken());
             if(reserved != null) {
                 tag.setWord(reserved);
                 return tag;
             }
-            // Remove unwated tags
+
         } else if(remove.contains(tag.getType())) {
+            // Certain tags should not be returned
             return null;
         }
         return tag;

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 public class Main {
 
     /**
-     *
      * @param args String Array, args[0] must be full path to the sourcec code
      */
     public static void main(String[] args) {
@@ -17,20 +16,22 @@ public class Main {
             System.out.println("Error.  Unable to find source code or grammar.  " +
                     "Make sure the program is called: java Main /path/to/source/code /path/to/grammar");
         } else {
-            // Prepare outputs
+            // Prepare inputs / outputs
             String sourceCodePath = args[0];
             String grammarPath = args[1];
             String base = args[0].substring(0, args[0].lastIndexOf(File.separator));
-
             String derivationOut = base + File.separator + "derivation.txt";
 
-            Grammar grammar = new Grammar();
+
             try {
-                grammar.parse(new File(grammarPath));
+                // Build grammar
+                Grammar grammar = new Grammar(grammarPath);
 
-
+                // Parse the source code
                 Tuple<ArrayList<Exception>, ArrayList<ArrayList<String>>> result =
                         grammar.LL(new File(sourceCodePath));
+
+                // Save derivation to out file
                 PrintWriter derivationWriter = new PrintWriter(derivationOut, "UTF-8");
                 for(ArrayList<String> derivationString :  result.getY()) {
                     String derivation = "";
@@ -42,9 +43,11 @@ public class Main {
                 }
                 derivationWriter.close();
 
+                // Print out all the errors
                 for(Exception e : result.getX()) {
                     System.out.println(e);
                 }
+
 
             } catch(FileNotFoundException e) {
                 System.out.println("Unable to find grammar or source code");

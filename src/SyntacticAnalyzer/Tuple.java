@@ -1,16 +1,17 @@
 package SyntacticAnalyzer;
 
+
+/**
+ * Class used to hold two related values at the same time
+ * @param <X>
+ * @param <Y>
+ */
 public class Tuple<X, Y> {
 
     public X x;
     public Y y;
-    public Tuple(X x, Y y) {
-        this.x = x;
-        this.y = y;
-    }
-    public Tuple() {
 
-    }
+    public Tuple() {}
 
     public void setX(X x) {
         this.x = x;

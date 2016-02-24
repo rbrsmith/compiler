@@ -4,25 +4,38 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class abstracting a table
+ * Used for parse table
+ */
 public class Table {
 
     HashMap<String, HashMap<String, Integer>> data;
 
 
     public Table() {
-        data = new HashMap<String, HashMap<String, Integer>>();
+        data = new HashMap<>();
     }
 
+    /**
+     *
+     * @param row String
+     * @param col String
+     * @param data Integer of rule ID
+     * @throws AmbiguousGrammarException
+     */
     public void add(String row, String col, Integer data) throws AmbiguousGrammarException {
         HashMap<String, Integer> cols = this.data.get(row);
+        // First time seeing this row, create it
         if(cols == null) {
-            cols = new HashMap<String, Integer>();
+            cols = new HashMap<>();
             cols.put(col, data);
             this.data.put(row, cols);
         } else {
+            // Add this column to the row
+            // If there is already a value - then grammar is invalid
             if(cols.get(col) != null && cols.get(col) != data) {
                 throw new AmbiguousGrammarException(data);
-            //    throw new Exception("Inproper grammar at rule: "+data+".  Trying to set {" + row+", "+col+", "+ data+"} but found {"+row+", "+col+", "+cols.get(col) + "}");
             }
             cols.put(col, data);
         }
@@ -39,6 +52,7 @@ public class Table {
     public String toString() {
         String rtn = "\t";
 
+        // Print header
         ArrayList<String> header = new ArrayList<String>();
         for(Map.Entry<String, HashMap<String, Integer>> row : data.entrySet()) {
             for (Map.Entry<String, Integer> col : row.getValue().entrySet()) {
@@ -51,11 +65,10 @@ public class Table {
         rtn += "\n";
 
 
-
+        // Print each row and value
+        // Value of -1 printed if no option exists
         for(Map.Entry<String, HashMap<String, Integer>> row : data.entrySet()) {
-
             String rowId = row.getKey();
-
             rtn += rowId + "\t";
 
             HashMap<String, Integer> col = row.getValue();
@@ -67,22 +80,8 @@ public class Table {
                 rtn += "\t" + v;
             }
             rtn += "\n";
-
-//            for(Map.Entry<String,Integer> col : row.getValue().entrySet()) {
-//
-//                String colId = col.getKey();
-//                Integer val = col.getValue();
-//
-//                rtn += colId + " = " + val + "\t";
-//
-//            }
-//            rtn += "\n";
-
-
         }
-
         return rtn;
-
     }
 
 
