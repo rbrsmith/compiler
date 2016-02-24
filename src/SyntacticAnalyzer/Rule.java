@@ -2,18 +2,26 @@ package SyntacticAnalyzer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
+
+/**
+ * Class that encapulates a single grammar rule
+ */
 public class Rule {
 
-    String LHS;
-    ArrayList<String> RHS;
+    String LHS; // Left Hand Side
+    ArrayList<String> RHS; // Right Hand Side
     static int id = 0;
     int ruleId;
 
+    /**
+     *
+     * @param LHS String LHS of a rule
+     * @param RHS String RHS of a rule in space delimited form a B c
+     */
     public Rule(String LHS, String RHS) {
         this.LHS = LHS;
-        this.RHS = new ArrayList<String>(Arrays.asList(RHS.split(" ")));
+        this.RHS = new ArrayList<>(Arrays.asList(RHS.split(" ")));
         this.id += 1;
         this.ruleId = id;
     }
@@ -26,9 +34,6 @@ public class Rule {
         return rtn;
     }
 
-    public String getFirst() {
-        return RHS.get(0);
-    }
 
     public String getLHS() {
         return LHS;
@@ -40,10 +45,6 @@ public class Rule {
 
     public ArrayList<String> getRHS() {
         return RHS;
-    }
-
-    public String getLast() {
-        return RHS.get(RHS.size() - 1);
     }
 
 

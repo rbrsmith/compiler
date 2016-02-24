@@ -4,15 +4,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class used to hold First and Follow sets
+ */
 public class FF {
 
+    // First and Follow data will be stored here
     protected HashMap<String, ArrayList<String>> map;
 
-    public FF() {
-
-    }
-
+    /**
+     *
+     * @param rules ArrayList of Rules in the grammar
+     */
     public FF(ArrayList<Rule> rules) {
+        // Add all left hand sides to the set
         map = new HashMap<>();
         String LHS;
         ArrayList<String> RHS;
@@ -22,10 +27,17 @@ public class FF {
         }
     }
 
+
     public ArrayList<String> get(String str) {
         return map.get(str);
     }
 
+    /**
+     *
+     * @param key String
+     * @param vals ArrayList values
+     * @return True if value is added | False otherwise
+     */
     public boolean add(String key, ArrayList<String> vals) {
         int added = 0;
         for(String val: vals) {
@@ -34,11 +46,15 @@ public class FF {
         return (added != 0);
     }
 
+    /**
+     *
+     * @param key String
+     * @param val String
+     * @return True if value is added | False otherwise
+     */
     public boolean add(String key, String val) {
         ArrayList<String> currentVals = map.get(key);
         if(currentVals == null) {
-            // TODO
-            System.out.println("ERR");
             return false;
         }
         if(!currentVals.contains(val)) {

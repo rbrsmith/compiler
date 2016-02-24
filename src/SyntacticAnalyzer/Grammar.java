@@ -4,23 +4,37 @@ import LexicalAnalyzer.DFA.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.Exchanger;
+import java.util.concurrent.ExecutionException;
 
+/**
+ * Class responsble for building and LL parsing a source code
+ */
 public class Grammar {
 
+    // Holds all production rules in the grammar
     ArrayList<Rule> rules;
 
+    // Holds the parse table
     private Table table;
 
+    // Holds the first and follow sets
     private FirstSet firstSet;
     private FollowSet followSet;
 
+    // Token names
     final static String EPSILON = "EPSILON";
     final String START = "prog";
     final String END = "$";
 
+    // Reference to the graph and State Transition Table to get our tokens from
     final private DFA tokenizer = new DFA();
 
+
+    public Grammar(String grammarPath) throws AmbiguousGrammarException, FileNotFoundException {
+        File f = new File(grammarPath);
+        buildGrammar(f);
+
+    }
 
 
     public String toString() {
@@ -42,54 +56,24 @@ public class Grammar {
         return rtn;
     }
 
-//    public void buildParseTable() throws Exception {
-//        table = new Table();
-//        for(Rule rule: rules) {
-//            String firstSmbl = rule.getFirst();
-//            ArrayList<String> first = firstSet.get(firstSmbl);
-//            if(!firstSmbl.equals(EPSILON) && first != null) {
-//                for(String f : first) {
-//                       table.add(rule.getLHS(), f, rule.getID());
-//                }
-//            } else {
-//                ArrayList<String> follow = followSet.get(rule.getLHS());
-//                for(String f : follow) {
-//                        table.add(rule.getLHS(), f, rule.getID());
-//                }
-//            }
-//        }
-//    }
 
-//    public void buildParseTable() throws Exception{
-//        table = new Table();
-//        for(Rule rule: rules) {
-//            for(String smbl : rule.getRHS()) {
-//                ArrayList<String> first = firstSet.get(smbl);
-//                if(!smbl.equals(EPSILON) && first != null) {
-//                    for(String f : first) {
-//                        table.add(rule.getLHS(), f, rule.getID());
-//                    }
-//                } else {
-//                    ArrayList<String> follow = followSet.get(rule.getLHS());
-//                    for(String f : follow) {
-//                        table.add(rule.getLHS(), f, rule.getID());
-//                    }
-//                }
-//
-//            }
-//
-//        }
-//    }
-
+    /**
+     * Constructs a parser table where each terminal and nonterminal matched with a token
+     * will say which rule to follow
+     * @throws AmbiguousGrammarException if the grammar is malformed
+     */
     public void buildParseTable() throws AmbiguousGrammarException {
         table = new Table();
         for (Rule rule : rules) {
-            ArrayList<String> first = MultiFirst(rule.getRHS());
+            // Get the first of the Right Hand Side
+            ArrayList<String> first = multiFirst(rule.getRHS());
+            // Add T[LHS, f] = ruleID - for each first
             if (first != null && !first.isEmpty()) {
                 for (String f : first) {
                     table.add(rule.getLHS(), f, rule.getID());
                 }
             }
+            // Add T[LHS, f] = ruleID - for each follow - only if first contains EPSILON
             if (first != null && first.contains(EPSILON)) {
                 ArrayList<String> follow = followSet.get(rule.getLHS());
                 for (String f : follow) {
@@ -100,49 +84,72 @@ public class Grammar {
     }
 
 
-
-
-    public void getFirsts() {
+    /**
+     * Builds the first sets from the grammar
+     * Uses a heuristic - we keep updating until nothing has changed
+     */
+    private void getFirsts() {
+        // Build initial rules for nonterminals
         firstSet = new FirstSet(rules);
         while(true) {
             int j = 0;
             for (Rule rule : rules) {
-              String X = rule.getLHS();
+              String LHS = rule.getLHS();
+              // Add EPSILON if needed
               if (rule.getRHS().contains(EPSILON)) {
-                     if(firstSet.addFirst(X, EPSILON)) j += 1;
+                     if(firstSet.addFirst(LHS, EPSILON)) j += 1;
                 } else {
-                      ArrayList<String> restOfFirst = MultiFirst(rule.getRHS());
-                     if(firstSet.addFirst(X, restOfFirst)) j += 1;
+                     // Get first of Right Hand Side add add to the Left Hand Side
+                     ArrayList<String> restOfFirst = multiFirst(rule.getRHS());
+                     if(firstSet.addFirst(LHS, restOfFirst)) j += 1;
               }
             }
             if(j == 0) {
+                // When no more changes are done we exit
                 break;
             }
         }
     }
 
-    public ArrayList<String> MultiFirst(ArrayList<String> Ys) {
+    /**
+     * Gets the first set of the Right Hand Side of the production rules
+     * Ex:  First(a B c) in L -> a B c
+     * @param Ys
+     * @return ArrayList of first in the production rule
+     */
+    private ArrayList<String> multiFirst(ArrayList<String> Ys) {
         if(Ys.size() == 0) return new ArrayList<>();
         String Y1 = Ys.get(0);
         ArrayList<String> firstY1 = firstSet.get(Y1);
+        // If the first of the first symbol does not have EPSILON
+        // then we have found our First
         if(!firstY1.contains(EPSILON)) {
             return firstY1;
         } else {
 
+            // If all the rule had was Epsilon, then we return just EPSILON
+            // Ex: A -> EPSILON; First(A) -> EPSILON
             if(firstY1.size() == 1 && firstY1.get(0).equals(EPSILON)) {
                 return new ArrayList<String>(){{add(EPSILON);}};
             }
+
+            // Otherwise we call multiFirst on everything but the first symbol
+            // Ex First(L) -> a B c
+            //      First(L) -> First(A) + First(B c) ...
 
             ArrayList<String> tmp = new ArrayList<>();
             for (int i = 1; i < Ys.size(); i++) {
                 tmp.add(Ys.get(i));
             }
-            ArrayList<String> Y2 = new ArrayList<>(MultiFirst(tmp));
+            ArrayList<String> Y2 = new ArrayList<>(multiFirst(tmp));
+            // Add first of first symbol back to the array
             for (String s : firstY1) {
                 if (!s.equals(EPSILON) && !Y2.contains(s)) {
                     Y2.add(s);
                 }
             }
+
+            // Add EPSILON if all Right Hand Side symbols has EPSILON
             boolean found = true;
             for (String s : Ys) {
                 ArrayList<String> firstS = firstSet.get(s);
@@ -158,67 +165,64 @@ public class Grammar {
     }
 
 
-
-    public void getFollows() {
+    /**
+     * Build the Follow Set for the grammar
+     */
+    private void getFollows() {
+        // Set up follow set
         followSet = new FollowSet(rules, START, END);
-        boolean change = true;
+
+        // Use heuristic - only exit when no more changes are being made
         while(true) {
 
             int l = 0;
             for(Rule rule: rules) {
-                // work our way through the terminals
+                // Work our way through the terminals in the Right Hand Side
                 ArrayList<String> RHS = rule.getRHS();
                 for(int j=0;j<RHS.size();++j){
                     String nonTerminal = RHS.get(j);
 
-//                    if(nonTerminal.equals(EPSILON)) continue;
-
                     if(followSet.isTerminal(nonTerminal)) continue;
                     if(j + 1 != RHS.size()) {
+                        // If there are values to the left we apply a rule
                         if(applyRule(RHS, j, nonTerminal, rule)) {
                             l+=1;
                         }
                     } else {
+                       // Otherwise follow of nonTerminal is follow of LHS
                        if(followSet.addFollow(nonTerminal, followSet.get(rule.getLHS()))){
                            l+=1;
                        }
                     }
                 }
             }
+
+            // Check for changes in this iteration
             if(l == 0){
                 break;
             }
         }
     }
 
-//    public boolean applyRule(ArrayList<String> RHS, int j, String nonTerminal, Rule rule) {
-//        boolean change = true;
-//        String next = RHS.get(j+1);
-//        // follow of nonTerminal is fist of j + 1
-//        ArrayList<String> firstNext = firstSet.get(next);
-//        for(String s: firstNext) {
-//            if(!s.equals(EPSILON)) {
-//                change = followSet.addFollow(nonTerminal, s);
-//            }
-//        }
-//        if(firstNext.contains(EPSILON)) {
-//            // follow of non temrinal equals follow of LHS
-//            change = followSet.addFollow(nonTerminal, followSet.get(rule.getLHS()));
-//        }
-//        return change;
-//    }
-
-    public boolean applyRule(ArrayList<String> RHS, int j, String nonTerminal, Rule rule) {
-        boolean change = true;
+    /**
+     * Apply Rule if we have a nonTerminal B in a rule L -> a B c
+     * @param RHS ArrayList full RHS of the rule (a B c)
+     * @param j int location of our terminal in the RHS (Ex: B -> j = 1)
+     * @param nonTerminal String nonTerminal we are looking at (Ex: B)
+     * @param rule Rule that we are current examining (L -> a B c)
+     * @return True if we updated the follow set | False otherwise
+     */
+    private boolean applyRule(ArrayList<String> RHS, int j, String nonTerminal, Rule rule) {
         int l = 0;
-      //  String next = RHS.get(j+1);
-        // follow of nonTerminal is fist of j + 1
+
+        // Get the remainder of the Right Hand Side after our terminal
         ArrayList<String> remRHS = new ArrayList<>();
         for(int k=j+1;k<RHS.size();k++){
             remRHS.add(RHS.get(k));
         }
 
-        ArrayList<String> firstNext = MultiFirst(remRHS);
+        // Look at the first of the remainder add add them to the follow
+        ArrayList<String> firstNext = multiFirst(remRHS);
         for(String s: firstNext) {
             if(!s.equals(EPSILON)) {
                 if(followSet.addFollow(nonTerminal, s)) {
@@ -226,20 +230,31 @@ public class Grammar {
                 }
             }
         }
+        // If first is EPSILON, then we must add the follow of the LHS
         if(firstNext.contains(EPSILON)) {
-            // follow of non temrinal equals follow of LHS
             if(followSet.addFollow(nonTerminal, followSet.get(rule.getLHS()))) {
                 l += 1;
             }
         }
+        // Check for changes in return
         return (l != 0);
     }
 
-    public void parse(File file) throws FileNotFoundException, AmbiguousGrammarException {
+    /**
+     * Parse the grammar file and build the grammar
+     *
+     * @param file File holding the grammar
+     * @throws FileNotFoundException thrown if we cannot find the grammar
+     * @throws AmbiguousGrammarException thrown if the grammar has ambiguities
+     */
+    private void buildGrammar(File file) throws FileNotFoundException, AmbiguousGrammarException {
+        // Stop if we already have some rules
         if(rules != null ){
             return ;
         }
         Scanner input = new Scanner(file);
+
+        // Split the Right Hand Side of A -> b C d
         String line;
         String[] tokens;
         rules = new ArrayList<>();
@@ -250,99 +265,110 @@ public class Grammar {
             rules.add(new Rule(tokens[0], tokens[2]));
         }
 
+        // Construct the parse table
         getFirsts();
         getFollows();
         buildParseTable();
-
     }
 
+    /**
+     * Parse the source file
+     * @param file File containing source code
+     * @return Tuuple containing derivations and Exceptions
+     * @throws IOException thrown if there was an issue readying the source code
+     */
     public Tuple LL(File file) throws IOException {
         // TODO not factor
-        DFA dfa = new DFA();
-        ArrayList<POS> tags = dfa.getTags(file);
-        dfa.cleanTags(tags);
 
-
-
+        // Access source code
         RandomAccessFile buffer = new RandomAccessFile(file, "r");
 
-
-
-
-        Integer i = 0;
+        // Stack used to parse
         Stack<String> stack = new Stack<>();
         stack.push(END);
         stack.push(START);
 
+        // Array containing the derivation at each step
+        ArrayList<ArrayList<String>> allDerivations = new ArrayList<>();
+        // Current derivation
         ArrayList<String> derivation = new ArrayList<>();
         int dIndex = 0;
         derivation.add(dIndex, START);
-        ArrayList<ArrayList<String>> allDerivations = new ArrayList<>();
 
 
+        // Keep track of where we are in the file for error reporting
         Position pos = new Position();
         ArrayList<Exception> errors = new ArrayList<>();
-//        String tkn = getNextToken(buffer);
+
+        // Get first token
         Tuple<String, String> tknTup = getNextToken(buffer, pos, errors);
-
-
-        i++;
-
-
 
 
 
         while(true) {
             String X = stack.get(stack.size()-1);
 
-            // TODO token is null from bad file?
-            // TODO error if no end symbol?
+            // We are at the end of the file
             if(X.equals(END) && tknTup.getX().equals(END)) {
                 break;
             }
 
             if(followSet.isTerminal(X)) {
+                // If we have found a token pop it and move on
                 if(X.equals(tknTup.getX().toLowerCase()) || X.equals(tknTup.getX().toUpperCase())) {
                     stack.pop();
+
+                    // Add derivation rule
                     derivation.set(dIndex, tknTup.getY());
                     allDerivations.add(new ArrayList<>(derivation));
                     dIndex++;
 
+                    // Get next token
                     tknTup = getNextToken(buffer, pos, errors);
                     if(tknTup == null){
-                        // TODO throw new error
+                        // Unable to recover
+                        // Could be an unexpected end of file
+                        // Impossible to parse
                         errors.add(new SyntacticError(pos));
                         buffer.close();
                         break;
                     }
-                    i++;
                 } else {
-
-//                    errors.add(new SyntacticError(pos));
+                    // We have an error - we encountered a terminal
+                    // but not the one we want - get next token and keep moving
                     tknTup = getNextToken(buffer, pos, errors);
                     if(tknTup == null){
-                        // TODO throw new error
+                        // Unable to recover
+                        // Could be an unexpected end of file
+                        // Impossible to parse
                         errors.add(new SyntacticError(pos));
                         buffer.close();
                         break;
                     }
                 }
             } else {
+                // We have a terminal
+                // We must replace it on the stack with its Right Hand Side
                 Integer rule = table.get(X, tknTup.getX().toLowerCase());
                 if(rule == null) rule = table.get(X, tknTup.getX().toUpperCase());
-                if(rule == null || rule == -1) {
-
-    //                buffer.close();
-    //                throw new SyntacticError();
+                if(rule == null) {
+                    // We have an error
+                    // Capture the error and move on in the hopes we find the correct
+                    // symbol to provide a rule soon
                     errors.add(new SyntacticError(pos, table.get(X), tknTup.getY()));
                     tknTup = getNextToken(buffer, pos, errors);
                     if(tknTup == null) {
-                        // TODO throw new error
+                        // Unable to recover
+                        // Could be an unexpected end of file
+                        // Impossible to parse
                         errors.add(new SyntacticError(pos));
                         break;
                     }
                     continue;
                 }
+
+                // We have a rule to replace with on the stack
+                // Find the rule, and replace the top of the stack with each Right Hand Side token
                 for(Rule r: rules) {
                     if(rule.compareTo(r.getID()) == 0) {
                         stack.pop();
@@ -358,24 +384,27 @@ public class Grammar {
                         }
 
 
-
+                        // Create a derivation
+                        // Keep all derived so far
                         for(int k=0; k<dIndex; k++){
                             tmp.add(derivation.get(k));
                         }
-
+                        // Then add the new rule
                         for(int k=0;k<RHS.size();k++){
                             if(!RHS.get(k).equals(EPSILON)) {
                                 tmp.add(RHS.get(k));
                             }
                         }
+                        // Now keep the remaining derivation to be done
                         for(int k=dIndex; k < derivation.size(); k++){
                             tmp.add(derivation.get(k));
                         }
 
+                        // Store the derivation
                         derivation = tmp;
-
                         allDerivations.add(new ArrayList<>(derivation));
 
+                        // We found our rule so we can move on
                         break;
                     }
                 }
@@ -394,43 +423,53 @@ public class Grammar {
     }
 
 
+    /**
+     *
+     * @param buffer File we are reading from
+     * @param pos Position we are at in the file
+     * @param errors List of current errors found
+     * @return Tuple contains token type and token value
+     */
     public Tuple getNextToken(RandomAccessFile buffer, Position pos,
-                              ArrayList<Exception> errors)  {
-        POS token = null;
-        String tkn = "";
+                              ArrayList<Exception> errors) throws IOException   {
+        POS token;
         Tuple<String, String> tuple = new Tuple<>();
-            try {
+        try {
             // Use RandomAccessFile as we will commonly go backtrack one in the file
-                if (buffer.getFilePointer() == buffer.length()) {
-                    // EOF
-                    return null;
-                }
-                try {
-                    token = tokenizer.getNextToken(buffer, pos);
-                    if (token.getType() == Token.RESERVED) {
-                        tkn = token.getWord().toString();
-                        tuple.setX(token.getWord().toString());
-                        tuple.setY(Reserved.valueOf(token.getWord().toString()).getWord());
-                    } else if (token.getType() == Token.EOF) {
-                        tkn = END;
-                        tuple.setX(END);
-                        tuple.setY(token.getToken());
-                    } else {
-                        tkn = token.getType().toString();
-                        tuple.setX(token.getType().toString());
-                        tuple.setY(token.getToken());
-                    }
-                } catch (Exception e) {
-                    // Any error that occurs during token reading
-                    errors.add(e);
-                    return getNextToken(buffer, pos, errors);
-                }
-            }catch(IOException e){
-                // File reading errors
-                System.out.println(e.getMessage());
-                System.out.println("Error reading file.");
+            if (buffer.getFilePointer() == buffer.length() - 1) {
+                // EOF
                 return null;
             }
+            try {
+
+                // Get the raw token
+                token = tokenizer.getNextToken(buffer, pos);
+                // Update it if it is a reserved word
+                if (token.getType() == Token.RESERVED) {
+                    tuple.setX(token.getWord().toString());
+                    tuple.setY(Reserved.valueOf(token.getWord().toString()).getWord());
+                } else if (token.getType() == Token.EOF) {
+                    // Update token if it is end of file
+                    tuple.setX(END);
+                    tuple.setY(token.getToken());
+                } else {
+                    // Prepare (type, token) return value
+                    tuple.setX(token.getType().toString());
+                    tuple.setY(token.getToken());
+                }
+            } catch (UnrecognizedCharacterException e) {
+                // Unrecognized Character
+                errors.add(e);
+                return getNextToken(buffer, pos, errors);
+            } catch (InvalidCharacterException fe) {
+                // Invalid Character
+                errors.add(fe);
+                return getNextToken(buffer, pos, errors);
+            }
+        }catch(IOException e){
+            // File reading errors
+            throw e;
+        }
         return tuple;
 
     }

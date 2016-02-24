@@ -35,26 +35,20 @@ public class CommentTest {
         String test = "/*";
         file = ht.makeFile(test);
         ArrayList<POS> tags = dfa.getTags(file);
-        assertTrue(tags.size() == 1);
-        assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.OPEN_COMMENT);
+        assertTrue(tags.size() == 0);
         ht.removeFile(file);
 
         test = "*/";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
-        assertTrue(tags.size() == 1);
-        assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.CLOSE_COMMENT);
+        assertTrue(tags.size() == 0);
         ht.removeFile(file);
 
 
         test = "//";
         file = ht.makeFile(test);
         tags = dfa.getTags(file);
-        assertTrue(tags.size() == 1);
-        assertTrue(tags.get(0).getToken().equals(test));
-        assertTrue(tags.get(0).getType() == Token.INLINE_COMMENT);
+        assertTrue(tags.size() == 0);
         ht.removeFile(file);
     }
 

@@ -1,2 +1,9 @@
 
-	PROGRAM{};
+program {
+
+	int idx;
+	idx = 5;
+
+	test = 5	
+
+;};$

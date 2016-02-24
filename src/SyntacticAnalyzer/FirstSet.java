@@ -1,15 +1,21 @@
 package SyntacticAnalyzer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
+/**
+ * Class holds all the Firsts in the grammar
+ */
 public class FirstSet extends FF {
 
-    private HashMap<String, ArrayList<String>> firstMap;
 
-
+    /**
+     *
+     * @param rules ArrayList of rules in the grammar
+     */
     public FirstSet(ArrayList<Rule> rules) {
         super(rules);
+
+        // In addition to super, we also add all the RHS' as First(terminal) -> terminal
         ArrayList<String> RHS;
         for(Rule rule : rules) {
             RHS = rule.getRHS();
@@ -22,6 +28,7 @@ public class FirstSet extends FF {
                 }
             }
         }
+        // First(EPSILON) -> EPSILON
         map.put(Grammar.EPSILON, new ArrayList<String>(){{ add(Grammar.EPSILON);}});
     }
 
