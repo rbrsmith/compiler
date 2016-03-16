@@ -369,7 +369,6 @@ public class GrammarTest {
         String test = "class id {};";
         tuple = run(test);
         // Impossible to parse as we are missing file end
-        System.out.println(tuple.getX());
         assertTrue(tuple.getX().size() == 1);
         assertTrue(tuple.getX().get(0).getMessage().contains("Unrecoverable"));
     }

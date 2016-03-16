@@ -83,12 +83,12 @@ term -> factor termRight
 termRight -> EPSILON
 termRight -> multOp factor termRight
 
-factor -> id F8
-F8 -> indiceR F9
-F8 -> F12
-F9 -> DOT factor
-F9 -> EPSILON
-F12 -> ORB aParams CRB
+factor -> id F1
+F1 -> indiceR F2
+F1 -> F3
+F2 -> DOT factor
+F2 -> EPSILON
+F3 -> ORB aParams CRB
 
 
 factor -> num

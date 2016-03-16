@@ -1,6 +1,7 @@
 package SyntacticAnalyzer;
 
 import LexicalAnalyzer.DFA.*;
+import SemanticAnalyzer.Analyzer;
 
 import java.io.*;
 import java.util.*;
@@ -303,6 +304,8 @@ public class Grammar {
         Tuple<String, String> tknTup = getNextToken(buffer, pos, errors);
 
 
+        // Assignment 3
+        Analyzer semanticAnalyzer = new Analyzer();
 
         while(true) {
             String X = stack.get(stack.size()-1);
@@ -316,6 +319,7 @@ public class Grammar {
                 // If we have found a token pop it and move on
                 if(X.equals(tknTup.getX().toLowerCase()) || X.equals(tknTup.getX().toUpperCase())) {
                     stack.pop();
+                    semanticAnalyzer.evaluate(tknTup);
 
 
                     // Add derivation rule
@@ -371,33 +375,40 @@ public class Grammar {
                 // We have a rule to replace with on the stack
 
                 Rule r = rules.get(rule);
-                        stack.pop();
+                String poppedToken = stack.pop();
+
+                ArrayList<String> RHS = r.getRHS();
+
+                semanticAnalyzer.evaluate(poppedToken, RHS);
+
+                for (int k = RHS.size() - 1; k > -1; --k) {
+                    if (!RHS.get(k).equals(EPSILON)) {
+                        stack.push(RHS.get(k));
+                    }
+                }
 
 
-                        ArrayList<String> RHS = r.getRHS();
-                        for (int k = RHS.size() - 1; k > -1; --k) {
-                            if (!RHS.get(k).equals(EPSILON)) {
-                                stack.push(RHS.get(k));
-                            }
-                        }
+                // new line to derivations
+                derivation = createDerivation(dIndex, derivation, RHS);
+                allDerivations.add(new ArrayList<>(derivation));
 
 
-                        // new line to derivations
-                        derivation = createDerivation(dIndex, derivation, RHS);
-                        allDerivations.add(new ArrayList<>(derivation));
-
-
-                        // We found our rule so we can move on
-                        //break;
+                // We found our rule so we can move on
+                //break;
 
             }
         }
 
         buffer.close();
 
+        semanticAnalyzer.analyze();
+
+    //    semanticAnalyzer.print();
+
         Tuple rtnTuple = new Tuple();
         rtnTuple.setX(errors);
         rtnTuple.setY(allDerivations);
+
 
         return rtnTuple;
     }

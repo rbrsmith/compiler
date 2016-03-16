@@ -48,6 +48,10 @@ public class Main {
                     System.out.println(e);
                 }
 
+                if(result.getX().size() == 0) {
+                    System.out.println("OK.");
+                }
+
 
             } catch(FileNotFoundException e) {
                 System.out.println("Unable to find grammar or source code");

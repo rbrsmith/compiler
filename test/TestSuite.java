@@ -1,6 +1,7 @@
 import LexicalAnalyzer.DFA.*;
-import SyntacticAnalyzer.Grammar;
-import SyntacticAnalyzer.GrammarTest;
+import SyntacticAnalyzer.*;
+import com.sun.media.sound.FFT;
+import com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -18,7 +19,12 @@ import org.junit.runners.Suite;
         BracketTest.class,
         CommentTest.class,
         SampleSourceTest.class,
-        GrammarTest.class
+        GrammarTest.class,
+        RuleTest.class,
+        FFTest.class,
+        FirstSetTest.class,
+        FollowSetTest.class,
+        TableTest.class
 
 })
 
