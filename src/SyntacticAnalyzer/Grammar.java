@@ -2,6 +2,7 @@ package SyntacticAnalyzer;
 
 import LexicalAnalyzer.DFA.*;
 import SemanticAnalyzer.Analyzer;
+import SemanticAnalyzer.SemanticException;
 
 import java.io.*;
 import java.util.*;
@@ -379,10 +380,12 @@ public class Grammar {
 
                 ArrayList<String> RHS = r.getRHS();
 
-                semanticAnalyzer.evaluate(poppedToken, RHS);
+                semanticAnalyzer.evaluate(poppedToken, r.getSemanticRHS());
 
                 for (int k = RHS.size() - 1; k > -1; --k) {
-                    if (!RHS.get(k).equals(EPSILON)) {
+                    // Assignment 3 - avoid semantic rules
+                    if (!RHS.get(k).equals(EPSILON) &&
+                            !RHS.get(k).contains("SEMANTIC")) {
                         stack.push(RHS.get(k));
                     }
                 }
@@ -401,9 +404,15 @@ public class Grammar {
 
         buffer.close();
 
-        semanticAnalyzer.analyze();
 
-    //    semanticAnalyzer.print();
+        if(errors.size() == 0) {
+            try {
+                semanticAnalyzer.analyze();
+                System.out.println(semanticAnalyzer);
+            } catch(SemanticException e){
+                errors.add(e);
+            }
+        }
 
         Tuple rtnTuple = new Tuple();
         rtnTuple.setX(errors);

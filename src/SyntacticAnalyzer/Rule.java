@@ -2,6 +2,7 @@ package SyntacticAnalyzer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 
 /**
@@ -43,8 +44,22 @@ public class Rule {
         return ruleId;
     }
 
-    public ArrayList<String> getRHS() {
+    // ASsignment 3
+    public ArrayList<String> getSemanticRHS() {
         return RHS;
+    }
+
+    public ArrayList<String> getRHS() {
+        // Assignment 3 - Remove SEMANTIC rules
+        ArrayList<String> filteredRHS = new ArrayList<>(RHS);
+        for (Iterator<String> iterator = filteredRHS.iterator(); iterator.hasNext();) {
+            String string = iterator.next();
+            if (string.contains("SEMANTIC")) {
+                // Remove the current element from the iterator and the list.
+                iterator.remove();
+            }
+        }
+        return filteredRHS;
     }
 
 

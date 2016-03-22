@@ -2,21 +2,21 @@ prog -> classDeclR progBody
 classDeclR -> classDecl classDeclR
 classDeclR -> EPSILON
 
-classDecl -> CLASS id OCB CD1 CCB SEMICOLON
+classDecl -> CLASS id SEMANTIC-1 OCB CD1 CCB SEMANTIC-0 SEMICOLON
 CD1 -> type id CD2
 CD1 -> EPSILON
-CD2 -> arraySizeR SEMICOLON CD1
-CD2 -> ORB fParams CRB funcBody SEMICOLON CD3
+CD2 -> arraySizeR SEMANTIC-3 SEMICOLON CD1
+CD2 -> ORB fParams CRB SEMANTIC-2 funcBody SEMANTIC-0 SEMICOLON CD3
 CD3 -> funcDefR
 
-progBody -> PROGRAM funcBody SEMICOLON funcDefR
+progBody -> PROGRAM SEMANTIC-7 funcBody SEMANTIC-0 SEMICOLON funcDefR
 
 funcDefR -> funcDef funcDefR
 funcDefR -> EPSILON
 
-funcHead -> type id ORB fParams CRB
+funcHead -> type id ORB fParams CRB SEMANTIC-2
 
-funcDef -> funcHead funcBody SEMICOLON
+funcDef -> funcHead funcBody SEMANTIC-0 SEMICOLON
 
 funcBody -> OCB FB1 CCB
 FB1 -> id FB4
@@ -34,7 +34,7 @@ FB1 -> S5 statementR
 FB1 -> S6 statementR
 
 FB2 -> V1 assignOp expr SEMICOLON statementR
-FB3 -> id arraySizeR SEMICOLON FB1 
+FB3 -> id arraySizeR SEMANTIC-3 SEMICOLON FB1 
 
 
 
@@ -52,7 +52,7 @@ statement -> S6
 
 S1 -> assignStat SEMICOLON
 S2 -> if ORB expr CRB then statBlock else statBlock SEMICOLON
-S3 -> for ORB type id assignOp expr SEMICOLON relExpr SEMICOLON assignStat CRB statBlock SEMICOLON
+S3 -> for ORB type id SEMANTIC-8 assignOp expr SEMICOLON relExpr SEMICOLON assignStat CRB statBlock SEMICOLON
 S4 -> get ORB variable CRB SEMICOLON
 S5 -> put ORB expr CRB SEMICOLON
 S6 -> return ORB expr CRB SEMICOLON
@@ -110,13 +110,13 @@ indiceR -> EPSILON
 
 indice -> OSB arithExpr CSB
 
-arraySize -> OSB integer CSB
+arraySize -> OSB integer SEMANTIC-6 CSB
 
 type -> int
 type -> float
 type -> ID
 
-fParams -> type id arraySizeR fParamsTailR
+fParams -> type id arraySizeR SEMANTIC-5 fParamsTailR
 fParams -> EPSILON
 fParamsTailR -> fParamsTail fParamsTailR
 fParamsTailR -> EPSILON
@@ -126,7 +126,7 @@ aParams -> EPSILON
 aParamsTailR -> aParamsTail aParamsTailR
 aParamsTailR -> EPSILON
 
-fParamsTail -> COMMA type id arraySizeR
+fParamsTail -> COMMA type id arraySizeR SEMANTIC-5  
 arraySizeR -> arraySize arraySizeR
 arraySizeR -> EPSILON
 aParamsTail -> COMMA expr

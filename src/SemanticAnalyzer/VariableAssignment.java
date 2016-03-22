@@ -140,4 +140,16 @@ public class VariableAssignment {
 
         return rtn.replaceAll(" = ...", "") + " = ...";
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public ArrayList<VariableAssignment> getAttributes() {
+        return attributeName;
+    }
+
+    public ArrayList<Integer> getSize() {
+        return arraySize;
+    }
 }

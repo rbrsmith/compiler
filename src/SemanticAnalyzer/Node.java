@@ -3,7 +3,9 @@ package SemanticAnalyzer;
 import SyntacticAnalyzer.Tuple;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by rbrsmith on 15/03/16.
@@ -73,11 +75,12 @@ public class Node {
         return children.get(id);
     }
 
+    // to undo put to +1
     public Node getLeftSibling() {
         Node current = this;
         while(!current.isRoot()) {
-            if(current.getParent().getChild(current.getNodeID() + 1) != null) {
-                return current.getParent().getChild(current.getNodeID() + 1);
+            if(current.getParent().getChild(current.getNodeID() - 1) != null) {
+                return current.getParent().getChild(current.getNodeID() - 1);
             } else {
                 current = current.getParent();
             }
@@ -142,5 +145,30 @@ public class Node {
             current = currentLeaf.getLeftSibling();
         }
         return res;
+    }
+
+    public ArrayList<Node> getChildrenValues() {
+        List<Integer> sortedKeys=new ArrayList(children.keySet());
+        Collections.sort(sortedKeys);
+
+        ArrayList<Node> vals = new ArrayList<>();
+        for(Integer i: sortedKeys) {
+            vals.add(children.get(i));
+        }
+        return vals;
+
+    }
+
+    public Node getRightSibling() {
+        Node current = this;
+        while(!current.isRoot()) {
+
+            if(current.getParent().getChild(current.getNodeID() + 1) != null) {
+                return current.getParent().getChild(current.getNodeID() + 1);
+            } else {
+                current = current.getParent();
+            }
+        }
+        return null;
     }
 }
