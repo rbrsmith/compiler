@@ -55,8 +55,12 @@ public class SymbolTable {
     public boolean alreadyExists(Declaration d) {
         String name = d.getName();
         for (Symbol s : symbols) {
+
+            // Allow using same names as class - unless its another class
             if (s.getDecl().getName().equals(name)) {
-                return true;
+                if(s.getDecl() instanceof ClassDecl && d instanceof ClassDecl) return true;
+                if(s.getDecl() instanceof ClassDecl) continue;
+                else return true;
             }
         }
         if(parent == null) return false;

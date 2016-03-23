@@ -253,6 +253,7 @@ public class DFA {
         while(cleaned == null) {
 
             token = g.getNextToken(buffer, pos);
+            if(token == null) return null;
 
             // Start & finish of comment
             if(token.getType() == Token.INLINE_COMMENT) {

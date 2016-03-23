@@ -231,6 +231,8 @@ public class Graph {
                     pos.newLine();
                 }
                 throw new UnrecognizedCharacterException(pos, token, str);
+            } else if(token.equals("") && (int) c == 65535) {
+                return null;
             }
 
             // Is there another state we can go to?

@@ -1,6 +1,7 @@
 package SyntacticAnalyzer;
 
 import LexicalAnalyzer.DFA.*;
+import SemanticAnalyzer.AlreadyDeclaredException;
 import SemanticAnalyzer.Analyzer;
 import SemanticAnalyzer.SemanticException;
 
@@ -313,14 +314,16 @@ public class Grammar {
 
             // We are at the end of the file
             if(X.equals(END) && tknTup.getX().equals(END)) {
+                // All good
                 break;
             }
+
 
             if(followSet.isTerminal(X)) {
                 // If we have found a token pop it and move on
                 if(X.equals(tknTup.getX().toLowerCase()) || X.equals(tknTup.getX().toUpperCase())) {
                     stack.pop();
-                    semanticAnalyzer.evaluate(tknTup);
+                    semanticAnalyzer.evaluate(tknTup, pos);
 
 
                     // Add derivation rule
@@ -380,7 +383,7 @@ public class Grammar {
 
                 ArrayList<String> RHS = r.getRHS();
 
-                semanticAnalyzer.evaluate(poppedToken, r.getSemanticRHS());
+                semanticAnalyzer.evaluate(poppedToken, r.getSemanticRHS(), pos);
 
                 for (int k = RHS.size() - 1; k > -1; --k) {
                     // Assignment 3 - avoid semantic rules
@@ -409,7 +412,7 @@ public class Grammar {
             try {
                 semanticAnalyzer.analyze();
                 System.out.println(semanticAnalyzer);
-            } catch(SemanticException e){
+            } catch(AlreadyDeclaredException e){
                 errors.add(e);
             }
         }
@@ -489,6 +492,7 @@ public class Grammar {
 
                 // Get the raw token
                 token = tokenizer.getNextToken(buffer, pos);
+                if(token == null) return null;
                 // Update it if it is a reserved word
                 if (token.getType() == Token.RESERVED) {
                     tuple.setX(token.getWord().toString());

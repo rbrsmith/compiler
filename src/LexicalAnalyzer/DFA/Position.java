@@ -16,6 +16,11 @@ public class Position {
         this.character = 0;
     }
 
+    public Position(Position pos2) {
+        this.lineNumber = pos2.getLine();
+        this.character = pos2.getChar();
+    }
+
     /**
      * Called once a character has been read
      */
