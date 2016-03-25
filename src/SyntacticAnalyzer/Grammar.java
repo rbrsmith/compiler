@@ -411,7 +411,6 @@ public class Grammar {
         if(errors.size() == 0) {
             try {
                 semanticAnalyzer.analyze();
-                System.out.println(semanticAnalyzer);
             } catch(AlreadyDeclaredException e){
                 errors.add(e);
             }
