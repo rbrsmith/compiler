@@ -1,15 +1,14 @@
 package SemanticAnalyzer;
 
+import LexicalAnalyzer.DFA.Position;
 import SyntacticAnalyzer.Tuple;
+import javafx.geometry.Pos;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by rbrsmith on 15/03/16.
- */
 public class Node {
 
     private String value;
@@ -20,9 +19,11 @@ public class Node {
     private boolean isRoot;
     public HashMap<Integer, Node> children;
 
+    Position pos;
+
     private Node parent;
 
-    public Node(String value, boolean isLeaf, boolean isRoot, Node parent) {
+    public Node(String value, boolean isLeaf, boolean isRoot, Node parent, Position pos) {
         this.value = value;
         this.leafValue = null;
         this.isLeaf = isLeaf;
@@ -30,10 +31,11 @@ public class Node {
         this.parent = parent;
         this.children = new HashMap<>();
         this.nodeid = id;
+        this.pos = new Position(pos);
         id += 1;
     }
 
-    public Node(Tuple value, boolean isLeaf, boolean isRoot, Node parent) {
+    public Node(Tuple value, boolean isLeaf, boolean isRoot, Node parent, Position pos) {
         this.value = null;
         this.leafValue = value;
         this.isLeaf = isLeaf;
@@ -41,6 +43,7 @@ public class Node {
         this.parent = parent;
         this.children = new HashMap<>();
         this.nodeid = id;
+        this.pos = new Position(pos);
         id += 1;
     }
 
@@ -170,5 +173,9 @@ public class Node {
             }
         }
         return null;
+    }
+
+    public Position getPosition() {
+        return pos;
     }
 }

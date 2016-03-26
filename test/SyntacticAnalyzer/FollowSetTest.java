@@ -3,7 +3,6 @@ package SyntacticAnalyzer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.IncludeCategories;
 
 import java.util.HashMap;
 

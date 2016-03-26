@@ -143,7 +143,7 @@ public class GrammarTest {
                 "           float var2;" +
                 "           int findMax(int array[100]) {" +
                 "               int maxValue ;" +
-                "               int idx ;" +
+                "               int id2 ;" +
                 "               maxValue = array[100] ;" +
                 "               for(int idx = 99; idx > 0; idx = idx - 1) {" +
                 "                   if ( array [idx] > maxValue) then {" +
@@ -167,7 +167,7 @@ public class GrammarTest {
         String test = "class Utility {" +
                         "int findMin(int array[100]) {" +
                 "           int minValue;\n" +
-                "           int idx;\n" +
+                "           int idx2;\n" +
                 "           minValue = array[100];\n" +
                 "           for( int idx = 1; idx <= 99; idx = ( idx ) + 1)\n" +
                 "           {\n" +
@@ -233,7 +233,7 @@ public class GrammarTest {
                 "int maxValue;\n" +
                 "int idx;\n" +
                 "maxValue = array[100];\n" +
-                "for( int idx = 99; idx > 0; idx = idx - 1 )\n" +
+                "for( int idx2 = 99; idx2 > 0; idx2 = idx2 - 1 )\n" +
                 "{\n" +
                 "if(array[idx] > maxValue) then {\n" +
                 "maxValue = array[idx];\n" +
@@ -244,7 +244,7 @@ public class GrammarTest {
                 "int findMin(int array[100])\n" +
                 "{\n" +
                 "int minValue;\n" +
-                "int idx;\n" +
+                "int idx3;\n" +
                 "minValue = array[100];\n" +
                 "for( int idx = 1; idx <= 99; idx = ( idx ) + 1)\n" +
                 "{\n" +
@@ -289,7 +289,7 @@ public class GrammarTest {
     @Test
     public void grammarTest13() throws Exception{
         String test = "class id {" +
-                "           float id; " +
+                "           float id2; " +
                 "           int id( ) { " +
                 "               if(  6.5 - id [8]. id ()  ==  id ) " +
                 "               then { put(not 5); } " +
@@ -306,21 +306,21 @@ public class GrammarTest {
     @Test
     public void grammarTest14() throws Exception{
         String test = "class id {\n" +
-                "           float id [ 5 ] ; \n" +
-                "           int id [6];\n" +
-                "           id id (long id [5][6][6] ,int id [5],long id  ) {\n" +
-                "               int id [1][2];\n" +
-                "               for(long id = (5) <> (not 5);\n" +
+                "           float id1 [ 5 ] ; \n" +
+                "           int id2 [6];\n" +
+                "           id id3 (long id36 [5][6][6] ,int id15 [5],long id16  ) {\n" +
+                "               int id4 [1][2];\n" +
+                "               for(long id5 = (5) <> (not 5);\n" +
                 "                   8 == 8;\n" +
                 "                   id = 5\n" +
                 "               ){\n" +
                 "                   return (7);\n" +
                 "               }\n;" +
-                "               return( id [5][4].  id [not 5] . id() or + 5 );\n" +
+                "               return( id47 [5][4].  id85 [not 5] . id69() or + 5 );\n" +
                 "           }\n;" +
-                "           int id() {}\n;" +
+                "           int id6() {}\n;" +
                 "}\n;" +
-                "class id {};\n" +
+                "class id12 {};\n" +
                 "program{};\n" +
                 "$ \n";
         tuple = run(test);
@@ -330,20 +330,20 @@ public class GrammarTest {
     @Test
     public void grammarTest15() throws Exception{
         String test = "program{}\n;" +
-                "       long id( )\n" +
+                "       long id1( )\n" +
                         "{" +
-                "           id id[5][4][3];" +
-                "           int id[2][3][4];" +
-                "           id[ +5 + not 5 + 5 ].id[5][4][3].id[4] = id[5][3].id( )\n== 5;" +
+                "           id id2[5][4][3];" +
+                "           int id3[2][3][4];" +
+                "           id4[ +5 + not 5 + 5 ].id5[5][4][3].id[4] = id6[5][3].id( )\n== 5;" +
                 "" +
                 "" +
                 "           if(5) then  else ;\n" +
-                "           for(int id = 6;id < 7; id = id + 1);\n" +
-                "            get(id[5][5].id[4]);\n" +
+                "           for(int id9 = 6;id < 7; id8 = i10d + 1);\n" +
+                "            get(id7[5][5].id[4]);\n" +
                 "           put(5);" +
                 "           return(5 + 5 + 5 <> 5);" +
                 "       }\n;" +
-                "int id(){}; $ ";
+                "int i11d(){}; $ ";
 
         tuple = run(test);
         assertTrue(tuple.getX().size() == 0);

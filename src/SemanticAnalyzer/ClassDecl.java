@@ -6,10 +6,7 @@ public class ClassDecl implements Declaration {
 
     private String name;
 
-    public ClassDecl(Node id) throws SemanticException {
-        if(!id.getLeafValue().getX().equals(Token.ID.toString())) {
-            throw new SemanticException("Bad Class");
-        }
+    public ClassDecl(Node id) {
         name = (String) id.getLeafValue().getY();
     }
 

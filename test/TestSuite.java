@@ -1,4 +1,5 @@
 import LexicalAnalyzer.DFA.*;
+import SemanticAnalyzer.AnalyzerTest;
 import SyntacticAnalyzer.*;
 import com.sun.media.sound.FFT;
 import com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators;
@@ -24,7 +25,8 @@ import org.junit.runners.Suite;
         FFTest.class,
         FirstSetTest.class,
         FollowSetTest.class,
-        TableTest.class
+        TableTest.class,
+        AnalyzerTest.class,
 
 })
 
