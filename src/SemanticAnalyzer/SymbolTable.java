@@ -67,7 +67,8 @@ public class SymbolTable {
         else return parent.alreadyExists(d);
     }
 
-    public boolean validate(VariableAssignment v) {
+
+    public boolean validate(VariableAssig v) {
         Symbol s = findID(v.getName());
         if (s == null) {
             return false;
@@ -99,7 +100,7 @@ public class SymbolTable {
                 }
                 // OK GOOD, we have a class
                 boolean allGood = true;
-                for(VariableAssignment va: v.getAttributes()) {
+                for(VariableAssig va: v.getAttributes()) {
                     // We can only do this because nothing is allowed to be declared befre
                     // classes according to the grammar
                     if(!classTable.validate(va)) {
@@ -111,9 +112,10 @@ public class SymbolTable {
                 return false;
             }
         }
-
         return true;
     }
+
+
 
     private SymbolTable getClassSymbolTable(String type) {
         for(Symbol s: symbols) {
@@ -147,5 +149,21 @@ public class SymbolTable {
 
     public String getName() {
         return name;
+    }
+
+    public boolean classExists(String type) {
+        // Classes are always defined in the global table
+        SymbolTable current = this;
+        while(current.getParent() != null) {
+            current = current.getParent();
+        }
+        for(Symbol s: current.symbols) {
+            if(s.getDecl() instanceof ClassDecl) {
+                if(s.getDecl().getName().equals(type)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

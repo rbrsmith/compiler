@@ -19,6 +19,15 @@ public class VariableDecl implements Declaration {
         if(array != null) analyzeArray(array);
     }
 
+    public boolean isPrimitive() {
+        if(type.equals("int") ||
+                type.equals("float")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public String getName() {
         return name;
     }
@@ -34,7 +43,7 @@ public class VariableDecl implements Declaration {
 
     private void analyzeArray(Node array) {
         for (Node child : array.getChildrenValues()) {
-            if (!child.isLeaf() && child.getValue().equals("SEMANTIC-6")) {
+            if (!child.isLeaf() && child.getValue().equals(Analyzer.ARR_ACTION)) {
                 Integer integer = Integer.parseInt(child.getLeftSibling().getFirstLeafValue());
                 sizes.add(integer);
             }

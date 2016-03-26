@@ -81,7 +81,7 @@ public class AnalyzerTest {
         String test = "" +
                         "program{" +
                 "           int findMin;" +
-                "           finMin = findMin();" +
+                "           findMin = findMin();" +
 
                 "       };" +
                 "       int findMin() {" +
@@ -106,15 +106,142 @@ public class AnalyzerTest {
                 "   id id;" +
                 "};" +
                 "program {" +
-                "   int id;" +
+                "   int id; int b;" +
                 "   b = id(); " +
                 "};" +
                 "int id(){};" +
                 "int id(){};" +
+
                 "$ ";
         tuple = run(test);
         assertTrue(tuple.getX().size() == 1);
         assertTrue(tuple.getX().get(0) instanceof AlreadyDeclaredException);
+    }
+
+
+    @Test
+    public void testSemanticThree() throws Exception {
+        String test = "" +
+                "program{" +
+                "   int a; " +
+                "   b = 5;" +
+                "};" +
+                "$ ";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 1);
+        assertTrue(tuple.getX().get(0) instanceof UndeclardException);
+
+        test = "" +
+                "class a {" +
+                "   int b;" +
+                "};" +
+                "program {" +
+                "   a foo;" +
+                "   foo.b = 4;" +
+                "}; $ ";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
+
+        test = "" +
+                "class a {" +
+                "   int b;" +
+                "};" +
+                "program {" +
+                "   a foo;" +
+                "   foo.c = 4;" +
+                "}; $ ";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 1);
+        assertTrue(tuple.getX().get(0) instanceof UndeclardException);
+
+    }
+
+        @Test
+        public void testSemanticFour() throws Exception {
+            String test = "" +
+                    "class a {" +
+                    "   int b;" +
+                    "};" +
+                    "program {" +
+                    "   bar foo;" +
+                    "}; $ ";
+            tuple = run(test);
+            assertTrue(tuple.getX().size() == 1);
+            assertTrue(tuple.getX().get(0) instanceof UndeclardException);
+
+
+            test = "" +
+                    "class a {" +
+                    "   int b[9];" +
+                    "};" +
+                    "program {" +
+                    "   a foo;" +
+                    "   foo.b[8] = 5;" +
+                    "}; $ ";
+            tuple = run(test);
+            assertTrue(tuple.getX().size() == 0);
+
+
+            test = "" +
+                    "class a {" +
+                    "   int b[9];" +
+                    "};" +
+                    "program {" +
+                    "   a foo;" +
+                    "   foo.b[10] = 5;" +
+                    "}; $ ";
+            tuple = run(test);
+            assertTrue(tuple.getX().size() == 1);
+            assertTrue(tuple.getX().get(0) instanceof UndeclardException);
+        }
+    @Test
+    public void testSemanticFive() throws Exception {
+
+        String test = "" +
+                "class a {" +
+                "   int b[9];" +
+                "};" +
+                "program {" +
+                "}; " +
+                "float a() {" +
+                "   a b;" +
+                "   b.b = 4;" +
+                "   b.c = 5;" +
+                "};$ ";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 1);
+        assertTrue(tuple.getX().get(0) instanceof UndeclardException);
+
+
+
+        test = "" +
+                "class a {" +
+                "};" +
+                "program {" +
+                "}; " +
+                "float a() {" +
+                "};" +
+                "float a() {" +
+                "}; $ ";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 1);
+        assertTrue(tuple.getX().get(0) instanceof AlreadyDeclaredException);
+
+        test = "class a{}; " +
+                "program{};" +
+                "int a(int b, int c) {};" +
+                "int d(int e, int f, int g, int h, int i) {" +
+                "   int f;" +
+                "   int g;" +
+                "   int h;" +
+                "   int i;" +
+                "}; $ ";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 4);
+        assertTrue(tuple.getX().get(0) instanceof AlreadyDeclaredException);
+        assertTrue(tuple.getX().get(1) instanceof AlreadyDeclaredException);
+        assertTrue(tuple.getX().get(2) instanceof AlreadyDeclaredException);
+        assertTrue(tuple.getX().get(3) instanceof AlreadyDeclaredException);
 
     }
 }

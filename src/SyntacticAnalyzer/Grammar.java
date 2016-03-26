@@ -24,7 +24,7 @@ public class Grammar {
     private FollowSet followSet;
 
     // Token names
-    final static String EPSILON = "EPSILON";
+    public final static String EPSILON = "EPSILON";
     final String START = "prog";
     final String END = "$";
 
@@ -409,11 +409,7 @@ public class Grammar {
 
 
         if(errors.size() == 0) {
-            try {
-                semanticAnalyzer.analyze();
-            } catch(AlreadyDeclaredException e){
-                errors.add(e);
-            }
+            semanticAnalyzer.analyze(errors);
         }
 
         Tuple rtnTuple = new Tuple();

@@ -19,7 +19,7 @@ public class FunctionDecl implements Declaration {
 
     public void analyzeFParams(Node fParams) {
         for(Node child: fParams.getChildrenValues()) {
-            if(!child.isLeaf() && child.getValue().equals("SEMANTIC-5")){
+            if(!child.isLeaf() && child.getValue().equals(Analyzer.FUNC_ACTION_2)){
                 Node type = child.getLeftSibling().getLeftSibling().getLeftSibling().getLeaf();
                 Node id = type.getRightSibling().getLeaf();
                 Node array = id.getRightSibling();

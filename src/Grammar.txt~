@@ -6,8 +6,11 @@ classDecl -> CLASS id SEMANTIC-1 OCB CD1 CCB SEMANTIC-0 SEMICOLON
 CD1 -> type id CD2
 CD1 -> EPSILON
 CD2 -> arraySizeR SEMANTIC-3 SEMICOLON CD1
-CD2 -> ORB fParams CRB SEMANTIC-2 funcBody SEMANTIC-0 SEMICOLON CD3
-CD3 -> funcDefR
+CD2 -> ORB fParams CRB SEMANTIC-2 funcBody SEMANTIC-0 SEMICOLON CD4
+
+
+CD4 -> type id CD2
+CD4 -> EPSILON
 
 progBody -> PROGRAM SEMANTIC-7 funcBody SEMANTIC-0 SEMICOLON funcDefR
 
@@ -33,7 +36,7 @@ FB1 -> S4 statementR
 FB1 -> S5 statementR
 FB1 -> S6 statementR
 
-FB2 -> V1 assignOp expr SEMICOLON statementR
+FB2 -> V1 assignOp SEMANTIC-10 expr SEMICOLON statementR
 FB3 -> id arraySizeR SEMANTIC-3 SEMICOLON FB1 
 
 
@@ -52,13 +55,13 @@ statement -> S6
 
 S1 -> assignStat SEMICOLON
 S2 -> if ORB expr CRB then statBlock else statBlock SEMICOLON
-S3 -> for ORB type id assignOp expr SEMICOLON relExpr SEMICOLON assignStat CRB statBlock SEMICOLON
+S3 -> for ORB type id SEMANTIC-8 assignOp SEMANTIC-11 expr SEMICOLON relExpr SEMICOLON assignStat CRB statBlock SEMICOLON
 S4 -> get ORB variable CRB SEMICOLON
 S5 -> put ORB expr CRB SEMICOLON
 S6 -> return ORB expr CRB SEMICOLON
 
 
-assignStat -> variable assignOp expr
+assignStat -> variable assignOp SEMANTIC-10 expr
 
 statBlock -> OCB statementR CCB
 statBlock -> statement

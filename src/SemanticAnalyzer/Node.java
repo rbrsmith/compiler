@@ -140,12 +140,12 @@ public class Node {
     public ArrayList<Tuple> getTokens() {
         ArrayList<Tuple> res = new ArrayList<>();
         Node current = this;
-        Node next = current.getLeftSibling();
+        Node next = current.getRightSibling();
         while(current.getNodeID() != next.getNodeID()) {
             Node currentLeaf = current.getLeaf();
             Tuple tkn = currentLeaf.getLeafValue();
             if(!tkn.getX().equals("EPSILON")) res.add(tkn);
-            current = currentLeaf.getLeftSibling();
+            current = currentLeaf.getRightSibling();
         }
         return res;
     }

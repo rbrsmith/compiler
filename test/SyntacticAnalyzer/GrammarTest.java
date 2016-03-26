@@ -40,7 +40,7 @@ public class GrammarTest {
     @Test
     public void testGrammarOne() throws Exception {
         String test = "class ross {\n" +
-                "    bob rman[5];\n" +
+                "    int rman[5];\n" +
                 "};\n" +
                 "class amb{};\n" +
                 "PROGRAM{};\n" +
@@ -58,7 +58,7 @@ public class GrammarTest {
         tuple = run(test);
         assertTrue(tuple.getX().size() == 0);
         test = "class ross{\n" +
-                "    long rman[5];\n" +
+                "    float rman[5];\n" +
                 "};\n" +
                 "class amb{};\n" +
                 "PROGRAM{};\n" +
@@ -90,7 +90,10 @@ public class GrammarTest {
                 "program " +
                 "{ } " +
                 "; " +
-                "int test2 ( ) { test4 [ 55 ] = 65 ; } ;" +
+                "int test2 ( ) { " +
+                "   int test4[56];" +
+                "   test4 [ 55 ] = 65 ; " +
+                "} ;" +
                 "$ ";
         tuple = run(test);
         assertTrue(tuple.getX().size() == 0);
@@ -105,8 +108,13 @@ public class GrammarTest {
 
     @Test
     public void testGrammarFive() throws Exception {
-        String test = "PROGRAM { " +
-                "        test1 . test2 = + 6.5 ;" +
+        String test = "" +
+                "   class a {" +
+                "       int test2;" +
+                "   };" +
+                "   PROGRAM { " +
+                "       a test1; " +
+                "       test1 . test2 = + 6.5 ;" +
                 "        return (" +
                 "            id  ) ;" +
                 "       put ( 6.5 <> 6.5 + 6.5 ) ;" +
@@ -119,7 +127,9 @@ public class GrammarTest {
     @Test
     public void testGrammarSix() throws Exception {
         String test = "PROGRAM { " +
-                "           float test1 [ 4 ] [ 5 ]; test2 = 4;" +
+                "           float test1 [ 4 ] [ 5 ]; " +
+                "           int test2;" +
+                "           test2 = 4;" +
                 "       } ; $";
         tuple = run(test);
         assertTrue(tuple.getX().size() == 0);
@@ -166,7 +176,8 @@ public class GrammarTest {
     public void testGrammarNine() throws Exception {
         String test = "class Utility {" +
                         "int findMin(int array[100]) {" +
-                "           int minValue;\n" +
+                "           int minValue;" +
+                "           int maxValue;\n" +
                 "           int idx2;\n" +
                 "           minValue = array[100];\n" +
                 "           for( int idx = 1; idx <= 99; idx = ( idx ) + 1)\n" +
@@ -185,7 +196,7 @@ public class GrammarTest {
 
     @Test
     public void testGrammar10() throws Exception {
-        String test = "program {" +
+        String test = "class Utility{}; program {" +
                 "       int sample[100];" +
                 "       int idx;" +
                 "       int minValue;" +
@@ -198,7 +209,6 @@ public class GrammarTest {
                 "       };"+
                    "    minValue =  utility.findMax(sample);"+
                    "    maxValue = utility.findMIn(sample);"+
-                    "   utility.var1[4][0][0][0][0] = 10;" +
                 "       put(maxValue);" +
                 "       put(minValue);"+
                 "}; $";
@@ -212,7 +222,7 @@ public class GrammarTest {
         String test = "program{};" +
                 "       float randomize() {" +
                 "           float value;" +
-                "           vaule = 100 * (2+3.0/7.006);" +
+                "           value = 100 * (2+3.0/7.006);" +
                 "           value = 1.05 + ((2.04*2.47) - 3.0) + 7.006;" +
                 "       };" +
                 "$ ";
@@ -226,60 +236,61 @@ public class GrammarTest {
         String test = "" +
               "class Utility\n" +
                 "{\n" +
-                "int var1[4][5][7][8][9][1][0];\n" +
-                "float var2;\n" +
-                "int findMax(int array[100])\n" +
-                "{\n" +
-                "int maxValue;\n" +
-                "int idx;\n" +
-                "maxValue = array[100];\n" +
-                "for( int idx2 = 99; idx2 > 0; idx2 = idx2 - 1 )\n" +
-                "{\n" +
-                "if(array[idx] > maxValue) then {\n" +
-                "maxValue = array[idx];\n" +
-                "}else{};\n" +
-                "};\n" +
-                "return (maxValue);\n" +
-                "};\n" +
-                "int findMin(int array[100])\n" +
-                "{\n" +
-                "int minValue;\n" +
-                "int idx3;\n" +
-                "minValue = array[100];\n" +
-                "for( int idx = 1; idx <= 99; idx = ( idx ) + 1)\n" +
-                "{\n" +
-                "if(array[idx] < maxValue) then {\n" +
-                "maxValue = array[idx];\n" +
-                "}else{};\n" +
-                "};\n" +
-                "return (minValue);\n" +
-                "};\n" +
+                "   int var1[4][5][7][8][9][1][0];\n" +
+                "   float var2;\n" +
+                "   int findMax(int array[100])\n" +
+                "   {\n" +
+                "       int maxValue;\n" +
+                "       int idx;\n" +
+                "       maxValue = array[100];\n" +
+                "       for( int idx2 = 99; idx2 > 0; idx2 = idx2 - 1 )\n" +
+                "       {\n" +
+                "           if(array[idx] > maxValue) then {\n" +
+                "               maxValue = array[idx];\n" +
+                "           }else{};\n" +
+                "       };\n" +
+                "       return (maxValue);\n" +
+                "   };\n" +
+                "   int findMin(int array[100])\n" +
+                "   {\n" +
+                "       int minValue;\n" +
+                "       int maxValue;\n" +
+                "       int idx3;\n" +
+                "       minValue = array[100];\n" +
+                "       for( int idx = 1; idx <= 99; idx = ( idx ) + 1)\n" +
+                "       {\n" +
+                "           if(array[idx] < maxValue) then {\n" +
+                "               maxValue = array[idx];\n" +
+                "           }else{};\n" +
+                "       };\n" +
+                "       return (minValue);\n" +
+                "   };\n" +
                 "};\n" +
                 "program {\n" +
-                "int sample[100];\n" +
-                "int idx;\n" +
-                "int maxValue;\n" +
-                "int minValue;\n" +
-                "Utility utility;\n" +
-                "Utility arrayUtility[2][3][6][7];\n" +
-                "for(int t = 0; t<=100 ; t = t + 1)\n" +
-                "{\n" +
-                "get(sample[t]);\n" +
-                "sample[t] = (sample[t] * randomize());\n" +
-                "};\n" +
-                "maxValue = utility.findMax(sample);\n" +
-                "minValue = utility.findMin(sample);\n" +
-                "utility. var1[4][1][0][0][0][0][0] = 10;\n" +
-                "arrayUtility[1][1][1][1].var1[4][1][0][0][0][0][0] = 2;\n" +
-                "put(maxValue);\n" +
-                "put(minValue);\n" +
+                "   int sample[100];\n" +
+                "   int idx;\n" +
+                "   int maxValue;\n" +
+                "   int minValue;\n" +
+                "   Utility utility;\n" +
+                "   Utility arrayUtility[2][3][6][7];\n" +
+                "   for(int t = 0; t<=100 ; t = t + 1)\n" +
+                "   {\n" +
+                "       get(sample[t]);\n" +
+                "       sample[t] = (sample[t] * randomize());\n" +
+                "   };\n" +
+                "   maxValue = utility.findMax(sample);\n" +
+                "   minValue = utility.findMin(sample);\n" +
+                "   utility. var1[4][1][0][0][0][0][0] = 10;\n" +
+                "   arrayUtility[1][1][1][1].var1[4][1][0][0][0][0][0] = 2;\n" +
+                "   put(maxValue);\n" +
+                "   put(minValue);\n" +
                 "};\n" +
                 "float randomize()\n" +
                 "{\n" +
-                "float value;\n" +
-                "value = 100 * (2 + 3.0 / 7.0006);\n" +
-                "value = 1.05 + ((2.04 * 2.47) - 3.0) + 7.0006 ;\n" +
-                "return (value);\n" +
+                "   float value;\n" +
+                "   value = 100 * (2 + 3.0 / 7.0006);\n" +
+                "   value = 1.05 + ((2.04 * 2.47) - 3.0) + 7.0006 ;\n" +
+                "   return (value);\n" +
                 "};"+
                   "$ ";
         tuple = run(test);
@@ -329,7 +340,7 @@ public class GrammarTest {
 
     @Test
     public void grammarTest15() throws Exception{
-        String test = "program{}\n;" +
+        String test = "class id {}; program{}\n;" +
                 "       long id1( )\n" +
                         "{" +
                 "           id id2[5][4][3];" +
@@ -338,7 +349,7 @@ public class GrammarTest {
                 "" +
                 "" +
                 "           if(5) then  else ;\n" +
-                "           for(int id9 = 6;id < 7; id8 = i10d + 1);\n" +
+                "           for(int id9 = 6;id9 < 7; id9 = i10d + 1);\n" +
                 "            get(id7[5][5].id[4]);\n" +
                 "           put(5);" +
                 "           return(5 + 5 + 5 <> 5);" +
@@ -346,7 +357,8 @@ public class GrammarTest {
                 "int i11d(){}; $ ";
 
         tuple = run(test);
-        assertTrue(tuple.getX().size() == 0);
+        assertTrue(tuple.getX().size() == 1);
+        assertFalse(tuple.getX().get(0) instanceof SyntacticException);
     }
 
     @Test
