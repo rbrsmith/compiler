@@ -2,22 +2,30 @@ package SemanticAnalyzer;
 
 import java.util.ArrayList;
 
+/**
+ * CLass holding a function declaration
+ */
 public class FunctionDecl implements Declaration {
 
     private String name;
     private String type;
+    // List of parameters passed to the function
     private ArrayList<VariableDecl> params;
 
     public FunctionDecl(Node id, Node type, Node fParams) {
         this.name = (String) id.getLeafValue().getY();
         this.type = (String) type.getLeafValue().getY();
-
         params = new ArrayList<>();
         analyzeFParams(fParams);
 
     }
 
-    public void analyzeFParams(Node fParams) {
+    /**
+     * Recursively examine every node in a tree starting at fParams
+     * Create variable declarations where required
+     * @param fParams Node representing root of fParams tree
+     */
+    private void analyzeFParams(Node fParams) {
         for(Node child: fParams.getChildrenValues()) {
             if(!child.isLeaf() && child.getValue().equals(Analyzer.FUNC_ACTION_2)){
                 Node type = child.getLeftSibling().getLeftSibling().getLeftSibling().getLeaf();
@@ -30,11 +38,9 @@ public class FunctionDecl implements Declaration {
             analyzeFParams(child);
 
         }
-
-
-
     }
 
+    @Override
     public String toString() {
         String rtn = "FUNCTION\t\tType: "+type+",\tName: "+name;
         if(params.size() != 0) {
@@ -52,6 +58,10 @@ public class FunctionDecl implements Declaration {
 
     public ArrayList<VariableDecl> getParams() {
         return params;
+    }
+
+    public String getType() {
+        return type;
     }
 
 }

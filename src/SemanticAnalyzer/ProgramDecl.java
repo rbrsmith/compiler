@@ -8,7 +8,6 @@ public class ProgramDecl implements Declaration {
         name = (String) program.getLeafValue().getX();
 
     }
-
     public String getName() {
         return name;
     }

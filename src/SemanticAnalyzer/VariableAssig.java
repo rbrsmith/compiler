@@ -1,19 +1,27 @@
 package SemanticAnalyzer;
 
-import LexicalAnalyzer.DFA.InvalidCharacterException;
 import LexicalAnalyzer.DFA.Token;
 import SyntacticAnalyzer.Tuple;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
+/**
+ * Class holding an assignment of a variable
+ */
 public class VariableAssig {
 
 
+    // ex a = 5;
     private String name;
+    // ex a[2] = 5;
     private ArrayList<Integer> arraySize;
+    // ex a.b = 5;
     private ArrayList<VariableAssig> attributeName;
 
+    /**
+     * Constructor
+     * @param variable Node representing an ID, V1 or a Variable
+     */
     public VariableAssig(Node variable) {
         name = null;
         arraySize = new ArrayList<>();
@@ -23,6 +31,7 @@ public class VariableAssig {
         }else if(variable.getFirstLeafType().equals(Token.ID.toString() )) {
             name = variable.getFirstLeafValue();
         } else if(variable.getValue().equals("V1")) {
+            // The ID of V1 is two parents up and one over
             Node FB2 = variable.getParent();
             Node FB4 = FB2.getParent();
             Node ID = FB4.getLeftSibling();
@@ -33,6 +42,9 @@ public class VariableAssig {
         }
     }
 
+    /**
+     * Default constructor
+     */
     public VariableAssig() {
         name = null;
         arraySize = new ArrayList<>();
@@ -40,6 +52,10 @@ public class VariableAssig {
     }
 
 
+    /**
+     * Analyze a V1
+     * @param V1 Node representing a V1 tree
+     */
     private void V1(Node V1) {
         ArrayList<Tuple> tokens = V1.getTokens();
         if(tokens.size() == 0) {
@@ -56,13 +72,18 @@ public class VariableAssig {
             } else if(t.getX().equals(Token.INTEGER.toString())) {
                 // This only works for simple arrays, any array that has an expression
                 // As the index wont work
+                // TODO - anaylze expr ex: indiceR
                 current.arraySize.add(Integer.parseInt(t.getY().toString()));
             }
         }
 
     }
 
-
+    /**
+     *
+     * @param variable Node representing a Variable tree
+     * @return VariableAssig if we find a variable assignment | Null otherwise
+     */
     public VariableAssig variable(Node variable) {
         Node firstLeaf = variable.getFirstChild().getLeaf();
         Tuple tkn = firstLeaf.getLeafValue();
@@ -87,9 +108,9 @@ public class VariableAssig {
         for(VariableAssig v: attributeName){
             rtn += "." + v.toString();
         }
-
         return rtn.replaceAll(" = ...", "") + " = ...";
     }
+
     public String getName() {
         return name;
     }

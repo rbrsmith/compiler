@@ -17,7 +17,7 @@ public class Analyzer {
 
     // Rule in Grammar that is a trigger for semantic action
     public final static String SEMANTIC = "SEMANTIC";
-    // Rules
+    // Rules for semantic action
     public final static String CLASS_ACTION = "SEMANTIC-1";
     public final static String FUNC_ACTION_1 = "SEMANTIC-2";
     public final static String FUNC_ACTION_2 = "SEMANTIC-5";
@@ -124,18 +124,24 @@ public class Analyzer {
      * @param errors ArrayList of Exceptions from Syntactic phase, this will be added to as we parse
      */
     private void analyze(Node current, ArrayList<Exception> errors) {
-
+        // Perform any necessary actions
         classDeclaration(current, errors);
         functionDeclaration(current, errors);
         variableDeclaration(current, errors);
         programDeclaration(current, errors);
         endScope(current, errors);
         variableAssignment(current, errors);
+        // Apply actions to children
         for(Node child : current.getChildrenValues()) {
             analyze(child, errors);
         }
     }
 
+    /**
+     * Create a class declaration if required
+     * @param current Node
+     * @param errors ArrayList of Exceptions to add to
+     */
     private void classDeclaration(Node current, ArrayList<Exception> errors) {
         if (!current.isLeaf() && current.getValue().equals(CLASS_ACTION)) {
             Node id = current.getLeftSibling().getLeaf();
@@ -148,6 +154,11 @@ public class Analyzer {
         }
     }
 
+    /**
+     * Create a function declaration if required
+     * @param current Node
+     * @param errors ArrayList of Exception to add to
+     */
     private void functionDeclaration(Node current, ArrayList<Exception> errors) {
         if (!current.isLeaf() && current.getValue().equals(FUNC_ACTION_1)) {
             Node id = current.getLeftSibling().getLeftSibling().getLeftSibling().getLeftSibling().getLeaf();
@@ -166,8 +177,12 @@ public class Analyzer {
         }
     }
 
+    /**
+     * Create variable declaration if required
+     * @param current Node
+     * @param errors ArrayList of Exceptions to add to
+     */
     private void variableDeclaration(Node current, ArrayList<Exception> errors) {
-
         if (!current.isLeaf() && current.getValue().equals(VAR_ACTION_1)) {
             Node id = current.getLeftSibling().getLeftSibling().getLeaf();
             Node type = id.getLeftSibling().getLeaf();
@@ -195,6 +210,11 @@ public class Analyzer {
     }
 
 
+    /**
+     * Create program declaration if required
+     * @param current Node
+     * @param errors ArrayList of Exception to be added to
+     */
     private void programDeclaration(Node current, ArrayList<Exception> errors) {
         if (!current.isLeaf() && current.getValue().equals(PROG_ACTION)) {
             Node program = current.getLeftSibling().getLeaf();
@@ -208,13 +228,22 @@ public class Analyzer {
 
     }
 
+    /**
+     * End a scope statement, forcing symbol table to return a level up
+     * @param current Node
+     * @param errors ArrayList of Exception to add to
+     */
     private void endScope(Node current, ArrayList<Exception> errors) {
-
         if (!current.isLeaf() && current.getValue().equals(SCOPE_CHANGE_ACTION)) {
             symbolTable = symbolTable.getParent();
         }
     }
 
+    /**
+     * Creat a variable assignment if required
+     * @param current Node
+     * @param errors ArrayList of exceptions to be added to
+     */
     private void variableAssignment(Node current, ArrayList<Exception> errors) {
         if(!current.isLeaf() && current.getValue().equals(ASSIG_ACTION_2)) {
             VariableAssig va = new VariableAssig(current.getLeftSibling().getLeftSibling().getLeftSibling());
@@ -230,7 +259,7 @@ public class Analyzer {
     }
 
 
-
+    @Override
     public String toString() {
         return symbolTable.toString();
     }

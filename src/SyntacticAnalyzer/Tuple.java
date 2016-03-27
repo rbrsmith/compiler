@@ -13,6 +13,11 @@ public class Tuple<X, Y> {
 
     public Tuple() {}
 
+    public Tuple(X X, Y Y) {
+        this.x = X;
+        this.y = Y;
+    }
+
     public void setX(X x) {
         this.x = x;
     }

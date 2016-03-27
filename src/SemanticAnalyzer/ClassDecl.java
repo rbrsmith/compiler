@@ -1,9 +1,12 @@
 package SemanticAnalyzer;
 
-import LexicalAnalyzer.DFA.Token;
 
+/**
+ * Wrapper for a class declaration
+ */
 public class ClassDecl implements Declaration {
 
+    // Name of class
     private String name;
 
     public ClassDecl(Node id) {
@@ -13,7 +16,6 @@ public class ClassDecl implements Declaration {
     public String getName() {
         return name;
     }
-
 
     public String toString() {
         return "CLASS\t\tName: "+name;
