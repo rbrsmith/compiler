@@ -12,7 +12,8 @@ public class UndeclardException extends Exception {
 
     }
 
-    public UndeclardException(Position pos, VariableDecl v) {
+    public UndeclardException(Position pos, Declaration v) {
         super("Semantic Error at: " + pos + ". Undeclared class for " + v.getName());
     }
+
 }

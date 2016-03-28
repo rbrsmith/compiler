@@ -1,4 +1,6 @@
-package SyntacticAnalyzer;
+import SyntacticAnalyzer.AmbiguousGrammarException;
+import SyntacticAnalyzer.Grammar;
+import SyntacticAnalyzer.Tuple;
 
 import java.io.*;
 import java.util.ArrayList;

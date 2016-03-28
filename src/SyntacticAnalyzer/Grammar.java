@@ -1,9 +1,7 @@
 package SyntacticAnalyzer;
 
 import LexicalAnalyzer.DFA.*;
-import SemanticAnalyzer.AlreadyDeclaredException;
 import SemanticAnalyzer.Analyzer;
-import SemanticAnalyzer.SemanticException;
 
 import java.io.*;
 import java.util.*;

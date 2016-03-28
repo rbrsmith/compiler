@@ -1,5 +1,7 @@
 package SemanticAnalyzer;
 
+import LexicalAnalyzer.DFA.Reserved;
+
 import java.util.ArrayList;
 
 /**
@@ -37,6 +39,19 @@ public class FunctionDecl implements Declaration {
             }
             analyzeFParams(child);
 
+        }
+    }
+
+    /**
+     *
+     * @return True if this variable is primitive | False otherwise
+     */
+    public boolean isPrimitive() {
+        if(type.equals(Reserved.INT.getWord()) ||
+                type.equals(Reserved.FLOAT.getWord())) {
+            return true;
+        } else {
+            return false;
         }
     }
 

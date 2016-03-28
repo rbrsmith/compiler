@@ -167,6 +167,9 @@ public class Analyzer {
             FunctionDecl f = new FunctionDecl(id, type, fParams);
             if(symbolTable.alreadyExists(f)) errors.add(
                     new AlreadyDeclaredException(current.getPosition(), f.getName()));
+            if(!f.isPrimitive() && !symbolTable.classExists(f.getType())) {
+                errors.add(new UndeclardException(current.getPosition(), f));
+            }
             Symbol sym = new Symbol(f, symbolTable, type.getPosition());
             SymbolTable sub = symbolTable.add(sym);
             symbolTable = sub;
