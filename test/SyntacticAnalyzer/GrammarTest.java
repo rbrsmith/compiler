@@ -28,6 +28,7 @@ public class GrammarTest {
     public void tearDown() throws Exception {
         g = null;
         ht = null;
+        tuple = null;
     }
 
     public Tuple run(String test) throws Exception {
@@ -45,19 +46,23 @@ public class GrammarTest {
                 "class amb{};\n" +
                 "PROGRAM{};\n" +
                 "$";
-        run(test);
         tuple = run(test);
         assertTrue(tuple.getX().size() == 0);
-        test = "class ross{\n" +
+    }
+    @Test
+    public void testGrammarOneA() throws Exception {
+        String test = "class ross{\n" +
                 "    int rman[5];\n" +
                 "};\n" +
                 "class amb{};\n" +
                 "PROGRAM{};\n" +
                 "$";
-        run(test);
         tuple = run(test);
         assertTrue(tuple.getX().size() == 0);
-        test = "class ross{\n" +
+    }
+    @Test
+    public void testGrammarOneB() throws Exception {
+        String test = "class ross{\n" +
                 "    float rman[5];\n" +
                 "};\n" +
                 "class amb{};\n" +
@@ -76,7 +81,7 @@ public class GrammarTest {
                 "program { " +
                 "   int test3 ; " +
                 "} ; " +
-                "long test4 ( int test5 , int test6 )" +
+                "float test4 ( int test5 , int test6 )" +
                 " { } ;" +
                 "$ ";
         tuple = run(test);
@@ -341,7 +346,7 @@ public class GrammarTest {
     @Test
     public void grammarTest15() throws Exception{
         String test = "class id {}; program{}\n;" +
-                "       long id1( )\n" +
+                "       float id1( )\n" +
                         "{" +
                 "           id id2[5][4][3];" +
                 "           int id3[2][3][4];" +

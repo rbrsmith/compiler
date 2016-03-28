@@ -29,11 +29,14 @@ public class Grammar {
     // Reference to the graph and State Transition Table to get our tokens from
     final private DFA tokenizer = new DFA();
 
+    // Assignment 3
+    private Analyzer semanticAnalyzer;
+
 
     public Grammar(String grammarPath) throws AmbiguousGrammarException, FileNotFoundException {
         File f = new File(grammarPath);
+        semanticAnalyzer = new Analyzer();
         buildGrammar(f);
-
     }
 
 
@@ -303,9 +306,7 @@ public class Grammar {
         // Get first token
         Tuple<String, String> tknTup = getNextToken(buffer, pos, errors);
 
-
-        // Assignment 3
-        Analyzer semanticAnalyzer = new Analyzer();
+    //    semanticAnalyzer = new Analyzer();
 
         while(true) {
             String X = stack.get(stack.size()-1);
@@ -514,6 +515,10 @@ public class Grammar {
         }
         return tuple;
 
+    }
+
+    public Analyzer getSemanticAnalyzer() {
+        return semanticAnalyzer;
     }
 
 }

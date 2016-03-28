@@ -23,6 +23,8 @@ public class Main {
             String grammarPath = args[1];
             String base = args[0].substring(0, args[0].lastIndexOf(File.separator));
             String derivationOut = base + File.separator + "derivation.txt";
+            String errorOut = base + File.separator + "errors.txt";
+            String symbolsOut = base + File.separator + "symbols.txt";
 
 
             try {
@@ -45,10 +47,19 @@ public class Main {
                 }
                 derivationWriter.close();
 
-                // Print out all the errors
+                // Print out all the errors & Save to file
+                PrintWriter errorWriter = new PrintWriter(errorOut, "UTF-8");
                 for(Exception e : result.getX()) {
                     System.out.println(e);
+                    errorWriter.write(e + "\n");
                 }
+                errorWriter.close();
+
+
+                PrintWriter symbolWriter = new PrintWriter(symbolsOut, "UTF-8");
+                symbolWriter.write(grammar.getSemanticAnalyzer().toString());
+                symbolWriter.close();
+
 
                 if(result.getX().size() == 0) {
                     System.out.println("OK.");
