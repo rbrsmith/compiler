@@ -99,11 +99,22 @@ public class SymbolTable {
      * @param v VariableAssig representing a variable assignment
      * @return True if the vairables in v are defiend, False otherwise
      */
-    public boolean validate(VariableAssig v) {
+    public Symbol validate(VariableAssig v) {
+        return validate(v, true);
+    }
+
+    /**
+     * Validate that variables used in a variable assignment are defiend
+     * // TODO - does not work for expr in RHS ie indiceR
+     * @param v VariableAssig representing a variable assignment
+     * @param global boolean if we should look globally or not
+     * @return True if the vairables in v are defiend, False otherwise
+     */
+    public Symbol validate(VariableAssig v, boolean global) {
         // Get symbol with this name
-        Symbol s = findID(v.getName());
+        Symbol s = findID(v.getName(), global);
         if (s == null) {
-            return false;
+            return null;
         } else {
             // Match array size
             if (s.getDecl() instanceof VariableDecl) {
@@ -111,11 +122,11 @@ public class SymbolTable {
                 if (tmp.getSize().size() >= v.getSize().size()) {
                     for (int i = 0; i < v.getSize().size(); i++) {
                         if (tmp.getSize().get(i) < v.getSize().get(i)) {
-                            return false;
+                            return null;
                         }
                     }
                 } else {
-                    return false;
+                    return null;
                 }
             }
         }
@@ -128,23 +139,23 @@ public class SymbolTable {
                 VariableDecl tmp = (VariableDecl) s.getDecl();
                 SymbolTable classTable = getClassSymbolTable(tmp.getType());
                 if(classTable == null) {
-                    return false;
+                    return null;
                 }
                 // OK GOOD, we have a class
                 boolean allGood = true;
                 for(VariableAssig va: v.getAttributes()) {
                     // We can only do this because nothing is allowed to be declared before
                     // classes according to the grammar
-                    if(!classTable.validate(va)) {
+                    if(classTable.validate(va, false) == null) {
                         allGood = false;
                     }
                 }
-                if(!allGood) return false;
+                if(!allGood) return null;
             } else {
-                return false;
+                return null;
             }
         }
-        return true;
+        return s;
     }
 
 
@@ -176,14 +187,24 @@ public class SymbolTable {
      * @return Symbol matching name if found
      */
     private Symbol findID(String name) {
+        return findID(name, true);
+    }
+
+    /**
+     *
+     * @param name String of symbol we are looking for
+     * @param global Boolean if we should look in parent scope or not
+     * @return Symbol matching name if found
+     */
+    private Symbol findID(String name, boolean global) {
         for (Symbol s : symbols) {
             if (s.getDecl().getName().equals(name)) {
                 return s;
             }
         }
         // No luck, check with parent
-        if (parent != null) {
-            return parent.findID(name);
+        if (parent != null && global) {
+            return parent.findID(name, global);
         } else {
             return null;
         }

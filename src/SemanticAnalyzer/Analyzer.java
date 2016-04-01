@@ -2,6 +2,7 @@ package SemanticAnalyzer;
 
 
 import LexicalAnalyzer.DFA.Position;
+import SemanticEvaluation.SemanticEvaluation;
 import SyntacticAnalyzer.Grammar;
 import SyntacticAnalyzer.Tuple;
 
@@ -28,8 +29,6 @@ public class Analyzer {
 
     public final static String SCOPE_CHANGE_ACTION = "SEMANTIC-0";
 
-    public final static String ASSIG_ACTION_1 = "SEMANTIC-10";
-    public final static String ASSIG_ACTION_2 = "SEMANTIC-11";
 
 
 
@@ -40,6 +39,8 @@ public class Analyzer {
     // Root symbol table, all sub tables are pointers in this main table
     private SymbolTable symbolTable;
 
+    private SemanticEvaluation evaluation;
+
 
     /**
      * Default constructor
@@ -48,6 +49,7 @@ public class Analyzer {
         root = null;
         current = null;
         symbolTable = new SymbolTable(null);
+        evaluation = new SemanticEvaluation();
     }
 
 
@@ -117,6 +119,7 @@ public class Analyzer {
         analyze(root, errors);
     }
 
+
     /**
      * Recursively traverse parse tree, building symbol tables and picking up semantic
      * exceptions along the way
@@ -130,7 +133,11 @@ public class Analyzer {
         variableDeclaration(current, errors);
         programDeclaration(current, errors);
         endScope(current, errors);
-        variableAssignment(current, errors);
+
+
+        evaluation.evaluate(current, symbolTable, errors);
+
+
         // Apply actions to children
         for(Node child : current.getChildrenValues()) {
             analyze(child, errors);
@@ -240,25 +247,6 @@ public class Analyzer {
         if (!current.isLeaf() && current.getValue().equals(SCOPE_CHANGE_ACTION)) {
             symbolTable = symbolTable.getParent();
         }
-    }
-
-    /**
-     * Creat a variable assignment if required
-     * @param current Node
-     * @param errors ArrayList of exceptions to be added to
-     */
-    private void variableAssignment(Node current, ArrayList<Exception> errors) {
-        if(!current.isLeaf() && current.getValue().equals(ASSIG_ACTION_2)) {
-            VariableAssig va = new VariableAssig(current.getLeftSibling().getLeftSibling().getLeftSibling());
-            if(!symbolTable.validate(va)) errors.add(
-                    new UndeclardException(current.getPosition(), va));
-        }
-        if(!current.isLeaf() && current.getValue().equals(ASSIG_ACTION_1)) {
-            VariableAssig va = new VariableAssig(current.getLeftSibling().getLeftSibling());
-            if(!symbolTable.validate(va)) errors.add(
-                    new UndeclardException(current.getPosition(), va));
-        }
-
     }
 
 

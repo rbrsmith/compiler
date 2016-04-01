@@ -265,4 +265,56 @@ public class AnalyzerTest {
         assertTrue(tuple.getX().get(3) instanceof AlreadyDeclaredException);
 
     }
+
+    @Test
+    public void testSemanticSix() throws Exception {
+        String test = "class a{" +
+                "       }; " +
+                "program{ " +
+                "   a b;" +
+                "   b.id[5] = 4;" +
+                "" +
+                "};" +
+                "$ ";
+
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 1);
+        assertTrue(tuple.getX().get(0) instanceof UndeclardException);
+
+    }
+
+    @Test
+    public void testSemanticSeven() throws Exception {
+        String test = "class a{" +
+                "          int id[2];" +
+                "       }; " +
+                "program{ " +
+                "   a b;" +
+                "   b.id[5] = 4;" +
+                "" +
+                "};" +
+                "$ ";
+
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 1);
+        assertTrue(tuple.getX().get(0) instanceof UndeclardException);
+
+    }
+
+    @Test
+    public void testSemanticEight() throws Exception {
+        String test = "class a{" +
+                "          int id[6];" +
+                "       }; " +
+                "program{ " +
+                "   a b;" +
+                "   b.id[5] = 4;" +
+                "" +
+                "};" +
+                "$ ";
+
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
+
+    }
 }

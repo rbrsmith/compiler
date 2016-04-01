@@ -345,11 +345,14 @@ public class GrammarTest {
 
     @Test
     public void grammarTest15() throws Exception{
-        String test = "class id {}; program{}\n;" +
+        String test = "class id {" +
+                "           int id[5];" +
+                "}; program{}\n;" +
                 "       float id1( )\n" +
                         "{" +
                 "           id id2[5][4][3];" +
                 "           int id3[2][3][4];" +
+                "           id id7[5][5];" +
                 "           id4[ +5 + not 5 + 5 ].id5[5][4][3].id[4] = id6[5][3].id( )\n== 5;" +
                 "" +
                 "" +
