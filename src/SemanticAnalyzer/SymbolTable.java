@@ -171,6 +171,7 @@ public class SymbolTable {
             if (s.getDecl() instanceof VariableDecl) {
                 VariableDecl tmp = (VariableDecl) s.getDecl();
                 if(tmp.getSize().size() < vr.getSize()) return null;
+                if(tmp.getSize().size() > 0 && vr.getSize() == 0) return null;
 
             }
         }
