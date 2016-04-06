@@ -13,6 +13,7 @@ public class VariableDecl implements Declaration {
 
     private String type;
     private String name;
+    private boolean initialize;
 
 
     // Size of variable
@@ -26,6 +27,7 @@ public class VariableDecl implements Declaration {
 
         sizes = new ArrayList<>();
         if(array != null) analyzeArray(array);
+        initialize = false;
 
     }
 
@@ -49,7 +51,13 @@ public class VariableDecl implements Declaration {
     }
 
     public String toString() {
-        String rtn = "VARIABLE\t\tType: "+type+",\tName: "+name;
+        String rtn = "";
+        if(initialize) {
+            rtn += "INITIALIZED ";
+        } else {
+            rtn += "UN-INITIALIED ";
+        }
+        rtn += "VAR\t\tType: "+type+",\tName: "+name;
         if(sizes.size() != 0) rtn += ",\tSize: ";
         for(Integer i : sizes) {
             rtn += "["+i+"]";
@@ -81,5 +89,11 @@ public class VariableDecl implements Declaration {
         return type;
     }
 
+    public void initialize() {
+        this.initialize = true;
+    }
 
+    public boolean isInitialized() {
+        return initialize;
+    }
 }

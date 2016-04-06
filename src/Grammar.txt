@@ -57,8 +57,8 @@ S1 -> assignStat SEMICOLON
 S2 -> if ORB expr CRB then statBlock else statBlock SEMICOLON
 S3 -> for ORB type id SEMANTIC-4 assignOp SEMANTIC-11 expr SEMICOLON relExpr SEMICOLON assignStat CRB statBlock SEMICOLON
 S4 -> get ORB variable SEMANTIC-12 CRB SEMICOLON
-S5 -> put ORB expr SEMANTIC-13 CRB SEMICOLON
-S6 -> return ORB expr SEMANTIC-13 CRB SEMICOLON
+S5 -> put ORB expr CRB SEMICOLON
+S6 -> return ORB expr CRB SEMICOLON
 
 
 assignStat -> variable assignOp SEMANTIC-10 expr

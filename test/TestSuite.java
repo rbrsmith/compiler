@@ -1,9 +1,8 @@
 import LexicalAnalyzer.DFA.*;
 import LexicalAnalyzer.DFA.NodeTest;
 import SemanticAnalyzer.*;
+import SemanticEvaluation.*;
 import SyntacticAnalyzer.*;
-import com.sun.media.sound.FFT;
-import com.sun.org.apache.xml.internal.dtm.ref.DTMDefaultBaseIterators;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -33,7 +32,8 @@ import org.junit.runners.Suite;
         NodeTest.class,
         ProgramDeclTest.class,
         SymbolTableTest.class,
-        VariableDeclTest.class
+        VariableDeclTest.class,
+        SemanticEvaluationTest.class
 })
 
 public class TestSuite {

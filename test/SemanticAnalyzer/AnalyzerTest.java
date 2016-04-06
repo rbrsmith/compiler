@@ -221,7 +221,7 @@ public class AnalyzerTest {
                 "}; " +
                 "float a() {" +
                 "   a b;" +
-                "   b.b = 4;" +
+                "   b.b[5] = 4;" +
                 "   b.c = 5;" +
                 "};$ ";
         tuple = run(test);

@@ -1,6 +1,7 @@
 package SemanticAnalyzer;
 
 import LexicalAnalyzer.DFA.Position;
+import SemanticEvaluation.VariableReference;
 
 /**
  * Thrown when we are assigning a variable that has not been declared
@@ -16,4 +17,7 @@ public class UndeclardException extends Exception {
         super("Semantic Error at: " + pos + ". Undeclared class for '" + v.getName() + "'.");
     }
 
+    public UndeclardException(Position pos, VariableReference vr) {
+        super("Semantic Error at: " + pos + ". Undeclared class for '" + vr.getName() + "'.");
+    }
 }

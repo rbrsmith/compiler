@@ -1,5 +1,7 @@
 package SemanticAnalyzer;
 
+import SemanticEvaluation.VariableReference;
+
 import java.util.ArrayList;
 
 /**
@@ -119,20 +121,22 @@ public class SymbolTable {
             // Match array size
             if (s.getDecl() instanceof VariableDecl) {
                 VariableDecl tmp = (VariableDecl) s.getDecl();
+                if(tmp.getSize().size() < v.getSize().size()) return null;
                 if (tmp.getSize().size() >= v.getSize().size()) {
                     for (int i = 0; i < v.getSize().size(); i++) {
                         if (tmp.getSize().get(i) < v.getSize().get(i)) {
                             return null;
                         }
                     }
-                } else {
+                }
+                if(tmp.getSize().size() > 0 && v.getSize().size() == 0) {
                     return null;
                 }
             }
         }
 
         // So ID is a match and array size is a match, now check attributes
-        if(v.getAttributes().size() > 0) {
+        if(v.getAttribute() != null) {
             // We think we have a class
             if(s.getDecl() instanceof VariableDecl) {
                 // Find that class name...
@@ -142,19 +146,56 @@ public class SymbolTable {
                     return null;
                 }
                 // OK GOOD, we have a class
-                boolean allGood = true;
-                for(VariableAssig va: v.getAttributes()) {
-                    // We can only do this because nothing is allowed to be declared before
-                    // classes according to the grammar
-                    if(classTable.validate(va, false) == null) {
-                        allGood = false;
-                    }
-                }
-                if(!allGood) return null;
+                VariableAssig va = v.getAttribute();
+                // We can only do this because nothing is allowed to be declared before
+                // classes according to the grammar
+                return classTable.validate(va, false);
             } else {
                 return null;
             }
         }
+        return s;
+    }
+
+
+    public Symbol validate(VariableReference vr) {
+        return validate(vr, true);
+    }
+
+    public Symbol validate(VariableReference vr, boolean global) {
+        Symbol s = findID(vr.getName(), global);
+        if (s == null) {
+            return null;
+        } else {
+            // Match array size
+            if (s.getDecl() instanceof VariableDecl) {
+                VariableDecl tmp = (VariableDecl) s.getDecl();
+                if(tmp.getSize().size() < vr.getSize()) return null;
+
+            }
+        }
+
+        // So ID is a match and array size is a match, now check attributes
+        if(vr.getAttribute() != null) {
+            // We think we have a class
+            if(s.getDecl() instanceof VariableDecl) {
+                // Find that class name...
+                VariableDecl tmp = (VariableDecl) s.getDecl();
+                SymbolTable classTable = getClassSymbolTable(tmp.getType());
+                if(classTable == null) {
+                    return null;
+                }
+                // OK GOOD, we have a class
+                VariableReference vrAttr =  vr.getAttribute();
+                // We can only do this because nothing is allowed to be declared before
+                // classes according to the grammar
+                return classTable.validate(vrAttr, false);
+
+            } else {
+                return null;
+            }
+        }
+
         return s;
     }
 
@@ -232,4 +273,5 @@ public class SymbolTable {
         }
         return false;
     }
+
 }
