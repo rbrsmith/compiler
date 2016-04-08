@@ -112,12 +112,20 @@ public class VariableReference {
                     s = symbolTable.validate(vrS);
                     if(s == null) throw new UndeclardException(first.getPosition(), vrS);
                     tmp = (VariableDecl) s.getDecl();
-                    if(!tmp.isInitialized()) throw new UninitializedException(first.getPosition(), tmp);
 
+
+                    if(vrS.getAttribute() != null) {
+                        tmp = tmp.getAttribute(vrS.getAttribute());
+                    }
+                    if(tmp == null) {
+                        // method, no initializing needed
+                    } else {
+                        if (!tmp.isInitialized()) throw new UninitializedException(first.getPosition(), tmp);
+                    }
                 }
 
                 break;
-            case "orb":
+            case "ORB":
                 arithExpr(first.getRightSibling());
                 break;
             case "not":

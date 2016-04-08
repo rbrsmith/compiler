@@ -81,6 +81,7 @@ public class Expression {
                     if(vr.getAttribute() != null){
                         caller = vr.getAttribute();
                     }
+                    if(caller.getParams() == null) throw new UndeclardException(factor.getPosition(), caller);
                     if(method.getParams().size() != caller.getParams().size()) throw new InvalidFunctionParamsException(factor.getPosition());
 
                     for(int i=0;i<method.getParams().size(); i++) {
