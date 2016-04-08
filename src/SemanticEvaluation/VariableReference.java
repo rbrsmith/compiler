@@ -22,6 +22,8 @@ public class VariableReference {
 
     private SymbolTable symbolTable;
 
+    private boolean inParam;
+
     public VariableReference(Node id, SymbolTable symbolTable) throws Exception {
         this.name = id.getFirstLeafValue();
         this.size = 0;
@@ -29,6 +31,7 @@ public class VariableReference {
         this.subVariables = new ArrayList<>();
         this.params = new ArrayList<>();
         this.symbolTable = symbolTable;
+        this.inParam = false;
         Node F1 = id.getRightSibling();
         Node F1First = F1.getFirstChild();
         if(F1First.getValue().equals("indiceR")) {

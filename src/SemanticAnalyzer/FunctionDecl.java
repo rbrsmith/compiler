@@ -34,6 +34,7 @@ public class FunctionDecl implements Declaration {
                 Node id = type.getRightSibling().getLeaf();
                 Node array = id.getRightSibling();
                 VariableDecl v = new VariableDecl(id, type, array);
+                v.initialize();
                 params.add(v);
                 // Add v to table
             }

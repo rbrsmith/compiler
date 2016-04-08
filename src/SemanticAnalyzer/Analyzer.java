@@ -162,7 +162,7 @@ public class Analyzer {
                 Symbol sym = new Symbol(c, symbolTable, id.getPosition());
                 SymbolTable sub2 = symbolTable.add(sym);
             }
-            SymbolTable sub = symbolTable.get(c.getName());
+            SymbolTable sub = symbolTable.get(c);
             symbolTable = sub;
         }
     }
@@ -189,7 +189,7 @@ public class Analyzer {
                 sym = new Symbol(f, symbolTable, type.getPosition());
                 SymbolTable sub2 = symbolTable.add(sym);
             }
-            SymbolTable sub = symbolTable.get(f.getName());
+            SymbolTable sub = symbolTable.get(f);
             symbolTable = sub;
             if(!eval) {
                 for (VariableDecl v : f.getParams()) {
@@ -217,6 +217,22 @@ public class Analyzer {
                 if (!v.isPrimitive() && !symbolTable.classExists(v.getType())) {
                     errors.add(new UndeclardException(current.getPosition(), v));
                 }
+
+                if(!v.isPrimitive()) {
+                    // ADD attribute possibilities
+                    SymbolTable classTable = symbolTable.getClassSymbolTable(v.getType());
+                    if(classTable != null) {
+                        ArrayList<VariableDecl> attributes = classTable.getVariables();
+                        v.setAttributes(attributes);
+                    }
+                }
+
+
+                // Classes attributes are initialized
+                if(symbolTable.getDecl() instanceof ClassDecl) {
+                    v.initialize();
+                }
+
                 Symbol sym = new Symbol(v, symbolTable, type.getPosition());
                 symbolTable.add(sym);
             }
@@ -228,6 +244,22 @@ public class Analyzer {
                 VariableDecl v = new VariableDecl(id, type, array);
                 if (symbolTable.alreadyExists(v)) errors.add(
                         new AlreadyDeclaredException(current.getPosition(), v.getName()));
+
+                if(!v.isPrimitive()) {
+                    // ADD attribute possibilities
+                    SymbolTable classTable = symbolTable.getClassSymbolTable(v.getType());
+                    if(classTable != null) {
+                        ArrayList<VariableDecl> attributes = classTable.getVariables();
+                        v.setAttributes(attributes);
+                    }
+                }
+
+
+                // Classes attributes are initialized
+                if(symbolTable.getDecl() instanceof ClassDecl) {
+                    v.initialize();
+                }
+
                 Symbol sym = new Symbol(v, symbolTable, type.getPosition());
                 symbolTable.add(sym);
             }
@@ -250,7 +282,7 @@ public class Analyzer {
                 Symbol sym = new Symbol(p, symbolTable, program.getPosition());
                 SymbolTable sub2 = symbolTable.add(sym);
             }
-            SymbolTable sub = symbolTable.get(p.getName());
+            SymbolTable sub = symbolTable.get(p);
             symbolTable = sub;
         }
 

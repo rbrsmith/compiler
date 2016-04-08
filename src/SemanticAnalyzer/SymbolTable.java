@@ -11,6 +11,7 @@ public class SymbolTable {
 
     ArrayList<Symbol> symbols;
     private SymbolTable parent;
+    private Declaration decl;
     private String name;
 
     /**
@@ -21,16 +22,17 @@ public class SymbolTable {
         symbols = new ArrayList<>();
         this.parent = parent;
         // Default to global table
+        decl = null;
         this.name = "Global";
     }
 
     /**
      *
      * @param parent SymbolTable this is a child of
-     * @param name String to call this table
      */
-    public SymbolTable(SymbolTable parent, String name) {
-        this.name = name;
+    public SymbolTable(SymbolTable parent, Declaration decl) {
+        this.decl = decl;
+        this.name = decl.getName();
         symbols = new ArrayList<>();
         this.parent = parent;
     }
@@ -106,8 +108,7 @@ public class SymbolTable {
     }
 
     /**
-     * Validate that variables used in a variable assignment are defiend
-     * // TODO - does not work for expr in RHS ie indiceR
+     * Validate that variables used in a variable assignment are defiends
      * @param v VariableAssig representing a variable assignment
      * @param global boolean if we should look globally or not
      * @return True if the vairables in v are defiend, False otherwise
@@ -140,7 +141,7 @@ public class SymbolTable {
                 VariableAssig va = v.getAttribute();
                 // We can only do this because nothing is allowed to be declared before
                 // classes according to the grammar
-                return classTable.validate(va, false);
+                if(classTable.validate(va, false) == null) return null;
             } else {
                 return null;
             }
@@ -181,7 +182,7 @@ public class SymbolTable {
                 VariableReference vrAttr =  vr.getAttribute();
                 // We can only do this because nothing is allowed to be declared before
                 // classes according to the grammar
-                return classTable.validate(vrAttr, false);
+                if(classTable.validate(vrAttr, false) == null) return null;
 
             } else {
                 return null;
@@ -199,7 +200,7 @@ public class SymbolTable {
      * @param type String representing a class name
      * @return SymbolTable representing all elements defined in @type class
      */
-    private SymbolTable getClassSymbolTable(String type) {
+    public SymbolTable getClassSymbolTable(String type) {
         // Get the class symbols in this table
         for(Symbol s: symbols) {
             if(s.getDecl() instanceof ClassDecl) {
@@ -268,14 +269,32 @@ public class SymbolTable {
         return false;
     }
 
-    public SymbolTable get(String name) {
+    public SymbolTable get(Declaration decl) {
+        String name = decl.getName();
         for(Symbol s: symbols) {
-            if(s.getDecl().getName().equals(name)){
-                return s.getSubTable();
+            Declaration symbolDecl = s.getDecl();
+            if(symbolDecl.getName().equals(name)) {
+                if(decl instanceof ClassDecl && symbolDecl instanceof ClassDecl) return s.getSubTable();
+                if(decl instanceof VariableDecl && symbolDecl instanceof VariableDecl) return s.getSubTable();
+                if(decl instanceof FunctionDecl && symbolDecl instanceof FunctionDecl) return s.getSubTable();
+                if(decl instanceof ProgramDecl && symbolDecl instanceof ProgramDecl) return s.getSubTable();
             }
         }
         return null;
     }
 
 
+    public Declaration getDecl() {
+        return decl;
+    }
+
+    public ArrayList<VariableDecl> getVariables() {
+        ArrayList<VariableDecl> res = new ArrayList<>();
+        for(Symbol s: symbols) {
+            if(s.getDecl() instanceof VariableDecl) {
+                res.add((VariableDecl) s.getDecl());
+            }
+        }
+        return res;
+    }
 }

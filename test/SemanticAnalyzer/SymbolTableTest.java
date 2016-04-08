@@ -15,7 +15,7 @@ public class SymbolTableTest {
         Node childID = new Node(new Tuple(Token.ID, "TestClass"), true, false, ID, new Position());
         ClassDecl c = new ClassDecl(childID);
 
-        SymbolTable symbolTable = new SymbolTable(null, "Global");
+        SymbolTable symbolTable = new SymbolTable(null);
         SymbolTable sub = symbolTable.add(new Symbol(c, symbolTable, new Position()));
         assertTrue(sub.getParent() == symbolTable);
         assertTrue(symbolTable.alreadyExists(c));

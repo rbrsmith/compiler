@@ -1,17 +1,16 @@
 package SemanticEvaluation;
 
 import SemanticAnalyzer.*;
-import com.sun.corba.se.impl.io.TypeMismatchException;
 
 import java.util.ArrayList;
 
 public class SemanticEvaluation {
 
-    private Expression expression;
-
 
     // Rule in Grammar that is a trigger for semantic action
     public final static String VAR_REF = "SEMANTIC-12";
+    public final static String EXPR_REF = "SEMANTIC-13";
+    public final static String RETURN_REF = "SEMANTIC-14";
 
 
     public final static String ASSIG_ACTION_1 = "SEMANTIC-10";
@@ -20,13 +19,18 @@ public class SemanticEvaluation {
 
 
 
+
+
     public void evaluate(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
 
         variableGetReference(current, symbolTable, errors);
         variableAssignment(current, symbolTable, errors);
+        expressionUse(current, symbolTable, errors);
+        returnUse(current, symbolTable, errors);
 
 
     }
+
 
 
 
@@ -71,14 +75,21 @@ public class SemanticEvaluation {
              // Check if this variable as been declared
             if(symbol == null) throw new UndeclardException(current.getPosition(), va);
             else {
-                symbol.initialize();
+                if(!(symbol.getDecl() instanceof VariableDecl)) throw new AlreadyDeclaredException(current.getPosition(), symbol.getDecl().getName());
+                VariableDecl LHSVar = (VariableDecl) symbol.getDecl();
+
+                if(va.getAttribute() != null) {
+                    LHSVar = LHSVar.getAttribute(va.getAttribute());
+                }
+
+                // FIX initialization
+            //    symbol.initialize();
+               LHSVar.initialize();
 
                 // Now make sure return types match otherwise throw an exception
                 Node expr = current.getRightSibling();
                 String exprType = new Expression(symbolTable).evaluate(expr);
 
-                if(!(symbol.getDecl() instanceof VariableDecl)) throw new AlreadyDeclaredException(expr.getPosition(), symbol.getDecl().getName());
-                VariableDecl LHSVar = (VariableDecl) symbol.getDecl();
                 if (!LHSVar.getType().equals(exprType)) {
                     throw new InvalidTypesException(expr.getPosition(), exprType, LHSVar.getType(), symbol.getDecl().getName());
                 }
@@ -90,6 +101,33 @@ public class SemanticEvaluation {
 
     }
 
+    private void expressionUse(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
+        if(!current.isLeaf() && current.getValue().equals(EXPR_REF)) {
+            try {
+                new Expression(symbolTable).evaluate(current.getLeftSibling());
+            } catch(Exception e) {
+                errors.add(e);
+            }
+        }
+    }
+
+    private void returnUse(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
+        if(!current.isLeaf() && current.getValue().equals(RETURN_REF)) {
+            try {
+                String returnType = new Expression(symbolTable).evaluate(current.getLeftSibling());
+                Declaration decl = symbolTable.getDecl();
+                if(decl instanceof FunctionDecl) {
+                    FunctionDecl tmp = (FunctionDecl) decl;
+                    if(!tmp.getType().equals(returnType)) {
+                        throw new InvalidTypesException(current.getPosition(), returnType,
+                                tmp.getType(), tmp.getName());
+                    }
+                }
+            } catch(Exception e) {
+                errors.add(e);
+            }
+        }
+    }
 
 
 

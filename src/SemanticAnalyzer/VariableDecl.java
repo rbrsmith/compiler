@@ -1,6 +1,7 @@
 package SemanticAnalyzer;
 
 import LexicalAnalyzer.DFA.Reserved;
+import SemanticEvaluation.VariableReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public class VariableDecl implements Declaration {
     // Size of variable
     // Ex:  int a[5][4];
     private ArrayList<Integer> sizes;
+    private ArrayList<VariableDecl> attributes;
 
 
     public VariableDecl(Node id, Node type, Node array) {
@@ -27,10 +29,22 @@ public class VariableDecl implements Declaration {
 
         sizes = new ArrayList<>();
         if(array != null) analyzeArray(array);
+
+        attributes = new ArrayList<>();
         initialize = false;
+
+
 
     }
 
+    public VariableDecl(VariableDecl v, boolean initialize) {
+        this.name = v.name;
+        this.type = v.type;
+        this.sizes = v.sizes;
+        this.attributes = v.attributes;
+        this.initialize = initialize;
+
+    }
 
 
     /**
@@ -61,6 +75,9 @@ public class VariableDecl implements Declaration {
         if(sizes.size() != 0) rtn += ",\tSize: ";
         for(Integer i : sizes) {
             rtn += "["+i+"]";
+        }
+        for(VariableDecl vd: attributes) {
+            rtn += "\n\t"+vd.toString();
         }
         return rtn;
     }
@@ -96,4 +113,30 @@ public class VariableDecl implements Declaration {
     public boolean isInitialized() {
         return initialize;
     }
+
+    public VariableDecl getAttribute(VariableAssig attribute) {
+        for(VariableDecl v : attributes) {
+            if(v.getName().equals(attribute.getName())) {
+                return v;
+            }
+        }
+        return null;
+    }
+
+
+    public VariableDecl getAttribute(VariableReference attribute) {
+        for(VariableDecl v : attributes) {
+        if(v.getName().equals(attribute.getName())) {
+            return v;
+        }
+    }
+        return null;
+    }
+
+    public void setAttributes(ArrayList<VariableDecl> attributes) {
+        for(VariableDecl vd: attributes) {
+            this.attributes.add(new VariableDecl(vd, false));
+        }
+    }
+
 }

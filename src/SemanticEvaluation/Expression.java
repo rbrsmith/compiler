@@ -54,8 +54,24 @@ public class Expression {
                 if(s == null) throw new UndeclardException(id.getPosition(), vr);
                 if(s.getDecl() instanceof VariableDecl) {
                     VariableDecl tmp = (VariableDecl) s.getDecl();
-                    if (!tmp.isInitialized()) throw new UninitializedException(id.getPosition(), tmp);
-                    return tmp.getType();
+
+                    if(vr.getAttribute() != null) {
+                        VariableDecl tmp2 = tmp.getAttribute(vr.getAttribute());
+                        if(tmp2 == null) {
+                            // Method
+                            SymbolTable classTable = symbolTable.getClassSymbolTable(tmp.getType());
+                            FunctionDecl method = (FunctionDecl) classTable.validate(vr.getAttribute(), false).getDecl();
+
+                            return method.getType();
+                        } else {
+                            // Attribute
+                            if (!tmp2.isInitialized()) throw new UninitializedException(id.getPosition(), tmp);
+                            return tmp2.getType();
+                        }
+                    } else {
+                       if (!tmp.isInitialized()) throw new UninitializedException(id.getPosition(), tmp);
+                       return tmp.getType();
+                    }
                 } else {
                     if(s.getDecl() instanceof ClassDecl) {
                         throw new AlreadyDeclaredException(factor.getPosition(), s.getDecl().getName());

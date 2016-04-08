@@ -21,7 +21,7 @@ public class Symbol {
      * @param pos Position in the source code we encounter this declaration
      */
     public Symbol(Declaration decl, SymbolTable parent, Position pos) {
-       if(!(decl instanceof VariableDecl)) this.table = new SymbolTable(parent, decl.getName());
+       if(!(decl instanceof VariableDecl)) this.table = new SymbolTable(parent, decl);
        this.decl = decl;
     }
 

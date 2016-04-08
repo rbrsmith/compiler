@@ -122,7 +122,7 @@ public class GrammarTest {
                 "       a test1; " +
                 "       test1 . test2 = + 6.5 ;" +
                 "        return (" +
-                "            id  ) ;" +
+                "            test1.test2  ) ;" +
                 "       put ( 6.5 <> 6.5 + 6.5 ) ;" +
                 "       }" +
                 " ; $";
@@ -184,7 +184,8 @@ public class GrammarTest {
                         "int findMin(int array[100]) {" +
                 "           int minValue;" +
                 "           int maxValue;\n" +
-                "           int idx2;\n" +
+                "           int idx2;" +
+                "           maxValue = 4;\n" +
                 "           minValue = array[100];\n" +
                 "           for( int idx = 1; idx <= 99; idx = ( idx ) + 1)\n" +
                 "           {\n" +
@@ -251,7 +252,9 @@ public class GrammarTest {
                 "   int findMax(int array[100])\n" +
                 "   {\n" +
                 "       int maxValue;\n" +
-                "       int idx;\n" +
+                "       int idx;" +
+                "       idx = 2;" +
+                "       maxValue = 3;\n" +
                 "       maxValue = array[100];\n" +
                 "       for( int idx2 = 99; idx2 > 0; idx2 = idx2 - 1 )\n" +
                 "       {\n" +
@@ -265,7 +268,8 @@ public class GrammarTest {
                 "   {\n" +
                 "       int minValue;\n" +
                 "       int maxValue;\n" +
-                "       int idx3;\n" +
+                "       int idx3;" +
+                "       maxValue = 43;\n" +
                 "       minValue = array[100];\n" +
                 "       for( int idx = 1; idx <= 99; idx = ( idx ) + 1)\n" +
                 "       {\n" +
@@ -288,19 +292,21 @@ public class GrammarTest {
                 "       get(sample[t]);\n" +
                 "       sample[t] = (sample[t] * randomize());\n" +
                 "   };\n" +
-                "   maxValue = utility.findMax(sample);\n" +
-                "   minValue = utility.findMin(sample);\n" +
+                "   maxValue = utility.findMax(sample[0]);\n" +
+                "   minValue = utility.findMin(sample[1]);\n" +
                 "   utility. var1[4][1][0][0][0][0][0] = 10;\n" +
                 "   arrayUtility[1][1][1][1].var1[4][1][0][0][0][0][0] = 2;\n" +
                 "   put(maxValue);\n" +
                 "   put(minValue);\n" +
                 "};\n" +
-                "float randomize()\n" +
+                "int randomize()\n" +
                 "{\n" +
-                "   float value;\n" +
-                "   value = 100 * (2 + 3.0 / 7.0006);\n" +
+                "   float value;" +
+                "   int m;" +
+                "   m = 4;\n" +
+                "   value = 100.0 * (2.0 + 3.0 / 7.0006);\n" +
                 "   value = 1.05 + ((2.04 * 2.47) - 3.0) + 7.0006 ;\n" +
-                "   return (value);\n" +
+                "   return (m);\n" +
                 "};"+
                   "$ ";
         tuple = run(test);
@@ -309,10 +315,13 @@ public class GrammarTest {
 
     @Test
     public void grammarTest13() throws Exception{
-        String test = "class id {" +
-                "           float id2; " +
+        String test = "class foo { int id(){}; };" +
+                "" +
+                "       class id {" +
+                "           int id2; " +
+                "           foo id3[9];" +
                 "           int id( ) { " +
-                "               if(  6.5 - id [8]. id ()  ==  id ) " +
+                "               if(  6 - id3 [8]. id ()  ==  id2 ) " +
                 "               then { put(not 5); } " +
                 "               else ; " +
                 "           } ;" +
@@ -333,7 +342,7 @@ public class GrammarTest {
                 "               int id4 [1][2];\n" +
                 "               for(long id5 = (5) <> (not 5);\n" +
                 "                   8 == 8;\n" +
-                "                   id = 5\n" +
+                "                   id2[0] = 5\n" +
                 "               ){\n" +
                 "                   return (7);\n" +
                 "               }\n;" +
@@ -345,7 +354,7 @@ public class GrammarTest {
                 "program{};\n" +
                 "$ \n";
         tuple = run(test);
-        assertTrue(tuple.getX().size() == 2);
+        assertTrue(tuple.getX().size() == 3);
     }
 
     @Test
@@ -353,7 +362,7 @@ public class GrammarTest {
         String test = "class id {" +
                 "           int id[5];" +
                 "}; program{}\n;" +
-                "       float id1( )\n" +
+                "       int id1( )\n" +
                         "{" +
                 "           id id2[5][4][3];" +
                 "           int id3[2][3][4];" +
