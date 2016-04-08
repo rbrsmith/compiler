@@ -10,7 +10,6 @@ public class UndeclardException extends Exception {
 
     public UndeclardException(Position pos, VariableAssig va) {
         super("Semantic Error at: " + pos + ".  Undeclared element in '" + va + "'.");
-
     }
 
     public UndeclardException(Position pos, Declaration v) {
@@ -18,6 +17,6 @@ public class UndeclardException extends Exception {
     }
 
     public UndeclardException(Position pos, VariableReference vr) {
-        super("Semantic Error at: " + pos + ". Undeclared class for '" + vr.getName() + "'.");
+        super("Semantic Error at: " + pos + ". Undeclared element in '" + vr.getName() + "'.");
     }
 }

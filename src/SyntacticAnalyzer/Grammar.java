@@ -2,6 +2,8 @@ package SyntacticAnalyzer;
 
 import LexicalAnalyzer.DFA.*;
 import SemanticAnalyzer.Analyzer;
+import SemanticEvaluation.Expression;
+import SemanticEvaluation.SemanticEvaluation;
 
 import java.io.*;
 import java.util.*;
@@ -408,7 +410,8 @@ public class Grammar {
 
 
         if(errors.size() == 0) {
-            semanticAnalyzer.analyze(errors);
+            semanticAnalyzer.analyze(errors, false);
+            semanticAnalyzer.analyze(errors, true);
         }
 
         Tuple rtnTuple = new Tuple();

@@ -91,6 +91,32 @@ public class SemanticEvaluationTest {
         tuple = run(test);
         assertTrue(tuple.getX().size() == 0);
     }
+    @Test
+    public void testSemanticFive() throws Exception {
+        String test = "" +
+                "  class foo {\n" +
+                "        int var1;\n" +
+                "        int var2;\n" +
+                "    };\n" +
+                "    class bar {\n" +
+                "        int var1;\n" +
+                "        int var2;\n" +
+                "    };\n" +
+                "\n" +
+                "    program {\n" +
+                "        foo bar;\n" +
+                "        bar foo;\n" +
+                "        int c;\n" +
+                "        bar.var1 = 5;\n" +
+                "        foo.var1 = bar.var1;\n" +
+                "        bar.var2 = foo.var1;\n" +
+                "        foo.var2 = bar.var2;\n" +
+                "        c = (foo.var2) + 4;\n" +
+                "    };\n" +
+                "    $ ";
+        tuple = run(test);
+        assertTrue(tuple.getX().size() == 0);
+    }
 
 
 }

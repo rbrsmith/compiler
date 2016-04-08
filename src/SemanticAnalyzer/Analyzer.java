@@ -41,6 +41,7 @@ public class Analyzer {
 
     private SemanticEvaluation evaluation;
 
+    private boolean eval;
 
     /**
      * Default constructor
@@ -50,6 +51,7 @@ public class Analyzer {
         current = null;
         symbolTable = new SymbolTable(null);
         evaluation = new SemanticEvaluation();
+        this.eval = false;
     }
 
 
@@ -115,8 +117,10 @@ public class Analyzer {
      * Main function used to traverse the parse tree
      * @param errors ArrayList of Exceptions from Syntactic phase, this will be added to as we parse
      */
-    public void analyze(ArrayList<Exception> errors) {
+    public void analyze(ArrayList<Exception> errors, boolean eval) {
+        this.eval = eval;
         analyze(root, errors);
+
     }
 
 
@@ -134,8 +138,7 @@ public class Analyzer {
         programDeclaration(current, errors);
         endScope(current, errors);
 
-
-        evaluation.evaluate(current, symbolTable, errors);
+        if(eval) evaluation.evaluate(current, symbolTable, errors);
 
 
         // Apply actions to children
@@ -153,10 +156,13 @@ public class Analyzer {
         if (!current.isLeaf() && current.getValue().equals(CLASS_ACTION)) {
             Node id = current.getLeftSibling().getLeaf();
             ClassDecl c = new ClassDecl(id);
-            if(symbolTable.alreadyExists(c)) errors.add(
-                    new AlreadyDeclaredException(current.getPosition(), c.getName()));
-            Symbol sym = new Symbol(c, symbolTable, id.getPosition());
-            SymbolTable sub = symbolTable.add(sym);
+            if(!eval) {
+                if (symbolTable.alreadyExists(c)) errors.add(
+                        new AlreadyDeclaredException(current.getPosition(), c.getName()));
+                Symbol sym = new Symbol(c, symbolTable, id.getPosition());
+                SymbolTable sub2 = symbolTable.add(sym);
+            }
+            SymbolTable sub = symbolTable.get(c.getName());
             symbolTable = sub;
         }
     }
@@ -172,17 +178,24 @@ public class Analyzer {
             Node type = id.getLeftSibling().getLeaf();
             Node fParams = current.getLeftSibling().getLeftSibling();
             FunctionDecl f = new FunctionDecl(id, type, fParams);
-            if(symbolTable.alreadyExists(f)) errors.add(
-                    new AlreadyDeclaredException(current.getPosition(), f.getName()));
-            if(!f.isPrimitive() && !symbolTable.classExists(f.getType())) {
-                errors.add(new UndeclardException(current.getPosition(), f));
+            Symbol sym;
+            if(!eval) {
+                if (symbolTable.alreadyExists(f)) errors.add(
+                        new AlreadyDeclaredException(current.getPosition(), f.getName()));
+
+                if (!f.isPrimitive() && !symbolTable.classExists(f.getType())) {
+                    errors.add(new UndeclardException(current.getPosition(), f));
+                }
+                sym = new Symbol(f, symbolTable, type.getPosition());
+                SymbolTable sub2 = symbolTable.add(sym);
             }
-            Symbol sym = new Symbol(f, symbolTable, type.getPosition());
-            SymbolTable sub = symbolTable.add(sym);
+            SymbolTable sub = symbolTable.get(f.getName());
             symbolTable = sub;
-            for (VariableDecl v : f.getParams()) {
-                sym = new Symbol(v, symbolTable, type.getPosition());
-                symbolTable.add(sym);
+            if(!eval) {
+                for (VariableDecl v : f.getParams()) {
+                    sym = new Symbol(v, symbolTable, type.getPosition());
+                    symbolTable.add(sym);
+                }
             }
         }
     }
@@ -193,29 +206,31 @@ public class Analyzer {
      * @param errors ArrayList of Exceptions to add to
      */
     private void variableDeclaration(Node current, ArrayList<Exception> errors) {
-        if (!current.isLeaf() && current.getValue().equals(VAR_ACTION_1)) {
-            Node id = current.getLeftSibling().getLeftSibling().getLeaf();
-            Node type = id.getLeftSibling().getLeaf();
-            Node array = current.getLeftSibling();
-            VariableDecl v = new VariableDecl(id, type, array);
-            if(symbolTable.alreadyExists(v)) errors.add(
-                    new AlreadyDeclaredException(current.getPosition(), v.getName()));
-            if(!v.isPrimitive() && !symbolTable.classExists(v.getType())) {
-                errors.add(new UndeclardException(current.getPosition(), v));
+        if(!eval) {
+            if (!current.isLeaf() && current.getValue().equals(VAR_ACTION_1)) {
+                Node id = current.getLeftSibling().getLeftSibling().getLeaf();
+                Node type = id.getLeftSibling().getLeaf();
+                Node array = current.getLeftSibling();
+                VariableDecl v = new VariableDecl(id, type, array);
+                if (symbolTable.alreadyExists(v)) errors.add(
+                        new AlreadyDeclaredException(current.getPosition(), v.getName()));
+                if (!v.isPrimitive() && !symbolTable.classExists(v.getType())) {
+                    errors.add(new UndeclardException(current.getPosition(), v));
+                }
+                Symbol sym = new Symbol(v, symbolTable, type.getPosition());
+                symbolTable.add(sym);
             }
-            Symbol sym = new Symbol(v, symbolTable, type.getPosition());
-            symbolTable.add(sym);
-        }
 
-        if (!current.isLeaf() && current.getValue().equals(VAR_ACTION_2)) {
-            Node id = current.getLeftSibling().getLeaf();
-            Node type = id.getLeftSibling().getLeaf();
-            Node array = null;
-            VariableDecl v = new VariableDecl(id, type, array);
-            if(symbolTable.alreadyExists(v)) errors.add(
-                    new AlreadyDeclaredException(current.getPosition(), v.getName()));
-            Symbol sym = new Symbol(v, symbolTable, type.getPosition());
-            symbolTable.add(sym);
+            if (!current.isLeaf() && current.getValue().equals(VAR_ACTION_2)) {
+                Node id = current.getLeftSibling().getLeaf();
+                Node type = id.getLeftSibling().getLeaf();
+                Node array = null;
+                VariableDecl v = new VariableDecl(id, type, array);
+                if (symbolTable.alreadyExists(v)) errors.add(
+                        new AlreadyDeclaredException(current.getPosition(), v.getName()));
+                Symbol sym = new Symbol(v, symbolTable, type.getPosition());
+                symbolTable.add(sym);
+            }
         }
     }
 
@@ -229,10 +244,13 @@ public class Analyzer {
         if (!current.isLeaf() && current.getValue().equals(PROG_ACTION)) {
             Node program = current.getLeftSibling().getLeaf();
             ProgramDecl p = new ProgramDecl(program);
-            if(symbolTable.alreadyExists(p)) errors.add(
-                    new AlreadyDeclaredException(current.getPosition(), p.getName()));
-            Symbol sym = new Symbol(p, symbolTable, program.getPosition());
-            SymbolTable sub = symbolTable.add(sym);
+            if(!eval) {
+                if (symbolTable.alreadyExists(p)) errors.add(
+                        new AlreadyDeclaredException(current.getPosition(), p.getName()));
+                Symbol sym = new Symbol(p, symbolTable, program.getPosition());
+                SymbolTable sub2 = symbolTable.add(sym);
+            }
+            SymbolTable sub = symbolTable.get(p.getName());
             symbolTable = sub;
         }
 
@@ -254,4 +272,5 @@ public class Analyzer {
     public String toString() {
         return symbolTable.toString();
     }
+
 }

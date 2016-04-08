@@ -114,7 +114,7 @@ public class AnalyzerTest {
                 "   id id;" +
                 "};" +
                 "program {" +
-                "   int id; int b;" +
+                "   int b;" +
                 "   b = id(); " +
                 "};" +
                 "int id(){};" +
@@ -122,7 +122,7 @@ public class AnalyzerTest {
 
                 "$ ";
         tuple = run(test);
-        assertTrue(tuple.getX().size() == 1);
+        assertTrue(tuple.getX().size() == 2);
         assertTrue(tuple.getX().get(0) instanceof AlreadyDeclaredException);
     }
 
@@ -207,8 +207,7 @@ public class AnalyzerTest {
                     "   foo.b[10] = 5;" +
                     "}; $ ";
             tuple = run(test);
-            assertTrue(tuple.getX().size() == 1);
-            assertTrue(tuple.getX().get(0) instanceof UndeclardException);
+            assertTrue(tuple.getX().size() == 0);
         }
     @Test
     public void testSemanticFive() throws Exception {
@@ -219,7 +218,7 @@ public class AnalyzerTest {
                 "};" +
                 "program {" +
                 "}; " +
-                "float a() {" +
+                "float c() {" +
                 "   a b;" +
                 "   b.b[5] = 4;" +
                 "   b.c = 5;" +
@@ -296,8 +295,7 @@ public class AnalyzerTest {
                 "$ ";
 
         tuple = run(test);
-        assertTrue(tuple.getX().size() == 1);
-        assertTrue(tuple.getX().get(0) instanceof UndeclardException);
+        assertTrue(tuple.getX().size() == 0);
 
     }
 

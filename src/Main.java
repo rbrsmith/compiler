@@ -51,6 +51,7 @@ public class Main {
                 PrintWriter errorWriter = new PrintWriter(errorOut, "UTF-8");
                 for(Exception e : result.getX()) {
                     System.out.println(e);
+                    e.printStackTrace();
                     errorWriter.write(e + "\n");
                 }
                 errorWriter.close();

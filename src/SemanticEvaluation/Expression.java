@@ -9,9 +9,11 @@ import java.util.ArrayList;
 public class Expression {
 
     private SymbolTable symbolTable;
+    private ArrayList<VariableReference> referencedVariables;
 
     public Expression(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
+        this.referencedVariables = new ArrayList<>();
     }
 
     public String evaluate(Node expr) throws Exception {
@@ -47,15 +49,48 @@ public class Expression {
             case "id":
                 Node id = first;
                 VariableReference vr = new VariableReference(id, symbolTable);
+                referencedVariables.add(vr);
                 Symbol s = symbolTable.validate(vr);
                 if(s == null) throw new UndeclardException(id.getPosition(), vr);
-                VariableDecl tmp = (VariableDecl) s.getDecl();
-                if(!tmp.isInitialized()) throw new UninitializedException(id.getPosition(), tmp);
+                if(s.getDecl() instanceof VariableDecl) {
+                    VariableDecl tmp = (VariableDecl) s.getDecl();
+                    if (!tmp.isInitialized()) throw new UninitializedException(id.getPosition(), tmp);
+                    return tmp.getType();
+                } else {
+                    if(s.getDecl() instanceof ClassDecl) {
+                        throw new AlreadyDeclaredException(factor.getPosition(), s.getDecl().getName());
+                    }
+                    FunctionDecl method = (FunctionDecl) s.getDecl();
+                    VariableReference caller = vr;
+                    if(vr.getAttribute() != null){
+                        caller = vr.getAttribute();
+                    }
+                    if(method.getParams().size() != caller.getParams().size()) throw new InvalidFunctionParamsException(factor.getPosition());
 
-                return tmp.getType();
+                    for(int i=0;i<method.getParams().size(); i++) {
+                        VariableReference callerParam = caller.getParams().get(i);
+                        if(callerParam.getName() == null) {
+                            // Not an id, but a number
+                            continue;
+                        }
+                        Symbol callerSymbol = symbolTable.validate(callerParam);
+                        if(callerSymbol == null) throw new UndeclardException(factor.getPosition(), callerParam);
+                        VariableDecl callerParamDecl = (VariableDecl) callerSymbol.getDecl();
+                        if(callerParamDecl.getType() != method.getParams().get(i).getType()) {
+                            throw new InvalidTypesException(factor.getPosition(), callerParamDecl.getType(),
+                                    method.getParams().get(i).getType(), callerParamDecl.getName());
+                        }
+                    }
+
+
+                    return method.getType();
+                }
             case "num":
                 Node num = first;
                 String val  =num.getFirstLeafType();
+
+                VariableReference vr2 = new VariableReference(symbolTable);
+                referencedVariables.add(vr2);
                 if(val.equals("FLOAT")) return "float";
                 if(val.equals("INTEGER")) return "int";
             case "ORB":
@@ -131,7 +166,10 @@ public class Expression {
     private String relOp(Node relOp) {
         // relOp is an operator
         return "";
+    }
 
+    public ArrayList<VariableReference> getReferencedVariables() {
+        return referencedVariables;
     }
 
 

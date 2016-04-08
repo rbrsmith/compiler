@@ -1,6 +1,7 @@
 package SyntacticAnalyzer;
 
 import LexicalAnalyzer.DFA.HelperTest;
+import SemanticAnalyzer.UndeclardException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -115,7 +116,7 @@ public class GrammarTest {
     public void testGrammarFive() throws Exception {
         String test = "" +
                 "   class a {" +
-                "       int test2;" +
+                "       float test2;" +
                 "   };" +
                 "   PROGRAM { " +
                 "       a test1; " +
@@ -201,7 +202,10 @@ public class GrammarTest {
 
     @Test
     public void testGrammar10() throws Exception {
-        String test = "class Utility{}; program {" +
+        String test = "class Utility{" +
+                "           int findMax(int a) {};" +
+                "           int findMIn(int b) {};" +
+                "}; program {" +
                 "       int sample[100];" +
                 "       int idx;" +
                 "       int minValue;" +
@@ -209,14 +213,15 @@ public class GrammarTest {
                 "       Utility utility;" +
                 "       Utility arrayUtility[2][3][6][7];" +
                 "       for(int t = 0; t<=100; t = t+1) {" +
+                "           sample[t] = 1;" +
                 "           get(sample[t]);" +
                 "           sample[t] = (sample[t] * randomize());" +
                 "       };"+
-                   "    minValue =  utility.findMax(sample);"+
-                   "    maxValue = utility.findMIn(sample);"+
+                   "    minValue =  utility.findMax(sample[0]);"+
+                   "    maxValue = utility.findMIn(sample[0]);"+
                 "       put(maxValue);" +
                 "       put(minValue);"+
-                "}; $";
+                "}; int randomize() {}; $ ";
 
         tuple = run(test);
         assertTrue(tuple.getX().size() == 0);
@@ -227,7 +232,7 @@ public class GrammarTest {
         String test = "program{};" +
                 "       float randomize() {" +
                 "           float value;" +
-                "           value = 100 * (2+3.0/7.006);" +
+                "           value = 100.0 * (2.0+3.0/7.006);" +
                 "           value = 1.05 + ((2.04*2.47) - 3.0) + 7.006;" +
                 "       };" +
                 "$ ";
@@ -340,7 +345,7 @@ public class GrammarTest {
                 "program{};\n" +
                 "$ \n";
         tuple = run(test);
-        assertTrue(tuple.getX().size() == 0);
+        assertTrue(tuple.getX().size() == 2);
     }
 
     @Test
@@ -365,8 +370,7 @@ public class GrammarTest {
                 "int i11d(){}; $ ";
 
         tuple = run(test);
-        assertTrue(tuple.getX().size() == 1);
-        assertFalse(tuple.getX().get(0) instanceof SyntacticException);
+        assertTrue(tuple.getX().size() == 2);
     }
 
     @Test

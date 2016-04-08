@@ -121,17 +121,8 @@ public class SymbolTable {
             // Match array size
             if (s.getDecl() instanceof VariableDecl) {
                 VariableDecl tmp = (VariableDecl) s.getDecl();
-                if(tmp.getSize().size() < v.getSize().size()) return null;
-                if (tmp.getSize().size() >= v.getSize().size()) {
-                    for (int i = 0; i < v.getSize().size(); i++) {
-                        if (tmp.getSize().get(i) < v.getSize().get(i)) {
-                            return null;
-                        }
-                    }
-                }
-                if(tmp.getSize().size() > 0 && v.getSize().size() == 0) {
-                    return null;
-                }
+                if(tmp.getSize().size() < v.getSize()) return null;
+                if(tmp.getSize().size() > 0 && v.getSize() == 0) return null;
             }
         }
 
@@ -196,6 +187,8 @@ public class SymbolTable {
                 return null;
             }
         }
+
+
 
         return s;
     }
@@ -274,5 +267,15 @@ public class SymbolTable {
         }
         return false;
     }
+
+    public SymbolTable get(String name) {
+        for(Symbol s: symbols) {
+            if(s.getDecl().getName().equals(name)){
+                return s.getSubTable();
+            }
+        }
+        return null;
+    }
+
 
 }

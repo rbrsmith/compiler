@@ -18,6 +18,8 @@ public class VariableReference {
     private VariableReference attribute;
     private ArrayList<VariableReference> subVariables;
 
+    private ArrayList<VariableReference> params;
+
     private SymbolTable symbolTable;
 
     public VariableReference(Node id, SymbolTable symbolTable) throws Exception {
@@ -25,6 +27,7 @@ public class VariableReference {
         this.size = 0;
         this.attribute = null;
         this.subVariables = new ArrayList<>();
+        this.params = new ArrayList<>();
         this.symbolTable = symbolTable;
         Node F1 = id.getRightSibling();
         Node F1First = F1.getFirstChild();
@@ -32,8 +35,7 @@ public class VariableReference {
             indiceR(F1First);
             F2(F1First.getRightSibling());
         } else if(F1First.getValue().equals("F3")) {
-            // TODO
-            //F3(F1First);
+            F3(F1First);
         }
 //        factor -> id F1
 //        F1 -> indiceR F2
@@ -44,7 +46,20 @@ public class VariableReference {
 
     }
 
-    private void indiceR(Node indiceR) throws Exception {
+
+
+    public VariableReference(SymbolTable symbolTable) {
+        this.name = null;
+        this.size = 0;
+        this.attribute = null;
+        this.subVariables = new ArrayList<>();
+        this.params = new ArrayList<>();
+        this.symbolTable = symbolTable;
+    }
+
+
+
+    public void indiceR(Node indiceR) throws Exception {
 //
 //        indiceR -> indice indiceR
 //        indiceR -> EPSILON
@@ -159,6 +174,48 @@ public class VariableReference {
 
     }
 
+    private void F3(Node F3) throws Exception {
+        //ORB aParams CRB
+        Node aParams = F3.getFirstChild().getRightSibling();
+        aParams(aParams);
+
+    }
+
+    private void aParams(Node aParams) throws Exception {
+//        aParams -> expr aParamsTailR
+//        aParams -> EPSILON
+        if(aParams.getFirstLeafType().equals(Grammar.EPSILON)) return;
+        Node expr = aParams.getFirstChild();
+        Node aParamsTailR = expr.getRightSibling();
+        expr(expr);
+        aParamsTailR(aParamsTailR);
+    }
+
+    private void expr(Node expr) throws Exception {
+        Expression expression = new Expression(symbolTable);
+        // Makes sure verything initialized fine and dandy
+        expression.evaluate(expr);
+        params.addAll(expression.getReferencedVariables());
+    }
+
+    private void aParamsTailR(Node aParamsTailR) throws Exception {
+//        aParamsTailR -> aParamsTail aParamsTailR
+//        aParamsTailR -> EPSILON
+        if(aParamsTailR.getFirstLeafType().equals(Grammar.EPSILON)) return;
+        Node aParamsTail = aParamsTailR.getFirstChild();
+        Node aParamsTailR2 = aParamsTail.getRightSibling();
+        aParamsTail(aParamsTail);
+        aParamsTailR(aParamsTailR2);
+    }
+
+    private void aParamsTail(Node aParamsTail) throws Exception {
+        //COMMA expr
+        Node expr = aParamsTail.getFirstChild().getRightSibling();
+        Expression expression = new Expression(symbolTable);
+        expression.evaluate(expr);
+        params.addAll(expression.getReferencedVariables());
+    }
+
 
     public String toString() {
         String rtn = "";
@@ -183,5 +240,9 @@ public class VariableReference {
 
     public ArrayList<VariableReference> getSubVariables() {
         return subVariables;
+    }
+
+    public ArrayList<VariableReference> getParams() {
+        return params;
     }
 }
