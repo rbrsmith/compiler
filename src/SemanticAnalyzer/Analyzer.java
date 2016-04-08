@@ -1,6 +1,7 @@
 package SemanticAnalyzer;
 
 
+import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.Position;
 import SemanticEvaluation.SemanticEvaluation;
 import SyntacticAnalyzer.Grammar;
@@ -43,6 +44,8 @@ public class Analyzer {
 
     private boolean eval;
 
+    private CodeGenerator code;
+
     /**
      * Default constructor
      */
@@ -52,6 +55,7 @@ public class Analyzer {
         symbolTable = new SymbolTable(null);
         evaluation = new SemanticEvaluation();
         this.eval = false;
+        this.code = null;
     }
 
 
@@ -117,8 +121,9 @@ public class Analyzer {
      * Main function used to traverse the parse tree
      * @param errors ArrayList of Exceptions from Syntactic phase, this will be added to as we parse
      */
-    public void analyze(ArrayList<Exception> errors, boolean eval) {
+    public void analyze(ArrayList<Exception> errors, CodeGenerator code, boolean eval) {
         this.eval = eval;
+        this.code = code;
         analyze(root, errors);
 
     }
@@ -218,6 +223,7 @@ public class Analyzer {
                     errors.add(new UndeclardException(current.getPosition(), v));
                 }
 
+
                 if(!v.isPrimitive()) {
                     // ADD attribute possibilities
                     SymbolTable classTable = symbolTable.getClassSymbolTable(v.getType());
@@ -235,6 +241,7 @@ public class Analyzer {
 
                 Symbol sym = new Symbol(v, symbolTable, type.getPosition());
                 symbolTable.add(sym);
+                sym.write(code);
             }
 
             if (!current.isLeaf() && current.getValue().equals(VAR_ACTION_2)) {

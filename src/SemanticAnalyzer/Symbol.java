@@ -1,5 +1,6 @@
 package SemanticAnalyzer;
 
+import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.Position;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ public class Symbol {
 
     private Declaration decl;
     private SymbolTable table;
+    private String memroyAddress;
 
 
     /**
@@ -23,6 +25,7 @@ public class Symbol {
     public Symbol(Declaration decl, SymbolTable parent, Position pos) {
        if(!(decl instanceof VariableDecl)) this.table = new SymbolTable(parent, decl);
        this.decl = decl;
+       this.memroyAddress = parent.getName() + "-"+decl.getName();
     }
 
     public Declaration getDecl() {
@@ -43,5 +46,9 @@ public class Symbol {
             VariableDecl tmp = (VariableDecl) decl;
             tmp.initialize();
         }
+    }
+
+    public void write(CodeGenerator code) {
+        code.write(memroyAddress, decl);
     }
 }

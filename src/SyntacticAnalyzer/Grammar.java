@@ -1,5 +1,6 @@
 package SyntacticAnalyzer;
 
+import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.*;
 import SemanticAnalyzer.Analyzer;
 import SemanticEvaluation.Expression;
@@ -410,8 +411,9 @@ public class Grammar {
 
 
         if(errors.size() == 0) {
-            semanticAnalyzer.analyze(errors, false);
-            semanticAnalyzer.analyze(errors, true);
+            CodeGenerator code = new CodeGenerator();
+            semanticAnalyzer.analyze(errors, code, false);
+            semanticAnalyzer.analyze(errors, code, true);
         }
 
         Tuple rtnTuple = new Tuple();

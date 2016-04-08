@@ -1,5 +1,6 @@
 package SemanticAnalyzer;
 
+import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.Reserved;
 import SemanticEvaluation.VariableReference;
 
@@ -138,5 +139,7 @@ public class VariableDecl implements Declaration {
             this.attributes.add(new VariableDecl(vd, false));
         }
     }
+
+
 
 }

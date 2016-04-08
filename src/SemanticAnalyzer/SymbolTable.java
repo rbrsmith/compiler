@@ -297,4 +297,8 @@ public class SymbolTable {
         }
         return res;
     }
+
+    public String getName() {
+        return name;
+    }
 }

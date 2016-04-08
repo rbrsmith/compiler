@@ -1,5 +1,6 @@
 package SemanticAnalyzer;
 
+import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.Reserved;
 
 import java.util.ArrayList;
@@ -79,5 +80,7 @@ public class FunctionDecl implements Declaration {
     public String getType() {
         return type;
     }
+
+
 
 }

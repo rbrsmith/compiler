@@ -1,5 +1,7 @@
 package SemanticAnalyzer;
 
+import CodeGeneration.CodeGenerator;
+
 public class ProgramDecl implements Declaration {
 
     private String name;

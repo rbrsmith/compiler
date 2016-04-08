@@ -1,6 +1,8 @@
 package SemanticAnalyzer;
 
 
+import CodeGeneration.CodeGenerator;
+
 /**
  * Wrapper for a class declaration
  */
@@ -20,5 +22,7 @@ public class ClassDecl implements Declaration {
     public String toString() {
         return "CLASS\t\tName: "+name;
     }
+
+
 
 }
