@@ -1,3 +1,5 @@
+import CodeGeneration.CodeGenerator;
+import CodeGeneration.CodeGeneratorTest;
 import LexicalAnalyzer.DFA.*;
 import LexicalAnalyzer.DFA.NodeTest;
 import SemanticAnalyzer.*;
@@ -33,7 +35,8 @@ import org.junit.runners.Suite;
         ProgramDeclTest.class,
         SymbolTableTest.class,
         VariableDeclTest.class,
-        SemanticEvaluationTest.class
+        SemanticEvaluationTest.class,
+        CodeGeneratorTest.class
 })
 
 public class TestSuite {

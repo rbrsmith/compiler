@@ -1,5 +1,6 @@
 package SemanticEvaluation;
 
+import CodeGeneration.CodeGenerator;
 import SemanticAnalyzer.*;
 
 import java.util.ArrayList;
@@ -16,19 +17,17 @@ public class SemanticEvaluation {
     public final static String ASSIG_ACTION_1 = "SEMANTIC-10";
     public final static String ASSIG_ACTION_2 = "SEMANTIC-11";
 
-
+    private CodeGenerator code;
 
 
 
 
     public void evaluate(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
-
+        this.code = CodeGenerator.getInstance();
         variableGetReference(current, symbolTable, errors);
         variableAssignment(current, symbolTable, errors);
         expressionUse(current, symbolTable, errors);
         returnUse(current, symbolTable, errors);
-
-
     }
 
 
@@ -72,6 +71,8 @@ public class SemanticEvaluation {
             if(va == null) return;
 
             Symbol symbol = symbolTable.validate(va);
+
+
              // Check if this variable as been declared
             if(symbol == null) throw new UndeclardException(current.getPosition(), va);
             else {
@@ -82,17 +83,17 @@ public class SemanticEvaluation {
                     LHSVar = LHSVar.getAttribute(va.getAttribute());
                 }
 
-                // FIX initialization
-            //    symbol.initialize();
                LHSVar.initialize();
 
                 // Now make sure return types match otherwise throw an exception
                 Node expr = current.getRightSibling();
                 String exprType = new Expression(symbolTable).evaluate(expr);
-
+                code.write(symbol.getAddress(), va);
                 if (!LHSVar.getType().equals(exprType)) {
                     throw new InvalidTypesException(expr.getPosition(), exprType, LHSVar.getType(), symbol.getDecl().getName());
                 }
+
+
             }
 
         } catch(Exception e){
@@ -105,6 +106,12 @@ public class SemanticEvaluation {
         if(!current.isLeaf() && current.getValue().equals(EXPR_REF)) {
             try {
                 new Expression(symbolTable).evaluate(current.getLeftSibling());
+                Node action = current.getLeftSibling().getLeftSibling().getLeftSibling();
+                if(action.getValue().equals("put")) {
+                    code.writePut();
+                }
+
+
             } catch(Exception e) {
                 errors.add(e);
             }

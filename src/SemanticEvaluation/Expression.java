@@ -1,6 +1,8 @@
 package SemanticEvaluation;
 
+import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.Reserved;
+import LexicalAnalyzer.DFA.Token;
 import SemanticAnalyzer.*;
 import SyntacticAnalyzer.Grammar;
 
@@ -10,11 +12,14 @@ public class Expression {
 
     private SymbolTable symbolTable;
     private ArrayList<VariableReference> referencedVariables;
+    private CodeGenerator code;
 
     public Expression(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
         this.referencedVariables = new ArrayList<>();
+        this.code = CodeGenerator.getInstance();
     }
+
 
     public String evaluate(Node expr) throws Exception {
         String ar = arithExpr(expr.getFirstChild());
@@ -70,6 +75,7 @@ public class Expression {
                         }
                     } else {
                        if (!tmp.isInitialized()) throw new UninitializedException(id.getPosition(), tmp);
+                        code.loadVar(s.getAddress());
                        return tmp.getType();
                     }
                 } else {
@@ -109,7 +115,10 @@ public class Expression {
                 VariableReference vr2 = new VariableReference(symbolTable);
                 referencedVariables.add(vr2);
                 if(val.equals("FLOAT")) return "float";
-                if(val.equals("INTEGER")) return "int";
+                if(val.equals("INTEGER")) {
+                    code.writeNum(num.getFirstLeafValue());
+                    return "int";
+                }
             case "ORB":
                 Node orb = first;
                 return arithExpr(first.getRightSibling());
@@ -136,6 +145,11 @@ public class Expression {
             String f = factor(factor);
             String tr = termRight(termRight2);
 
+            if(multOp.getFirstLeafType().equals(Token.MULTIPLICATION.toString())) {
+                code.writeMultiply();
+            } else if(multOp.getFirstLeafType().equals(Token.DIVISION.toString())) {
+                code.writeDivide();
+            }
             if(tr.equals(Grammar.EPSILON)) return f;
             if(!tr.equals(f)) throw new BadOpException(termRight.getPosition(), f, tr, "multiply");
             else return f;
@@ -159,6 +173,13 @@ public class Expression {
             addOp(addOp);
             String t = term(term);
             String arith = arithExprRight(artihExprRight2);
+
+
+            if(addOp.getFirstLeafType().equals(Token.ADDITION.toString())) {
+                code.writeAdd();
+            } else if(addOp.getFirstLeafType().equals(Token.SUBTRACTION.toString())) {
+                code.writeSub();
+            }
 
             if(arith.equals(Grammar.EPSILON)) return t;
             if(!t.equals(arith)) throw new BadOpException(arithExprRight.getPosition(), t, arith, "add");

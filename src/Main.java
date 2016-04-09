@@ -1,3 +1,4 @@
+import CodeGeneration.CodeGenerator;
 import SyntacticAnalyzer.AmbiguousGrammarException;
 import SyntacticAnalyzer.Grammar;
 import SyntacticAnalyzer.Tuple;
@@ -25,6 +26,7 @@ public class Main {
             String derivationOut = base + File.separator + "derivation.txt";
             String errorOut = base + File.separator + "errors.txt";
             String symbolsOut = base + File.separator + "symbols.txt";
+            String moonOut = base + File.separator + "moon.m";
 
 
             try {
@@ -60,6 +62,9 @@ public class Main {
                 PrintWriter symbolWriter = new PrintWriter(symbolsOut, "UTF-8");
                 symbolWriter.write(grammar.getSemanticAnalyzer().toString());
                 symbolWriter.close();
+
+                CodeGenerator code = CodeGenerator.getInstance();
+                code.save(moonOut);
 
 
                 if(result.getX().size() == 0) {

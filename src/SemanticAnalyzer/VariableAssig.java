@@ -100,6 +100,8 @@ public class VariableAssig {
         ArrayList<Tuple> tokens = indiceR.getTokens();
         for(Tuple token: tokens) {
             if(token.getX().equals(Token.DOT.toString())) break;
+            if(token.getX().equals(Token.ASSIGNMENT.toString())) break;
+            if(token.getX().equals(Token.SEMICOLON.toString())) break;
             if(token.getX().equals(Token.CSB.toString())) {
                 va.arraySize += 1;
             }

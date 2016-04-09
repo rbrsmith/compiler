@@ -162,15 +162,20 @@ public class Node {
         ArrayList<Tuple> res = new ArrayList<>();
         Node current = this;
         Node next = current.getRightSibling();
-//        while(current.getNodeID() != next.getNodeID()) {
         while(current != null) {
             Node currentLeaf = current.getLeaf();
+            if(current.getValue().contains(Analyzer.SEMANTIC)) {
+                current = current.getRightSibling();
+                continue;
+            }
             if(currentLeaf == null) {
                 break;
             }
             Tuple tkn = currentLeaf.getLeafValue();
 
             if(!tkn.getX().equals(Grammar.EPSILON)) res.add(tkn);
+
+
             current = currentLeaf.getRightSibling();
         }
         return res;

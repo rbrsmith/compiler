@@ -1,5 +1,6 @@
 package SemanticEvaluation;
 
+import CodeGeneration.CodeGenerator;
 import SemanticAnalyzer.*;
 import SyntacticAnalyzer.Grammar;
 
@@ -24,6 +25,8 @@ public class VariableReference {
 
     private boolean inParam;
 
+    private CodeGenerator code;
+
     public VariableReference(Node id, SymbolTable symbolTable) throws Exception {
         this.name = id.getFirstLeafValue();
         this.size = 0;
@@ -32,6 +35,7 @@ public class VariableReference {
         this.params = new ArrayList<>();
         this.symbolTable = symbolTable;
         this.inParam = false;
+        this.code = CodeGenerator.getInstance();
         Node F1 = id.getRightSibling();
         Node F1First = F1.getFirstChild();
         if(F1First.getValue().equals("indiceR")) {
@@ -58,6 +62,7 @@ public class VariableReference {
         this.subVariables = new ArrayList<>();
         this.params = new ArrayList<>();
         this.symbolTable = symbolTable;
+        this.code = CodeGenerator.getInstance();
     }
 
 
@@ -124,6 +129,13 @@ public class VariableReference {
                     }
                 }
 
+                break;
+            case "num":
+                Node num = first;
+                String val = first.getFirstLeafType();
+                if(val.equals("INTEGER")) {
+                    code.writeNum(num.getFirstLeafValue());
+                }
                 break;
             case "ORB":
                 arithExpr(first.getRightSibling());

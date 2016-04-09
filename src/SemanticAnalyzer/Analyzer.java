@@ -55,7 +55,7 @@ public class Analyzer {
         symbolTable = new SymbolTable(null);
         evaluation = new SemanticEvaluation();
         this.eval = false;
-        this.code = null;
+        this.code = CodeGenerator.getInstance();
     }
 
 
@@ -121,9 +121,8 @@ public class Analyzer {
      * Main function used to traverse the parse tree
      * @param errors ArrayList of Exceptions from Syntactic phase, this will be added to as we parse
      */
-    public void analyze(ArrayList<Exception> errors, CodeGenerator code, boolean eval) {
+    public void analyze(ArrayList<Exception> errors, boolean eval) {
         this.eval = eval;
-        this.code = code;
         analyze(root, errors);
 
     }
@@ -241,7 +240,14 @@ public class Analyzer {
 
                 Symbol sym = new Symbol(v, symbolTable, type.getPosition());
                 symbolTable.add(sym);
-                sym.write(code);
+
+                if(v.isPrimitive()) {
+                    if(v.getSize().size() == 0) {
+                        code.writeDefine(sym.getAddress(), 0);
+                    } else {
+                        code.writeRes(sym.getAddress(), array);
+                    }
+                }
             }
 
             if (!current.isLeaf() && current.getValue().equals(VAR_ACTION_2)) {
@@ -312,4 +318,7 @@ public class Analyzer {
         return symbolTable.toString();
     }
 
+    public CodeGenerator getCode() {
+        return code;
+    }
 }

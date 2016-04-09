@@ -411,10 +411,10 @@ public class Grammar {
 
 
         if(errors.size() == 0) {
-            CodeGenerator code = new CodeGenerator();
-            semanticAnalyzer.analyze(errors, code, false);
-            semanticAnalyzer.analyze(errors, code, true);
+            semanticAnalyzer.analyze(errors, false);
+            semanticAnalyzer.analyze(errors, true);
         }
+
 
         Tuple rtnTuple = new Tuple();
         rtnTuple.setX(errors);

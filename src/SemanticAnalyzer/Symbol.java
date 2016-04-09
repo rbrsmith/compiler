@@ -25,7 +25,7 @@ public class Symbol {
     public Symbol(Declaration decl, SymbolTable parent, Position pos) {
        if(!(decl instanceof VariableDecl)) this.table = new SymbolTable(parent, decl);
        this.decl = decl;
-       this.memroyAddress = parent.getName() + "-"+decl.getName();
+       this.memroyAddress = parent.getName() + decl.getName();
     }
 
     public Declaration getDecl() {
@@ -48,7 +48,8 @@ public class Symbol {
         }
     }
 
-    public void write(CodeGenerator code) {
-        code.write(memroyAddress, decl);
+
+    public String getAddress() {
+        return memroyAddress;
     }
 }
