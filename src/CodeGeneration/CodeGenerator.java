@@ -31,6 +31,9 @@ public class CodeGenerator {
     private ArrayList<String> varStack;
     private ArrayList<String> tmpVars;
     private ArrayList<String> arrays;
+    private ArrayList<Integer> ifNums;
+    private int ifNumCount;
+
     private int randomVar;
     private final int intSize = 4;
 
@@ -41,6 +44,8 @@ public class CodeGenerator {
         varStack = new ArrayList<>();
         tmpVars = new ArrayList<>();
         arrays = new ArrayList<>();
+        ifNums = new ArrayList<Integer>() {{ add(1); }};
+        ifNumCount = 1;
         randomVar = 0;
     }
 
@@ -106,60 +111,40 @@ public class CodeGenerator {
 
     public void writeAdd() {
         comment("Addition");
-        String var2 = pop();
-        if(var2 == null) return;
-        String reg2 = loadWord(var2);
-
-        String var1 = pop();
-        if(var1 == null) return;
-        String reg1 = loadWord(var1);
-
-        String reg3 = getRegister();
-        String e = "add\t"+reg3 + ", " +reg1+", "+reg2;
-        execution.add(e);
-        writeTemprorary(reg3);
-        freeRegister(reg1);freeRegister(reg2);freeRegister(reg3);
-
+        binaryOp("add");
     }
 
 
     public void writeSub() {
         comment("Subtraction");
-        String var2 = pop();
-        if(var2 == null) return;
-        String reg2 = loadWord(var2);
-
-        String var1 = pop();
-        if(var1 == null) return;
-        String reg1 = loadWord(var1);
-
-        String reg3 = getRegister();
-        String e = "sub\t"+reg3+", "+reg1+", " +reg2;
-        execution.add(e);
-        writeTemprorary(reg3);
-        freeRegister(reg1);freeRegister(reg2);freeRegister(reg3);
+        binaryOp("sub");
     }
 
     public void writeMultiply() {
         comment("Multiply");
-        String var2 = pop();
-        if(var2 == null) return;
-        String reg2 = loadWord(var2);
-
-        String var1 = pop();
-        if(var1 == null) return;
-        String reg1 = loadWord(var1);
-
-        String reg3 = getRegister();
-        String e = "mul\t"+reg3 +", " + reg1 + ", " + reg2;
-        execution.add(e);
-        writeTemprorary(reg3);
-        freeRegister(reg1);freeRegister(reg2);freeRegister(reg3);
+        binaryOp("mul");
     }
 
 
     public void writeDivide() {
         comment("Divide");
+        binaryOp("div");
+    }
+
+
+    public void writeEquals() {
+        comment("Equals");
+        binaryOp("ceq");
+    }
+
+
+    public void writeGreaterThan() {
+        comment("Greater Than");
+        binaryOp("cgt");
+
+    }
+
+    private void binaryOp(String op) {
         String var2 = pop();
         if(var2 == null) return;
         String reg2 = loadWord(var2);
@@ -169,12 +154,14 @@ public class CodeGenerator {
         String reg1 = loadWord(var1);
 
         String reg3 = getRegister();
-        String e = "div\t"+reg3 +", " + reg1 + ", " + reg2;
-        execution.add(e);
+        execution.add(op +"\t"+reg3+", " + reg1 +", " + reg2);
         writeTemprorary(reg3);
-        freeRegister(reg1);freeRegister(reg2);freeRegister(reg3);
+        freeRegister(reg1);
+        freeRegister(reg2);
+        freeRegister(reg3);
 
     }
+
 
     public void writePut() {
         if(varStack.size() == 0) return;
@@ -182,10 +169,10 @@ public class CodeGenerator {
 
         String tmpVar = pop();
         String offsetReg;
-        if(varStack.size() == 0){
-            offsetReg = r0;
-        } else {
+        if(arrays.contains(tmpVar)) {
             offsetReg = getPositionReg();
+        } else {
+            offsetReg = r0;
         }
         String reg = loadWord(tmpVar, offsetReg);
         String tmpReg = getRegister();
@@ -306,6 +293,13 @@ public class CodeGenerator {
         varStack.remove(varStack.size() - 1);
         return var;
     }
+
+    private Integer getIfNum(boolean pop) {
+        Integer num = ifNums.get(ifNums.size() - 1);
+        if(pop) ifNums.remove(ifNums.size() - 1);
+        return num;
+    }
+
     private void freeRegister(String reg) {
         registers.put(reg, true);
     }
@@ -341,5 +335,51 @@ public class CodeGenerator {
     }
     private void commentRES(String s) {
         dataRes.add("\n%\t" + s);
+    }
+
+    public void writeIf() {
+        comment("If Statement");
+
+        ifNumCount += 1;
+        ifNums.add(ifNumCount);
+
+        String tmpVar = pop();
+        if(tmpVar == null) return;
+        String relOpReg = loadWord(tmpVar);
+        String e = "bz\t" + relOpReg + ", else" + getIfNum(false);
+        execution.add(e);
+        freeRegister(relOpReg);
+    }
+
+    public void writeElse() {
+        comment("Else Statement");
+        execution.add("j\tendif"+getIfNum(false));
+        execution.add("else"+getIfNum(false));
+    }
+
+    public void writeEndIf() {
+        comment("End If");
+        execution.add("endif"+getIfNum(true));
+
+    }
+
+    public void writeGreaterThanEquals() {
+        comment("Greater Than Equals");
+        binaryOp("cge");
+    }
+
+    public void writeLessThanEquals() {
+        comment("Less Than Equals");
+        binaryOp("cle");
+    }
+
+    public void writeLessThan() {
+        comment("Less Than");
+        binaryOp("clt");
+    }
+
+    public void writeNotEquals() {
+        comment("Not Equals");
+        binaryOp("cne");
     }
 }

@@ -196,13 +196,32 @@ public class Expression {
 
     private String E1(Node E1) throws Exception {
         if(E1.getFirstLeafType().equals(Grammar.EPSILON)) return Grammar.EPSILON;
-        relOp(E1.getFirstChild());
-        return arithExpr(E1.getFirstChild().getRightSibling());
+        Node relOp = E1.getFirstChild();
+        relOp(relOp);
+        String ae = arithExpr(E1.getFirstChild().getRightSibling());
+
+        if(relOp.getFirstLeafType().equals(Token.EQUALS.toString())) {
+            code.writeEquals();
+        } else if(relOp.getFirstLeafType().equals(Token.GREATER_THAN.toString())) {
+            code.writeGreaterThan();
+        } else if(relOp.getFirstLeafType().equals(Token.GREATER_THAN_EQUALS.toString())) {
+            code.writeGreaterThanEquals();
+        } else if(relOp.getFirstLeafType().equals(Token.LESS_THAN_EQUALS.toString())) {
+            code.writeLessThanEquals();
+        } else if(relOp.getFirstLeafType().equals(Token.LESS_THAN.toString())) {
+            code.writeLessThan();
+        } else if(relOp.getFirstLeafType().equals(Token.NOT_EQUALS.toString())) {
+            code.writeNotEquals();
+        }
+
+
+        return ae;
 
     }
 
     private String relOp(Node relOp) {
-        // relOp is an operator
+
+
         return "";
     }
 

@@ -54,7 +54,7 @@ statement -> S5
 statement -> S6
 
 S1 -> assignStat SEMICOLON
-S2 -> if ORB expr SEMANTIC-13 CRB then statBlock else statBlock SEMICOLON
+S2 -> if ORB expr SEMANTIC-13 CRB then statBlock else SEMANTIC-15 statBlock SEMICOLON SEMANTIC-16
 S3 -> for ORB type id SEMANTIC-4 assignOp SEMANTIC-11 expr SEMICOLON relExpr SEMICOLON assignStat CRB statBlock SEMICOLON
 S4 -> get ORB variable SEMANTIC-12 CRB SEMICOLON
 S5 -> put ORB expr SEMANTIC-13 CRB SEMICOLON

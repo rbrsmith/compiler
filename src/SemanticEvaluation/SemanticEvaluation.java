@@ -13,6 +13,8 @@ public class SemanticEvaluation {
     public final static String EXPR_REF = "SEMANTIC-13";
     public final static String RETURN_REF = "SEMANTIC-14";
 
+    public final static String ELSE = "SEMANTIC-15";
+    public final static String ENDIF = "SEMANTIC-16";
 
     public final static String ASSIG_ACTION_1 = "SEMANTIC-10";
     public final static String ASSIG_ACTION_2 = "SEMANTIC-11";
@@ -28,9 +30,20 @@ public class SemanticEvaluation {
         variableAssignment(current, symbolTable, errors);
         expressionUse(current, symbolTable, errors);
         returnUse(current, symbolTable, errors);
+        conditional(current, symbolTable, errors);
     }
 
+    private void conditional(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
 
+        if (!current.isLeaf() && current.getValue().equals(ELSE)) {
+            code.writeElse();
+        }
+        if (!current.isLeaf() && current.getValue().equals(ENDIF)) {
+            code.writeEndIf();
+        }
+
+
+    }
 
 
     // GET
@@ -109,6 +122,8 @@ public class SemanticEvaluation {
                 Node action = current.getLeftSibling().getLeftSibling().getLeftSibling();
                 if(action.getValue().equals("put")) {
                     code.writePut();
+                } else if(action.getValue().equals("if")){
+                    code.writeIf();
                 }
 
 

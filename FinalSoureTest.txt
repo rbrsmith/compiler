@@ -1,0 +1,29 @@
+program {
+	int a;
+	int b;
+	int c;
+
+	int arr[3];
+	int brr[2];
+	int crr[1];
+
+// Test Addition
+	a = 2;
+	b = 3;
+	c = 4;
+	put(9);
+	put(a+b+c);
+	put((c*b*a/2)-3);	
+
+// Test singluar arrays
+	arr[2] = 9;
+	put(arr[2]);
+	arr[1] = (a+b+c);
+	put(arr[1]);
+	put(arr[2]);
+
+
+
+
+};
+$ 
