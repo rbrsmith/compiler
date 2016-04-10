@@ -1,8 +1,7 @@
 package CodeGeneration;
 
 import LexicalAnalyzer.DFA.Token;
-import SemanticAnalyzer.Node;
-import SemanticAnalyzer.VariableAssig;
+import SemanticAnalyzer.*;
 import SyntacticAnalyzer.Tuple;
 
 import java.io.FileNotFoundException;
@@ -20,10 +19,12 @@ public class CodeGenerator {
         put("r6",true);put("r7",true);put("r8",true);put("r9",true);put("r10",true);
         put("r11",true);put("r12",true);
     }};
-    private String r0 = "r0";
-    private String r13 = "r13";
-    private String r14 = "r14";
-    private String r15 = "r15";
+    private final String r0 = "r0";
+    private final String r13 = "r13";
+    private final String r14 = "r14";
+    private final String r15 = "r15";
+
+    private final String rtn = "rtn";
 
     private ArrayList<String> execution;
     private ArrayList<String> dataRes;
@@ -32,10 +33,13 @@ public class CodeGenerator {
     private ArrayList<String> tmpVars;
     private ArrayList<String> arrays;
     private ArrayList<Integer> ifNums;
+    private HashMap<String, String> functionMap;
     private int ifNumCount;
 
     private int randomVar;
     private final int intSize = 4;
+    private final String endProgram = "endProgram";
+    private final ArrayList<String> returnVar;
 
     private CodeGenerator(){
         execution = new ArrayList<>();
@@ -46,7 +50,10 @@ public class CodeGenerator {
         arrays = new ArrayList<>();
         ifNums = new ArrayList<Integer>() {{ add(1); }};
         ifNumCount = 1;
+        functionMap = new HashMap<>();
         randomVar = 0;
+        returnVar = new ArrayList<>();
+
     }
 
     public static CodeGenerator getInstance() {
@@ -68,6 +75,27 @@ public class CodeGenerator {
         if(!multOffsetReg.equals(r0)) freeRegister(multOffsetReg);
 
         freeRegister(reg);
+
+    }
+
+    public void write(FunctionDecl f) {
+        comment("Function");
+        String e = f.getName();
+        execution.add(e);
+
+        String returnReg = getFunctionReg(f.getName());
+        if(returnReg == null) return;
+        String rv = "returnVar"+randomVar;
+        randomVar += 1;
+        returnVar.add(rv);
+        writeDefine(rv, 0);
+        storeWord(rv, returnReg);
+
+        for(VariableDecl vd : f.getParams()) {
+            writeDefine(f.getName() + vd.getName(), 0);
+        }
+
+        writeDefine(f.getName() + rtn, 0);
 
     }
 
@@ -269,10 +297,14 @@ public class CodeGenerator {
         moonWriter.write("align\nentry\n\n");
         moonWriter.write("addi\t" + r14 +",r0,topaddr\n");
 
+//        writePutStr();
+
         for(String line: execution){
             moonWriter.write(line + "\n");
         }
 
+
+        moonWriter.write("\n" + endProgram);
         moonWriter.write("\nhlt");
         moonWriter.write("\n");
         writeRes("buf", 20);
@@ -337,11 +369,16 @@ public class CodeGenerator {
         dataRes.add("\n%\t" + s);
     }
 
+    private void updateIfNum() {
+        ifNumCount += 1;
+        ifNums.add(ifNumCount);
+    }
+
     public void writeIf() {
         comment("If Statement");
 
-        ifNumCount += 1;
-        ifNums.add(ifNumCount);
+        updateIfNum();
+
 
         String tmpVar = pop();
         if(tmpVar == null) return;
@@ -381,5 +418,145 @@ public class CodeGenerator {
     public void writeNotEquals() {
         comment("Not Equals");
         binaryOp("cne");
+    }
+
+    public void writeStartFor() {
+        comment("For");
+        updateIfNum();
+        String e = "for"+getIfNum(false);
+        execution.add(e);
+    }
+
+
+    public void writeForBranch() {
+        String tmpVar = pop();
+        if(tmpVar == null) return;
+        String relOpReg = loadWord(tmpVar);
+        String e = "bz\t"+relOpReg+", endfor"+getIfNum(false);
+        execution.add(e);
+        e = "j\tstartFor" + getIfNum(false);
+        execution.add(e);
+        freeRegister(relOpReg);
+    }
+
+    public void writeEndFor() {
+        String e = "j\tassigFor" + getIfNum(false);
+        execution.add(e);
+
+        e = "endfor"+getIfNum(true);
+        execution.add(e);
+    }
+
+    public void writeStartForBlock() {
+        String e = "startFor"+ getIfNum(false);
+        execution.add(e);
+    }
+
+    public void writeForAssig() {
+        String e = "assigFor" + getIfNum(false);
+        execution.add(e);
+    }
+
+    public void writeEndForAssig() {
+        String e = "j\tfor"+getIfNum(false);
+        execution.add(e);
+    }
+
+    public void writeEnd(Declaration decl) {
+        if(decl instanceof ProgramDecl) {
+            String e = "j\t"+endProgram;
+            execution.add(e);
+        } else if(decl instanceof FunctionDecl) {
+            comment("Leaving function");
+
+            if(returnVar.size() == 0) return;
+            String rv = returnVar.get(returnVar.size() - 1);
+            returnVar.remove(returnVar.size() - 1);
+
+            String returnReg = loadWord(rv);
+            if(returnReg == null) return;
+            String e = "jr\t"+returnReg;
+            execution.add(e);
+            freeRegister(returnReg);
+        }
+    }
+
+    public void writeFunctionCall(FunctionDecl f) {
+
+        if(f.getParams().size() != varStack.size()) return;
+
+        for(int i =f.getParams().size() - 1; i > -1;i--){
+            String popped = pop();
+            String reg = loadWord(popped);
+            if(reg == null) return;
+            String param = f.getName() + f.getParams().get(i).getName();
+            storeWord(param, reg);
+
+        }
+
+
+
+        String reg = getRegister();
+        String e = "jl\t"+reg+", " + f.getName();
+        storeFunctionReg(reg, f.getName());
+        execution.add(e);
+    }
+
+    private void storeFunctionReg(String reg, String name) {
+        functionMap.put(name, reg);
+    }
+
+    private String getFunctionReg(String name) {
+        String reg = functionMap.get(name);
+        return reg;
+    }
+
+    private void writePutStr() {
+        comment("Library PUTSTR");
+        String reg1 = getRegister();
+        String reg2 = getRegister();
+        String reg3 = getRegister();
+
+        String e = "putstr    lw    "+reg1+",-8(r14)    % i := r1";
+        execution.add(e);
+        e = "addi  "+reg2+",r0,0";
+        execution.add(e);
+        e = "putstr1   lb    "+reg2+",0("+reg1+")      % ch := B[i]";
+        execution.add(e);
+        e = "ceqi  "+reg3+","+reg2+",0";
+        execution.add(e);
+        e = "bnz   "+reg3+",putstr2    % branch if ch = 0";
+        execution.add(e);
+        e = "putc  "+reg2+"";
+        execution.add(e);
+        e = "addi  "+reg1+","+reg1+",1       % i++";
+        execution.add(e);
+        e = "j     putstr1";
+        execution.add(e);
+        e = "putstr2   jr    " + r15;
+        execution.add(e);
+
+        freeRegister(reg1);
+        freeRegister(reg2);
+
+
+    }
+
+    public void writeReturn(String name) {
+        comment("Set up return");
+        String varName = name + rtn;
+        String tmpVar = pop();
+        if(tmpVar == null) return;
+        String tmpReg = loadWord(tmpVar);
+        if(tmpReg == null) return;
+        storeWord(varName, tmpReg);
+    }
+
+    public void writeGetReturn(String name) {
+        comment("Get return");
+        String varName = name + rtn;
+        String tmpReg = loadWord(varName);
+        if(tmpReg == null) return;
+        writeTemprorary(tmpReg);
     }
 }

@@ -192,14 +192,20 @@ public class Analyzer {
                 }
                 sym = new Symbol(f, symbolTable, type.getPosition());
                 SymbolTable sub2 = symbolTable.add(sym);
+
+
             }
             SymbolTable sub = symbolTable.get(f);
             symbolTable = sub;
+            if(eval) code.write(f);
+
             if(!eval) {
                 for (VariableDecl v : f.getParams()) {
                     sym = new Symbol(v, symbolTable, type.getPosition());
                     symbolTable.add(sym);
                 }
+
+
             }
         }
     }
@@ -275,6 +281,14 @@ public class Analyzer {
 
                 Symbol sym = new Symbol(v, symbolTable, type.getPosition());
                 symbolTable.add(sym);
+
+                if(v.isPrimitive()) {
+                    if(v.getSize().size() == 0) {
+                        code.writeDefine(sym.getAddress(), 0);
+                    } else {
+                        code.writeRes(sym.getAddress(), array);
+                    }
+                }
             }
         }
     }
@@ -308,6 +322,9 @@ public class Analyzer {
      */
     private void endScope(Node current, ArrayList<Exception> errors) {
         if (!current.isLeaf() && current.getValue().equals(SCOPE_CHANGE_ACTION)) {
+            if(eval) {
+                code.writeEnd(symbolTable.getDecl());
+            }
             symbolTable = symbolTable.getParent();
         }
     }

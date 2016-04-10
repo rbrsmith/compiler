@@ -29,7 +29,7 @@ public class Expression {
         else return e;
     }
 
-    private String arithExpr(Node arithExpr) throws Exception {
+    public String arithExpr(Node arithExpr) throws Exception {
         String t = term(arithExpr.getFirstChild());
         String ar = arithExprRight(arithExpr.getFirstChild().getRightSibling());
         if(ar.equals(Grammar.EPSILON)) return t;
@@ -82,6 +82,7 @@ public class Expression {
                     if(s.getDecl() instanceof ClassDecl) {
                         throw new AlreadyDeclaredException(factor.getPosition(), s.getDecl().getName());
                     }
+                    // else Function Declaration
                     FunctionDecl method = (FunctionDecl) s.getDecl();
                     VariableReference caller = vr;
                     if(vr.getAttribute() != null){
@@ -105,6 +106,9 @@ public class Expression {
                         }
                     }
 
+                    code.writeFunctionCall(method);
+
+                    code.writeGetReturn(method.getName());
 
                     return method.getType();
                 }

@@ -1,6 +1,7 @@
 package SemanticEvaluation;
 
 import CodeGeneration.CodeGenerator;
+import LexicalAnalyzer.DFA.Token;
 import SemanticAnalyzer.*;
 
 import java.util.ArrayList;
@@ -16,8 +17,17 @@ public class SemanticEvaluation {
     public final static String ELSE = "SEMANTIC-15";
     public final static String ENDIF = "SEMANTIC-16";
 
+
+    public final static String FOR_REL_EXPR = "SEMANTIC-17";
+    public final static String FOR_END = "SEMANTIC-18";
+    public final static String FOR_BLOCK = "SEMANTIC-19";
+
+    public final static String FOR_ASSIG = "SEMANTIC-20";
+    public final static String END_ASSIG = "SEMANTIC-21";
+
     public final static String ASSIG_ACTION_1 = "SEMANTIC-10";
     public final static String ASSIG_ACTION_2 = "SEMANTIC-11";
+
 
     private CodeGenerator code;
 
@@ -32,6 +42,9 @@ public class SemanticEvaluation {
         returnUse(current, symbolTable, errors);
         conditional(current, symbolTable, errors);
     }
+
+
+
 
     private void conditional(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
 
@@ -131,6 +144,61 @@ public class SemanticEvaluation {
                 errors.add(e);
             }
         }
+        if(!current.isLeaf() && current.getValue().equals(FOR_REL_EXPR)) {
+            try {
+
+                code.writeStartFor();
+
+
+                Node relExpr = current.getLeftSibling();
+                Node arithExprLHS = relExpr.getFirstChild();
+                Node relOp = arithExprLHS.getRightSibling();
+                Node arithExprRHS = relOp.getRightSibling();
+
+                String LHSType = new Expression(symbolTable).arithExpr(arithExprLHS);
+                String RHSType = new Expression(symbolTable).arithExpr(arithExprRHS);
+
+                if (!LHSType.equals(RHSType)) {
+                    throw new InvalidTypesException(arithExprLHS.getPosition(), LHSType, RHSType);
+                }
+
+                if(relOp.getFirstLeafType().equals(Token.EQUALS.toString())) {
+                    code.writeEquals();
+                } else if(relOp.getFirstLeafType().equals(Token.GREATER_THAN.toString())) {
+                    code.writeGreaterThan();
+                } else if(relOp.getFirstLeafType().equals(Token.GREATER_THAN_EQUALS.toString())) {
+                    code.writeGreaterThanEquals();
+                } else if(relOp.getFirstLeafType().equals(Token.LESS_THAN_EQUALS.toString())) {
+                    code.writeLessThanEquals();
+                } else if(relOp.getFirstLeafType().equals(Token.LESS_THAN.toString())) {
+                    code.writeLessThan();
+                } else if(relOp.getFirstLeafType().equals(Token.NOT_EQUALS.toString())) {
+                    code.writeNotEquals();
+                }
+
+                code.writeForBranch();
+
+            } catch(Exception e) {
+                errors.add(e);
+            }
+
+
+        }
+        if(!current.isLeaf() && current.getValue().equals(FOR_END)) {
+            code.writeEndFor();
+
+        }
+        if(!current.isLeaf() && current.getValue().equals(FOR_BLOCK)) {
+            code.writeStartForBlock();
+        }
+
+        if(!current.isLeaf() && current.getValue().equals(FOR_ASSIG)) {
+            code.writeForAssig();
+        }
+
+        if(!current.isLeaf() && current.getValue().equals(END_ASSIG)) {
+            code.writeEndForAssig();
+        }
     }
 
     private void returnUse(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
@@ -144,6 +212,8 @@ public class SemanticEvaluation {
                         throw new InvalidTypesException(current.getPosition(), returnType,
                                 tmp.getType(), tmp.getName());
                     }
+
+                    code.writeReturn(tmp.getName());
                 }
             } catch(Exception e) {
                 errors.add(e);
