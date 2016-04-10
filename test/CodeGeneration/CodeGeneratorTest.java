@@ -89,6 +89,8 @@ public class CodeGeneratorTest {
         tuple = run(test);
         assertTrue(tuple.getX().size() == 0);
         assertTrue(g.getSemanticAnalyzer().getCode().getExecutionSize() == 17);
+
+
     }
     @Test
     public void testCodeFour() throws Exception {

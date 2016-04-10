@@ -1,6 +1,7 @@
 package SemanticEvaluation;
 
 import CodeGeneration.CodeGenerator;
+import LexicalAnalyzer.DFA.Token;
 import SemanticAnalyzer.*;
 import SyntacticAnalyzer.Grammar;
 
@@ -175,10 +176,18 @@ public class VariableReference {
 //        arithExprRight -> addOp term arithExprRight
         if(arithExprRight.getFirstLeafType().equals(Grammar.EPSILON)) return;
         else {
+            Node addOp = arithExprRight.getFirstChild();
             Node term = arithExprRight.getFirstChild().getRightSibling();
             Node arithExprRight2 = term.getRightSibling();
             term(term);
             arithExprRight(arithExprRight2);
+
+
+            if(addOp.getFirstLeafType().equals(Token.SUBTRACTION.toString())) {
+                code.writeSub();
+            } else if(addOp.getFirstLeafType().equals(Token.ADDITION.toString())) {
+                code.writeAdd();
+            }
         }
 
     }
@@ -194,6 +203,14 @@ public class VariableReference {
         Node termRight2 = factor.getRightSibling();
         factor(factor);
         termRight(termRight2);
+
+        Node multOp = termRight.getFirstChild();
+
+        if(multOp.getFirstLeafType().equals(Token.MULTIPLICATION.toString())) {
+            code.writeMultiply();
+        } else if(multOp.getFirstLeafType().equals(Token.DIVISION.toString())) {
+            code.writeDivide();
+        }
 
     }
 
