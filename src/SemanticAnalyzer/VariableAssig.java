@@ -145,8 +145,10 @@ public class VariableAssig {
     public String toString(){
         String rtn = "";
         rtn = name;
-        if(arraySize != 0) rtn += " size: " + arraySize;
-        if(attributeName != null) rtn += " [ " + attributeName.toString() + " ]";
+        for(int i=0;i<arraySize; i++){
+            rtn += "[]";
+        }
+        if(attributeName != null) rtn += " . " + attributeName.toString() + " ";
 
         return rtn;
     }

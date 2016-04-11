@@ -24,7 +24,13 @@ public class CodeGenerator {
     private final String r14 = "r14";
     private final String r15 = "r15";
 
-    private final String rtn = "rtn";
+    public final String functionName = "FUNCTION__";
+    public final String className = "CLASS__";
+    public final String variableName = "VARIABLE__";
+    public final String globalName = "GLOBAL__";
+
+
+    private final String rtn = "__RTN";
 
     private ArrayList<String> execution;
     private ArrayList<String> dataRes;
@@ -60,7 +66,7 @@ public class CodeGenerator {
         return instance;
     }
 
-    public void write(String address, VariableAssig va) {
+    public void write(String address, VariableAssig va, Integer attributeOffset) {
         if(varStack.size() == 0) return;
         comment("Variable Assignment " + va.toString() + " = ...");
 
@@ -69,8 +75,24 @@ public class CodeGenerator {
         if(va.getSize() == 0) {
             multOffsetReg = r0;
         } else {
-            multOffsetReg= getPositionReg();
+            multOffsetReg = getPositionReg();
         }
+
+        if(attributeOffset != null){
+            String attributeOffsetReg = getAttributeOffset(attributeOffset);
+
+            if(!multOffsetReg.equals(r0)) {
+                String tmpReg = getRegister();
+                String e = "mul\t" + tmpReg +", " + attributeOffsetReg + ", " + multOffsetReg;
+                execution.add(e);
+                freeRegister(multOffsetReg);
+                multOffsetReg = tmpReg;
+            } else {
+                freeRegister(multOffsetReg);
+                multOffsetReg = attributeOffsetReg;
+            }
+        }
+
         storeWord(address, reg, multOffsetReg);
         if(!multOffsetReg.equals(r0)) freeRegister(multOffsetReg);
 
@@ -78,24 +100,49 @@ public class CodeGenerator {
 
     }
 
-    public void write(FunctionDecl f) {
+    private String getAttributeOffset(Integer attributeOffset) {
+        String reg = getRegister();
+        String e = "addi\t"+reg+", " +r0+","+attributeOffset.toString();
+        execution.add(e);
+        String reg2 = getRegister();
+        e = "muli\t"+reg2+", "+reg+", 4";
+        execution.add(e);
+        freeRegister(reg);
+        return reg2;
+    }
+
+    public void write(String address, FunctionDecl f, boolean method) {
         comment("Function");
-        String e = f.getName();
+        String e = address;
         execution.add(e);
 
-        String returnReg = getFunctionReg(f.getName());
-        if(returnReg == null) return;
-        String rv = "returnVar"+randomVar;
-        randomVar += 1;
-        returnVar.add(rv);
-        writeDefine(rv, 0);
-        storeWord(rv, returnReg);
+        String returnReg;
+        if(!method) {
+            returnReg = getFunctionReg(f.getName());
+        } else {
+            returnReg = getRegister();
+            storeFunctionReg(returnReg, f.getName());
+        }
+            if (returnReg != null) {
+                String rv = "returnVar" + randomVar;
+                randomVar += 1;
+                returnVar.add(rv);
+                writeDefine(rv, 0);
+                storeWord(rv, returnReg);
+            }
 
         for(VariableDecl vd : f.getParams()) {
-            writeDefine(f.getName() + vd.getName(), 0);
+            writeDefine(address + variableName+ vd.getName(), 0);
         }
 
-        writeDefine(f.getName() + rtn, 0);
+        writeDefine(address + rtn, 0);
+
+    }
+
+    public void writeDefine(String addrss, VariableDecl v) {
+        if(!v.isPrimitive()) {
+            writeRes(addrss, v.getAttributes().size()*4);
+        }
 
     }
 
@@ -117,11 +164,10 @@ public class CodeGenerator {
                 size *= Integer.parseInt((String)tokens.get(i).getY());
             }
         }
-        writeRes(memoryAddress, size);
+        writeRes(memoryAddress, size*4);
     }
 
     public void writeRes(String memoryAddress, int size) {
-        comment("Memory Definition");
         String d = memoryAddress + "\tres\t" + size;
         dataRes.add(d);
         arrays.add(memoryAddress);
@@ -296,8 +342,7 @@ public class CodeGenerator {
         PrintWriter moonWriter = new PrintWriter(path, "UTF-8");
         moonWriter.write("align\nentry\n\n");
         moonWriter.write("addi\t" + r14 +",r0,topaddr\n");
-
-//        writePutStr();
+        moonWriter.write("j\tstartProgram\n");
 
         for(String line: execution){
             moonWriter.write(line + "\n");
@@ -334,6 +379,24 @@ public class CodeGenerator {
 
     private void freeRegister(String reg) {
         registers.put(reg, true);
+    }
+
+    public void loadVar(String address, Integer offset){
+        comment("Get Variable " + address);
+        String offsetReg = getRegister();
+        if(offsetReg == null) return;
+        String e = "addi\t" + offsetReg +", "+r0+", " + offset.toString();
+        execution.add(e);
+        String offsetProperReg = getRegister();
+        if(offsetProperReg == null) return;
+        e = "muli\t"+offsetProperReg+","+offsetReg+", "+ intSize;
+        execution.add(e);
+        String varReg = loadWord(address, offsetProperReg);
+        writeTemprorary(varReg);
+
+        freeRegister(offsetReg);
+        freeRegister(offsetProperReg);
+        freeRegister(varReg);
     }
 
     public void loadVar(String address) {
@@ -464,7 +527,7 @@ public class CodeGenerator {
 
     public void writeEnd(Declaration decl) {
         if(decl instanceof ProgramDecl) {
-            String e = "j\t"+endProgram;
+            String e = "\nj\t"+endProgram;
             execution.add(e);
         } else if(decl instanceof FunctionDecl) {
             comment("Leaving function");
@@ -481,24 +544,26 @@ public class CodeGenerator {
         }
     }
 
-    public void writeFunctionCall(FunctionDecl f) {
+    public void writeFunctionCall(FunctionDecl f, String address, boolean method) {
 
-        if(f.getParams().size() != varStack.size()) return;
 
         for(int i =f.getParams().size() - 1; i > -1;i--){
             String popped = pop();
             String reg = loadWord(popped);
             if(reg == null) return;
-            String param = f.getName() + f.getParams().get(i).getName();
+            String param = address + variableName + f.getParams().get(i).getName();
             storeWord(param, reg);
 
         }
 
-
-
-        String reg = getRegister();
-        String e = "jl\t"+reg+", " + f.getName();
-        storeFunctionReg(reg, f.getName());
+        String reg;
+        if(!method) {
+            reg = getRegister();
+            storeFunctionReg(reg, f.getName());
+        } else {
+            reg = getFunctionReg(f.getName());
+        }
+        String e = "jl\t"+reg+", " + address;
         execution.add(e);
     }
 
@@ -542,9 +607,9 @@ public class CodeGenerator {
 
     }
 
-    public void writeReturn(String name) {
+    public void writeReturn(String address) {
         comment("Set up return");
-        String varName = name + rtn;
+        String varName = address + rtn;
         String tmpVar = pop();
         if(tmpVar == null) return;
         String tmpReg = loadWord(tmpVar);
@@ -552,11 +617,16 @@ public class CodeGenerator {
         storeWord(varName, tmpReg);
     }
 
-    public void writeGetReturn(String name) {
+    public void writeGetReturn(String address) {
         comment("Get return");
-        String varName = name + rtn;
+        String varName = address + rtn;
         String tmpReg = loadWord(varName);
         if(tmpReg == null) return;
         writeTemprorary(tmpReg);
+    }
+
+    public void writeStartProgram() {
+        comment("Start of Program Block");
+        execution.add("startProgram");
     }
 }

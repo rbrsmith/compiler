@@ -41,9 +41,14 @@ public class SemanticEvaluation {
         expressionUse(current, symbolTable, errors);
         returnUse(current, symbolTable, errors);
         conditional(current, symbolTable, errors);
+        startProgram(current, symbolTable, errors);
     }
 
-
+    private void startProgram(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
+        if (!current.isLeaf() && current.getValue().equals(Analyzer.PROG_ACTION)) {
+            code.writeStartProgram();
+        }
+    }
 
 
     private void conditional(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
@@ -99,6 +104,7 @@ public class SemanticEvaluation {
             Symbol symbol = symbolTable.validate(va);
 
 
+
              // Check if this variable as been declared
             if(symbol == null) throw new UndeclardException(current.getPosition(), va);
             else {
@@ -114,7 +120,12 @@ public class SemanticEvaluation {
                 // Now make sure return types match otherwise throw an exception
                 Node expr = current.getRightSibling();
                 String exprType = new Expression(symbolTable).evaluate(expr);
-                code.write(symbol.getAddress(), va);
+
+                Integer attributeOffset = symbol.getOffset(LHSVar);
+
+
+
+                code.write(symbol.getAddress(), va, attributeOffset);
                 if (!LHSVar.getType().equals(exprType)) {
                     throw new InvalidTypesException(expr.getPosition(), exprType, LHSVar.getType(), symbol.getDecl().getName());
                 }
@@ -212,8 +223,15 @@ public class SemanticEvaluation {
                         throw new InvalidTypesException(current.getPosition(), returnType,
                                 tmp.getType(), tmp.getName());
                     }
+                    String address = "";
+                    if(symbolTable.getParent().getDecl() instanceof ClassDecl) {
+                        address += code.className + symbolTable.getParent().getName();
+                        address += code.functionName + tmp.getName();
+                    } else {
+                        address += code.functionName + tmp.getName();
+                    }
 
-                    code.writeReturn(tmp.getName());
+                    code.writeReturn(address);
                 }
             } catch(Exception e) {
                 errors.add(e);

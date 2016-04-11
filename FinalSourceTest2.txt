@@ -1,7 +1,23 @@
+class foo{
+	int var1;
+	int var2;
+	int getSum(int a, int b) {
+		return(a+b);
+	};
+	int getSub(int a, int b) {
+		return(a-b);
+	};
+
+};
+
 program {
 	int c;
 	int d;
 	int a[4];
+
+	foo cls;
+	int res;
+
 	a[1] = 1;
 	a[2] = 2;
 	a[3] = 3;
@@ -83,12 +99,35 @@ program {
 	};
 	};
 	c = randomize();
-	d = rec(9);
-	if(d == 1) then {
-		put(9);
-	} else {
-		put(0);
-	};
+
+	cls.var1 = 5;
+	cls.var2 = 4;
+	
+	res = cls.getSum(cls.var1, cls.var2);
+	put(res);
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//	d = rec(9);
+//	if(d == 1) then {
+//		put(9);
+//	} else {
+//		put(0);
+//	};
 	
 };
 
@@ -97,17 +136,17 @@ int randomize() {
 	put(9);
 };
 
-int rec(int a) {
-	int b;
-	int c;
-	if(a == 1) then {
-		b = 1;
-	} else {
-		c = a-1;
-		b = rec(c);		
-	};
-	return(b);
-};
+//int rec(int a) {
+//	int b;
+////	int c;
+//	if(a == 1) then {
+//		b = 1;
+//	} else {
+//		c = a-1;
+//		b = rec(c);		
+//	};
+//	return(b);
+//};
 
 
 

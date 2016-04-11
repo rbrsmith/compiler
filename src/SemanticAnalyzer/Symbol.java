@@ -23,9 +23,34 @@ public class Symbol {
      * @param pos Position in the source code we encounter this declaration
      */
     public Symbol(Declaration decl, SymbolTable parent, Position pos) {
-       if(!(decl instanceof VariableDecl)) this.table = new SymbolTable(parent, decl);
-       this.decl = decl;
-       this.memroyAddress = parent.getName() + decl.getName();
+        if (!(decl instanceof VariableDecl)) this.table = new SymbolTable(parent, decl);
+        this.decl = decl;
+
+        this.memroyAddress = "";
+        if (parent.getDecl() == null) {
+            this.memroyAddress = CodeGenerator.getInstance().globalName  + decl.getName();;
+        } else if (parent.getDecl() instanceof ClassDecl) {
+            this.memroyAddress = CodeGenerator.getInstance().className + decl.getName();
+        } else if (parent.getDecl() instanceof VariableDecl) {
+            this.memroyAddress = CodeGenerator.getInstance().variableName;
+        } else if (parent.getDecl() instanceof FunctionDecl) {
+
+            String address = "";
+            CodeGenerator code = CodeGenerator.getInstance();
+            FunctionDecl f = (FunctionDecl) parent.getDecl();
+            if (parent.getParent().getDecl() instanceof ClassDecl) {
+                address += code.className + parent.getParent().getName();
+                address += code.functionName + f.getName() + code.variableName + decl.getName();
+            } else {
+                address += code.functionName + f.getName() + code.variableName + decl.getName();
+                ;
+            }
+
+            this.memroyAddress = address;
+        } else {
+
+            this.memroyAddress += parent.getName() + "__"+ decl.getName();
+        }
     }
 
     public Declaration getDecl() {
@@ -51,5 +76,18 @@ public class Symbol {
 
     public String getAddress() {
         return memroyAddress;
+    }
+
+    public Integer getOffset(VariableDecl lhs) {
+        if(decl instanceof VariableDecl){
+            VariableDecl tmp = (VariableDecl) decl;
+            for(int i=0;i<tmp.getAttributes().size();i++){
+                if(tmp.getAttributes().get(i).getName().equals(lhs.getName())) {
+                    return i;
+                }
+            }
+
+        }
+        return null;
     }
 }

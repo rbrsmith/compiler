@@ -67,10 +67,74 @@ public class Expression {
                             SymbolTable classTable = symbolTable.getClassSymbolTable(tmp.getType());
                             FunctionDecl method = (FunctionDecl) classTable.validate(vr.getAttribute(), false).getDecl();
 
+
+
+
+                            VariableReference caller = vr;
+                            if(vr.getAttribute() != null){
+                                caller = vr.getAttribute();
+                            }
+                            if(caller.getParams() == null) throw new UndeclardException(factor.getPosition(), caller);
+                            if(method.getParams().size() != caller.getParams().size()) throw new InvalidFunctionParamsException(factor.getPosition());
+
+                            for(int i=0;i<method.getParams().size(); i++) {
+                                VariableReference callerParam = caller.getParams().get(i);
+
+                                if(callerParam.getName() == null) {
+                                    // Not an id, but a number
+                                    continue;
+                                }
+                                Symbol callerSymbol = symbolTable.validate(callerParam);
+                                if(callerSymbol == null) {
+                                    throw new UndeclardException(factor.getPosition(), callerParam);
+                                }
+
+
+                                VariableDecl callerParamDecl = (VariableDecl) callerSymbol.getDecl();
+
+                                if(callerParam.getAttribute() != null) {
+                                    callerParamDecl = callerParamDecl.getAttribute(callerParam.getAttribute());
+                                }
+
+
+
+                                if(callerParamDecl.getType() != method.getParams().get(i).getType()) {
+                                    throw new InvalidTypesException(factor.getPosition(), callerParamDecl.getType(),
+                                            method.getParams().get(i).getType(), callerParamDecl.getName());
+                                }
+                            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            String address = code.className + classTable.getName() + code.functionName + method.getName();
+                            code.writeFunctionCall(method, address,  true);
+
+
+                            code.writeGetReturn(address);
+
+
                             return method.getType();
                         } else {
                             // Attribute
                             if (!tmp2.isInitialized()) throw new UninitializedException(id.getPosition(), tmp);
+                            int offset = s.getOffset(tmp2);
+                            code.loadVar(s.getAddress(), offset);
                             return tmp2.getType();
                         }
                     } else {
@@ -93,6 +157,8 @@ public class Expression {
 
                     for(int i=0;i<method.getParams().size(); i++) {
                         VariableReference callerParam = caller.getParams().get(i);
+
+
                         if(callerParam.getName() == null) {
                             // Not an id, but a number
                             continue;
@@ -100,15 +166,30 @@ public class Expression {
                         Symbol callerSymbol = symbolTable.validate(callerParam);
                         if(callerSymbol == null) throw new UndeclardException(factor.getPosition(), callerParam);
                         VariableDecl callerParamDecl = (VariableDecl) callerSymbol.getDecl();
+
+
+                        if(callerParam.getAttribute() != null) {
+                            callerParamDecl = callerParamDecl.getAttribute(callerParam.getAttribute());
+                        }
+
+
                         if(callerParamDecl.getType() != method.getParams().get(i).getType()) {
                             throw new InvalidTypesException(factor.getPosition(), callerParamDecl.getType(),
                                     method.getParams().get(i).getType(), callerParamDecl.getName());
                         }
                     }
 
-                    code.writeFunctionCall(method);
+                    String address = "";
+                    if(symbolTable.getParent().getDecl() instanceof ClassDecl) {
+                        SymbolTable classTable = symbolTable.getParent();
+                        address += code.className + classTable.getName() + code.functionName + method.getName();
+                        code.writeFunctionCall(method, address, true);
+                    } else {
+                        address = code.functionName + method.getName();
+                        code.writeFunctionCall(method, address, false);
+                    }
 
-                    code.writeGetReturn(method.getName());
+                    code.writeGetReturn(address);
 
                     return method.getType();
                 }

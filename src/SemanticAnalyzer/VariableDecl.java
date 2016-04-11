@@ -141,5 +141,9 @@ public class VariableDecl implements Declaration {
     }
 
 
+    public ArrayList<VariableDecl> getAttributes() {
+        return attributes;
+    }
+
 
 }
