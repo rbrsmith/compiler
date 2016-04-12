@@ -185,6 +185,12 @@ public class Expression {
 
                         if(callerParam.getName() == null) {
                             // Not an id, but a number
+                            // but is the other one the same number type?
+                            String methodType = method.getParams().get(i).getType();
+                            String callerType = callerParam.getType();
+                            if(!callerType.equals(methodType)) {
+                                throw new InvalidFunctionParamsException(id.getPosition());
+                            }
                             continue;
                         }
                         Symbol callerSymbol = symbolTable.validate(callerParam);
@@ -239,8 +245,12 @@ public class Expression {
                 } else {
                     referencedVariables.add(vr2);
                 }
-                if(val.equals("FLOAT")) return "float";
+                if(val.equals("FLOAT")) {
+                    vr2.setType("float");
+                    return "float";
+                }
                 if(val.equals("INTEGER")) {
+                    vr2.setType("int");
                     Node sign = num.getLeftSibling();
 
                     code.writeNum(num.getFirstLeafValue());

@@ -28,6 +28,8 @@ public class VariableReference {
 
     private CodeGenerator code;
 
+    private String type;
+
     public VariableReference(Node id, SymbolTable symbolTable) throws Exception {
         this.name = id.getFirstLeafValue();
         this.size = 0;
@@ -37,6 +39,7 @@ public class VariableReference {
         this.symbolTable = symbolTable;
         this.inParam = false;
         this.code = CodeGenerator.getInstance();
+        this.type = null;
         Node F1 = id.getRightSibling();
         Node F1First = F1.getFirstChild();
         if(F1First.getValue().equals("indiceR")) {
@@ -64,6 +67,15 @@ public class VariableReference {
         this.params = new ArrayList<>();
         this.symbolTable = symbolTable;
         this.code = CodeGenerator.getInstance();
+        this.type = null;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getType() {
+        return this.type;
     }
 
 

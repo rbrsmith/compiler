@@ -13,6 +13,9 @@ import java.util.Map;
 
 public class CodeGenerator {
 
+
+    private boolean active;
+
     private static CodeGenerator instance = new CodeGenerator();
     private final HashMap<String, Boolean> registers = new HashMap<String,Boolean>() {{
         put("r1",true);put("r2",true);put("r3",true);put("r4",true);put("r5",true);
@@ -61,7 +64,7 @@ public class CodeGenerator {
         randomVar = 0;
         returnVar = new ArrayList<>();
         tmpVarPointer = 0;
-
+        active = true;
     }
 
     public static CodeGenerator getInstance() {
@@ -69,7 +72,7 @@ public class CodeGenerator {
     }
 
     public void write(String address, VariableAssig va, Integer attributeOffset) {
-        if(varStack.size() == 0) return;
+        if(varStack.size() == 0 || !active) return;
         comment("Variable Assignment " + va.toString() + " = ...");
 
         String reg = loadWord(pop());
@@ -113,6 +116,7 @@ public class CodeGenerator {
     }
 
     public void write(String address, FunctionDecl f, boolean method) {
+        if(!active) return;
         comment("Function");
         tmpVarPointer += 1;
         String e = address;
@@ -145,6 +149,7 @@ public class CodeGenerator {
     }
 
     public void writeDefine(String addrss, VariableDecl v) {
+        if(!active) return;
         if(!v.isPrimitive()) {
             writeRes(addrss, v.getAttributes().size()*4);
         }
@@ -154,12 +159,14 @@ public class CodeGenerator {
 
 
     public void writeDefine(String address, int val) {
+        if(!active) return;
         String d = address + "\tdw\t" + val;
         dataDW.add(d);
     }
 
 
     public void writeRes(String memoryAddress, Node array) {
+        if(!active) return;
         // Definition nis easy, no expression in array size
         ArrayList<Tuple> tokens = array.getTokens();
         int size = 1;
@@ -169,10 +176,11 @@ public class CodeGenerator {
                 size *= Integer.parseInt((String)tokens.get(i).getY());
             }
         }
-        writeRes(memoryAddress, size*4);
+        writeRes(memoryAddress, size * 4);
     }
 
     public void writeRes(String memoryAddress, int size) {
+        if(!active) return;
         String d = memoryAddress + "\tres\t" + size;
         dataRes.add(d);
         arrays.add(memoryAddress);
@@ -180,6 +188,7 @@ public class CodeGenerator {
 
 
     public void writeNum(String num) {
+        if(!active) return;
         comment("Save number");
         String reg = getRegister();
         String a2 = "addi\t" + reg +", " + "r0" + ", " + num;
@@ -189,12 +198,14 @@ public class CodeGenerator {
     }
 
     public void writeAdd() {
+        if(!active) return;
         comment("Addition");
         binaryOp("add");
     }
 
 
     public void writeSub() {
+        if(!active) return;
         comment("Subtraction");
     //    binaryOp("sub");
         binaryOp("add");
@@ -202,24 +213,28 @@ public class CodeGenerator {
     }
 
     public void writeMultiply() {
+        if(!active) return;
         comment("Multiply");
         binaryOp("mul");
     }
 
 
     public void writeDivide() {
+        if(!active) return;
         comment("Divide");
         binaryOp("div");
     }
 
 
     public void writeEquals() {
+        if(!active) return;
         comment("Equals");
         binaryOp("ceq");
     }
 
 
     public void writeGreaterThan() {
+        if(!active) return;
         comment("Greater Than");
         binaryOp("cgt");
 
@@ -246,6 +261,7 @@ public class CodeGenerator {
 
 
     public void writePut() {
+        if(!active) return;
         if(varStack.size() == 0) return;
         comment("Put");
 
@@ -272,6 +288,7 @@ public class CodeGenerator {
 
 
     private void writeTemprorary(String register) {
+        if(!active) return;
         String tmpVar = getTmpVar();
         storeWord(tmpVar, register);
         varStack.add(tmpVar);
@@ -357,6 +374,8 @@ public class CodeGenerator {
 
 
     public void save(String path) throws FileNotFoundException, UnsupportedEncodingException {
+
+        if(!active) return;
         PrintWriter moonWriter = new PrintWriter(path, "UTF-8");
         moonWriter.write("align\nentry\n\n");
         moonWriter.write("addi\t" + r14 +",r0,topaddr\n");
@@ -402,6 +421,7 @@ public class CodeGenerator {
     }
 
     public void loadVar(String address, Integer offset){
+        if(!active) return;
         comment("Get Variable " + address);
         String offsetReg = getRegister();
         if(offsetReg == null) return;
@@ -420,6 +440,8 @@ public class CodeGenerator {
     }
 
     public void loadVar(String address) {
+
+        if(!active) return;
         varStack.add(address);
     }
 
@@ -458,6 +480,7 @@ public class CodeGenerator {
     }
 
     public void writeIf() {
+        if(!active) return;
         comment("If Statement");
 
         updateIfNum();
@@ -472,38 +495,45 @@ public class CodeGenerator {
     }
 
     public void writeElse() {
+        if(!active) return;
         comment("Else Statement");
         execution.add("j\tendif"+getIfNum(false));
-        execution.add("else"+getIfNum(false));
+        execution.add("else" + getIfNum(false));
     }
 
     public void writeEndIf() {
+        if(!active) return;
         comment("End If");
         execution.add("endif"+getIfNum(true));
 
     }
 
     public void writeGreaterThanEquals() {
+        if(!active) return;
         comment("Greater Than Equals");
         binaryOp("cge");
     }
 
     public void writeLessThanEquals() {
+        if(!active) return;
         comment("Less Than Equals");
         binaryOp("cle");
     }
 
     public void writeLessThan() {
+        if(!active) return;
         comment("Less Than");
         binaryOp("clt");
     }
 
     public void writeNotEquals() {
+        if(!active) return;
         comment("Not Equals");
         binaryOp("cne");
     }
 
     public void writeStartFor() {
+        if(!active) return;
         comment("For");
         updateIfNum();
         String e = "for"+getIfNum(false);
@@ -512,6 +542,7 @@ public class CodeGenerator {
 
 
     public void writeForBranch() {
+        if(!active) return;
         String tmpVar = pop();
         if(tmpVar == null) return;
         String relOpReg = loadWord(tmpVar);
@@ -523,6 +554,7 @@ public class CodeGenerator {
     }
 
     public void writeEndFor() {
+        if(!active) return;
         String e = "j\tassigFor" + getIfNum(false);
         execution.add(e);
 
@@ -531,21 +563,25 @@ public class CodeGenerator {
     }
 
     public void writeStartForBlock() {
+        if(!active) return;
         String e = "startFor"+ getIfNum(false);
         execution.add(e);
     }
 
     public void writeForAssig() {
+        if(!active) return;
         String e = "assigFor" + getIfNum(false);
         execution.add(e);
     }
 
     public void writeEndForAssig() {
+        if(!active) return;
         String e = "j\tfor"+getIfNum(false);
         execution.add(e);
     }
 
     public void writeEnd(Declaration decl) {
+        if(!active) return;
         if(decl instanceof ProgramDecl) {
             String e = "\nj\t"+endProgram;
             execution.add(e);
@@ -566,6 +602,7 @@ public class CodeGenerator {
 
     public void writeFunctionCall(FunctionDecl f, String address, boolean method) {
 
+        if(!active) return;
 
         for(int i =f.getParams().size() - 1; i > -1;i--){
             String popped = pop();
@@ -600,38 +637,9 @@ public class CodeGenerator {
         return reg;
     }
 
-    private void writePutStr() {
-        comment("Library PUTSTR");
-        String reg1 = getRegister();
-        String reg2 = getRegister();
-        String reg3 = getRegister();
-
-        String e = "putstr    lw    "+reg1+",-8(r14)    % i := r1";
-        execution.add(e);
-        e = "addi  "+reg2+",r0,0";
-        execution.add(e);
-        e = "putstr1   lb    "+reg2+",0("+reg1+")      % ch := B[i]";
-        execution.add(e);
-        e = "ceqi  "+reg3+","+reg2+",0";
-        execution.add(e);
-        e = "bnz   "+reg3+",putstr2    % branch if ch = 0";
-        execution.add(e);
-        e = "putc  "+reg2+"";
-        execution.add(e);
-        e = "addi  "+reg1+","+reg1+",1       % i++";
-        execution.add(e);
-        e = "j     putstr1";
-        execution.add(e);
-        e = "putstr2   jr    " + r15;
-        execution.add(e);
-
-        freeRegister(reg1);
-        freeRegister(reg2);
-
-
-    }
 
     public void writeReturn(String address) {
+        if(!active) return;
         comment("Set up return");
         String varName = address + rtn;
         String tmpVar = pop();
@@ -642,6 +650,7 @@ public class CodeGenerator {
     }
 
     public void writeGetReturn(String address) {
+        if(!active) return;
         comment("Get return");
         String varName = address + rtn;
         String tmpReg = loadWord(varName);
@@ -650,11 +659,13 @@ public class CodeGenerator {
     }
 
     public void writeStartProgram() {
+        if(!active) return;
         comment("Start of Program Block");
         execution.add("startProgram");
     }
 
     public void writeSign(String firstLeafValue) {
+        if(!active) return;
         if(firstLeafValue.equals(Token.SUBTRACTION.toString())) {
             if(varStack.size() == 0) return;
             comment("Negative Number");
@@ -669,5 +680,9 @@ public class CodeGenerator {
             freeRegister(reg);
             freeRegister(varReg);
         }
+    }
+
+    public void deactivate() {
+        this.active = false;
     }
 }

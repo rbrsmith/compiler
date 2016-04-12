@@ -1,5 +1,6 @@
 package SyntacticAnalyzer;
 
+import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.HelperTest;
 import SemanticAnalyzer.UndeclardException;
 import org.junit.After;
@@ -22,6 +23,7 @@ public class GrammarTest {
     @Before
     public void setUp() throws Exception {
         g = new Grammar(System.getProperty("user.dir") + File.separator + "src" + File.separator + "Grammar.txt");
+        CodeGenerator.getInstance().deactivate();
         ht = new HelperTest();
     }
 
