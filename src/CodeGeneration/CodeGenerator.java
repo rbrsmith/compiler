@@ -46,6 +46,7 @@ public class CodeGenerator {
     private final int intSize = 4;
     private final String endProgram = "endProgram";
     private final ArrayList<String> returnVar;
+    int tmpVarPointer;
 
     private CodeGenerator(){
         execution = new ArrayList<>();
@@ -59,6 +60,7 @@ public class CodeGenerator {
         functionMap = new HashMap<>();
         randomVar = 0;
         returnVar = new ArrayList<>();
+        tmpVarPointer = 0;
 
     }
 
@@ -88,7 +90,6 @@ public class CodeGenerator {
                 freeRegister(multOffsetReg);
                 multOffsetReg = tmpReg;
             } else {
-                freeRegister(multOffsetReg);
                 multOffsetReg = attributeOffsetReg;
             }
         }
@@ -113,6 +114,7 @@ public class CodeGenerator {
 
     public void write(String address, FunctionDecl f, boolean method) {
         comment("Function");
+        tmpVarPointer += 1;
         String e = address;
         execution.add(e);
 
@@ -120,7 +122,10 @@ public class CodeGenerator {
         if(!method) {
             returnReg = getFunctionReg(f.getName());
         } else {
-            returnReg = getRegister();
+            returnReg = getFunctionReg(f.getName());
+            if(returnReg == null) {
+                returnReg = getRegister();
+            }
             storeFunctionReg(returnReg, f.getName());
         }
             if (returnReg != null) {
@@ -191,7 +196,9 @@ public class CodeGenerator {
 
     public void writeSub() {
         comment("Subtraction");
-        binaryOp("sub");
+    //    binaryOp("sub");
+        binaryOp("add");
+
     }
 
     public void writeMultiply() {
@@ -228,6 +235,7 @@ public class CodeGenerator {
         String reg1 = loadWord(var1);
 
         String reg3 = getRegister();
+        if(reg3 == null) return;
         execution.add(op +"\t"+reg3+", " + reg1 +", " + reg2);
         writeTemprorary(reg3);
         freeRegister(reg1);
@@ -316,22 +324,32 @@ public class CodeGenerator {
         for(Map.Entry<String, Boolean> map: registers.entrySet()) {
             if(map.getValue()) {
                 registers.put(map.getKey(), false);
+                System.out.println("Register reserved:\t"+map.getKey());
                 return map.getKey();
             }
         }
         // TODO expcetion
+        try {
+            throw new Exception("OUT OF REGISTERS");
+        } catch(Exception e){e.printStackTrace();}
         return null;
     }
 
     public String getTmpVar()
     {
         if(tmpVars.size() == 0) {
-            String tmp = "tmp" + randomVar;
+            String tmp = "tmp" + tmpVarPointer + "_"+randomVar;
             randomVar += 1;
             writeDefine(tmp, 0);
             return tmp;
         } else {
             String tmp = tmpVars.get(tmpVars.size() - 1);
+            if(!tmp.contains("tmp" + tmpVarPointer)) {
+                tmp = "tmp" + tmpVarPointer + "_"+randomVar;
+                randomVar += 1;
+                writeDefine(tmp, 0);
+                return tmp;
+            }
             tmpVars.remove(tmpVars.size() - 1);
             return tmp;
         }
@@ -378,6 +396,8 @@ public class CodeGenerator {
     }
 
     private void freeRegister(String reg) {
+        if(reg.equals(r0) || reg.equals(r13) || reg.equals(r14) || reg.equals(r15)) return;
+        System.out.println("Freed Register:\t"+reg);
         registers.put(reg, true);
     }
 
@@ -558,13 +578,17 @@ public class CodeGenerator {
 
         String reg;
         if(!method) {
-            reg = getRegister();
+            reg = getFunctionReg(f.getName());
+            if(reg == null) {
+                reg = getRegister();
+            }
             storeFunctionReg(reg, f.getName());
         } else {
             reg = getFunctionReg(f.getName());
         }
         String e = "jl\t"+reg+", " + address;
         execution.add(e);
+        freeRegister(reg);
     }
 
     private void storeFunctionReg(String reg, String name) {
@@ -628,5 +652,22 @@ public class CodeGenerator {
     public void writeStartProgram() {
         comment("Start of Program Block");
         execution.add("startProgram");
+    }
+
+    public void writeSign(String firstLeafValue) {
+        if(firstLeafValue.equals(Token.SUBTRACTION.toString())) {
+            if(varStack.size() == 0) return;
+            comment("Negative Number");
+            String reg = getRegister();
+            String tmpVar = pop();
+            if(tmpVar == null) return;
+            String varReg = loadWord(tmpVar);
+            if(varReg == null) return;
+            String e = "muli\t"+reg+ ", " + varReg + ", -1";
+            execution.add(e);
+            writeTemprorary(reg);
+            freeRegister(reg);
+            freeRegister(varReg);
+        }
     }
 }

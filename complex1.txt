@@ -1,0 +1,45 @@
+class foo {
+	int var1;
+	int var2;
+
+	int getNine() {
+		return(9);
+	};
+
+};
+
+program {
+	foo cls;
+	int a[3];
+	int res;	
+	a[1] = 1;
+	a[2] = 2;
+	a[3] = 3;
+	put(getProduct(a[1], a[2], a[3]) + 3);
+
+	cls.var1 = 9;
+	put(cls.var1);
+	
+	cls.var1 = 3;
+	put(cls.var1 * 3);
+
+	cls.var2 = 3;
+	put(cls.var1 * cls.var2);
+
+	put(cls.getNine());
+
+
+	
+
+	
+	
+};
+
+
+int getProduct(int a, int b, int c) {
+	return(a*b*c);
+};
+
+
+
+$

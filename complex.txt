@@ -1,0 +1,25 @@
+program {
+	int a;
+	int b;
+	int c;
+	int res;
+	a = 4;
+	b = 5;
+	c = 2;
+
+	res = getSum(a, b);
+	put(res);
+	put(a+b);
+	put(getSum(a, b));
+
+	put(getSum(getSum(c,c), b));
+
+};
+
+int getSum(int a, int b) {
+	return(a + b);
+};
+
+
+
+$

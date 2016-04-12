@@ -1,0 +1,71 @@
+program {
+	int a;
+	int b;
+	int c[3];
+	
+	a = 4;
+	b = 5;
+	c[1] = 1;
+	c[2] = 2;
+	c[3] = 3;
+
+	if(c[1] == 1) then {
+		put(9);
+	} else {
+		put(0);
+	};
+
+	if(a+b == 9) then {
+		put(9);
+	} else {
+		put(0);
+	};
+
+	if(a + b == c[3] + 3 * c[2]) then {
+		put(9);
+	} else {
+		put(0);
+	};
+
+
+	for( int i = 0; i <2; i = i + 1) {	
+		put(9);
+	};
+
+	for( int j = 0; j <2; j = j + 1) {
+		if(i < 9) then {
+			put(9);
+		} else {
+			put(0);
+		};
+	};
+
+	if(c[3]*3 == 9) then {
+		for(int k = 0; k< 2; k= k+1) {
+			put(9);
+		};
+	} else {
+		put(0);
+	};
+
+
+	if(getNine() == 9) then {
+		put(9);
+	} else {
+		put(0);
+	};
+
+
+	if(3*c[3] == getNine()) then {
+		put(9);
+	} else {
+		put(0);
+	};
+
+};
+
+int getNine() {
+	return(9);
+};
+
+$

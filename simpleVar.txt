@@ -1,0 +1,56 @@
+program {
+
+	// Declaration
+	int a;
+	int b;
+	int res;
+
+	// Execution
+	put(9);
+	
+	a = 9;
+	put(a);
+	
+	b = a;
+	put(b);
+
+	b = a * 2 - a;
+	put(b);
+
+	b = a * 2 / 2;
+	put(b);
+
+	a = 1;
+	b = a + 1 + a + 1 + a + 1 + a + 1 + a;
+	put(b);
+
+	b = b;
+	put(b);
+
+	a = -9;
+	put(a);
+
+	// Bug
+	a = 9 - 2 + 2;
+	put(a);	
+	
+	a = (9-2) + 2;
+	put(a);
+
+	a = -1 * -9;
+	put(a);
+	
+	a = (1+2) + (3*4*5) + 10 + (98 - 72 + 34) * (35 - 11) + 8486;
+	put(a);
+
+	b = 9;
+	a = 9;
+	put(a + b - a);
+
+	put(((a + b) / a) + 7);
+
+	put((a - b) * 9 + 9);
+	
+};
+
+$

@@ -30,9 +30,9 @@ public class Symbol {
         if (parent.getDecl() == null) {
             this.memroyAddress = CodeGenerator.getInstance().globalName  + decl.getName();;
         } else if (parent.getDecl() instanceof ClassDecl) {
-            this.memroyAddress = CodeGenerator.getInstance().className + decl.getName();
+            this.memroyAddress = CodeGenerator.getInstance().className + parent.getName() + decl.getName();
         } else if (parent.getDecl() instanceof VariableDecl) {
-            this.memroyAddress = CodeGenerator.getInstance().variableName;
+            this.memroyAddress = CodeGenerator.getInstance().variableName + decl.getName();
         } else if (parent.getDecl() instanceof FunctionDecl) {
 
             String address = "";

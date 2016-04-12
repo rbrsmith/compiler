@@ -135,7 +135,13 @@ public class VariableReference {
                 Node num = first;
                 String val = first.getFirstLeafType();
                 if(val.equals("INTEGER")) {
+                    Node sign = num.getLeftSibling();
                     code.writeNum(num.getFirstLeafValue());
+
+                    if(sign.getValue().equals("addOp")) {
+                        code.writeSign(sign.getFirstLeafType());
+                    }
+
                 }
                 break;
             case "ORB":

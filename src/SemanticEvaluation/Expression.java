@@ -53,8 +53,14 @@ public class Expression {
         switch (first.getValue()) {
             case "id":
                 Node id = first;
+
+                Node possibleSign = id.getLeftSibling();
                 VariableReference vr = new VariableReference(id, symbolTable);
-                referencedVariables.add(vr);
+                if(possibleSign.getValue().equals("addOp") || possibleSign.getValue().equals("relOp")) {
+
+                } else {
+                    referencedVariables.add(vr);
+                }
                 Symbol s = symbolTable.validate(vr);
                 if(s == null) throw new UndeclardException(id.getPosition(), vr);
                 if(s.getDecl() instanceof VariableDecl) {
@@ -89,18 +95,28 @@ public class Expression {
                                     throw new UndeclardException(factor.getPosition(), callerParam);
                                 }
 
+                                String callerType = "";
+                                String callerName = "";
+                                if(callerSymbol.getDecl() instanceof VariableDecl) {
+                                    VariableDecl callerParamDecl = (VariableDecl) callerSymbol.getDecl();
 
-                                VariableDecl callerParamDecl = (VariableDecl) callerSymbol.getDecl();
+                                    if (callerParam.getAttribute() != null) {
+                                        callerParamDecl = callerParamDecl.getAttribute(callerParam.getAttribute());
+                                    }
+                                    callerType = callerParamDecl.getType();
+                                    callerName = callerParamDecl.getName();
+                                } else if(callerSymbol.getDecl() instanceof FunctionDecl) {
 
-                                if(callerParam.getAttribute() != null) {
-                                    callerParamDecl = callerParamDecl.getAttribute(callerParam.getAttribute());
+                                    FunctionDecl callerParamDecl = (FunctionDecl) callerSymbol.getDecl();
+                                    callerType = callerParamDecl.getType();
+                                    callerName = callerParamDecl.getName();
                                 }
 
 
 
-                                if(callerParamDecl.getType() != method.getParams().get(i).getType()) {
-                                    throw new InvalidTypesException(factor.getPosition(), callerParamDecl.getType(),
-                                            method.getParams().get(i).getType(), callerParamDecl.getName());
+                                if(callerType != method.getParams().get(i).getType()) {
+                                    throw new InvalidTypesException(factor.getPosition(), callerType,
+                                            method.getParams().get(i).getType(), callerName);
                                 }
                             }
 
@@ -135,11 +151,17 @@ public class Expression {
                             if (!tmp2.isInitialized()) throw new UninitializedException(id.getPosition(), tmp);
                             int offset = s.getOffset(tmp2);
                             code.loadVar(s.getAddress(), offset);
+                            if(possibleSign.getValue().equals("addOp")) {
+                                code.writeSign(possibleSign.getFirstLeafType());
+                            }
                             return tmp2.getType();
                         }
                     } else {
                        if (!tmp.isInitialized()) throw new UninitializedException(id.getPosition(), tmp);
                         code.loadVar(s.getAddress());
+                        if(possibleSign.getValue().equals("addOp")) {
+                            code.writeSign(possibleSign.getFirstLeafType());
+                        }
                        return tmp.getType();
                     }
                 } else {
@@ -153,7 +175,9 @@ public class Expression {
                         caller = vr.getAttribute();
                     }
                     if(caller.getParams() == null) throw new UndeclardException(factor.getPosition(), caller);
-                    if(method.getParams().size() != caller.getParams().size()) throw new InvalidFunctionParamsException(factor.getPosition());
+                    if(method.getParams().size() != caller.getParams().size()) {
+                        throw new InvalidFunctionParamsException(factor.getPosition());
+                    }
 
                     for(int i=0;i<method.getParams().size(); i++) {
                         VariableReference callerParam = caller.getParams().get(i);
@@ -165,17 +189,27 @@ public class Expression {
                         }
                         Symbol callerSymbol = symbolTable.validate(callerParam);
                         if(callerSymbol == null) throw new UndeclardException(factor.getPosition(), callerParam);
-                        VariableDecl callerParamDecl = (VariableDecl) callerSymbol.getDecl();
 
+                        String callerType = "";
+                        String callerName = "";
+                        if(callerSymbol.getDecl() instanceof VariableDecl) {
+                            VariableDecl callerParamDecl = (VariableDecl) callerSymbol.getDecl();
 
-                        if(callerParam.getAttribute() != null) {
-                            callerParamDecl = callerParamDecl.getAttribute(callerParam.getAttribute());
+                            if (callerParam.getAttribute() != null) {
+                                callerParamDecl = callerParamDecl.getAttribute(callerParam.getAttribute());
+                            }
+                            callerType = callerParamDecl.getType();
+                            callerName = callerParamDecl.getName();
+
+                        } else if(callerSymbol.getDecl() instanceof FunctionDecl) {
+                            FunctionDecl callerParamDecl = (FunctionDecl) callerSymbol.getDecl();
+                            callerType = callerParamDecl.getType();
+                            callerName = callerParamDecl.getName();
                         }
 
-
-                        if(callerParamDecl.getType() != method.getParams().get(i).getType()) {
-                            throw new InvalidTypesException(factor.getPosition(), callerParamDecl.getType(),
-                                    method.getParams().get(i).getType(), callerParamDecl.getName());
+                        if(callerType!= method.getParams().get(i).getType()) {
+                            throw new InvalidTypesException(factor.getPosition(), callerType,
+                                    method.getParams().get(i).getType(), callerName);
                         }
                     }
 
@@ -197,11 +231,22 @@ public class Expression {
                 Node num = first;
                 String val  =num.getFirstLeafType();
 
+                Node possibleSign2 = num.getLeftSibling();
+
                 VariableReference vr2 = new VariableReference(symbolTable);
-                referencedVariables.add(vr2);
+                if(possibleSign2.getValue().equals("addOp") || possibleSign2.getValue().equals("relOp")) {
+
+                } else {
+                    referencedVariables.add(vr2);
+                }
                 if(val.equals("FLOAT")) return "float";
                 if(val.equals("INTEGER")) {
+                    Node sign = num.getLeftSibling();
+
                     code.writeNum(num.getFirstLeafValue());
+                    if(sign.getValue().equals("addOp")) {
+                        code.writeSign(sign.getFirstLeafType());
+                    }
                     return "int";
                 }
             case "ORB":
@@ -212,7 +257,11 @@ public class Expression {
                 return factor(not.getRightSibling());
             case "sign":
                 Node sign = first;
-                return factor(sign.getRightSibling());
+                String factorType = factor(sign.getRightSibling());
+
+                code.writeSign(sign.getFirstLeafType());
+
+                return factorType;
             default:
                 // Overflow loop
                 return factor(factor);

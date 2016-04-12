@@ -1,0 +1,58 @@
+program {
+	int a[3];
+	int b[6];
+	int res;
+
+	a[1] = 1;
+	a[2] = 2;
+	a[3] = 3;
+
+	put(9);
+	put(a[3] * 3);
+
+	put(a[1] + a[2] + a[3] + a[3]);
+
+	put(a[1] * 9);
+
+	put((9 / a[3] ) * a[3]);
+
+	b[4] = a[1] * 4;
+	b[5] = a[2] * 2 + 1;
+	b[6] = a[3] * 2;
+
+	put(b[6] + a[3]);
+
+	put(b[4] + b[5] + b[6] - a[3] - a[2] - a[1]);
+
+	put(getFour() + a[3] + a[2]);
+	
+	put(getFour() * 2 + 1);
+
+	put(getFour() + getFour() + a[1]);
+
+	res = p(getFour() + getFour() + a[1]);
+
+	put(5 + getFour());
+
+	res = p(getFour() - 4 + 9);
+
+	res = p(getFive() + getFour());
+
+};
+
+
+
+int getFour() {
+	return(4);
+};
+
+int getFive() {
+	return(5);
+};
+
+int p(int a) {
+	put(a);
+};
+
+
+$
