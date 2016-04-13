@@ -36,7 +36,6 @@ import org.junit.runners.Suite;
         SymbolTableTest.class,
         VariableDeclTest.class,
         SemanticEvaluationTest.class,
-//        CodeGeneratorTest.class
 })
 
 public class TestSuite {
