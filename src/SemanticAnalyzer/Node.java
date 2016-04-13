@@ -175,7 +175,6 @@ public class Node {
 
             if(!tkn.getX().equals(Grammar.EPSILON)) res.add(tkn);
 
-
             current = currentLeaf.getRightSibling();
         }
         return res;

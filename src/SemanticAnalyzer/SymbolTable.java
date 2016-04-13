@@ -1,5 +1,6 @@
 package SemanticAnalyzer;
 
+import SemanticEvaluation.Variable;
 import SemanticEvaluation.VariableReference;
 
 import java.util.ArrayList;
@@ -96,25 +97,22 @@ public class SymbolTable {
         else return parent.alreadyExists(d);
     }
 
-
     /**
-     * Validate that variables used in a variable assignment are defiend
-     * // TODO - does not work for expr in RHS ie indiceR
-     * @param v VariableAssig representing a variable assignment
-     * @return True if the vairables in v are defiend, False otherwise
+     *
+     * @param v Variable to validate
+     * @return Symbol if v is found | null otherwise
      */
-    public Symbol validate(VariableAssig v) {
+    public Symbol validate(Variable v) {
         return validate(v, true);
     }
 
     /**
-     * Validate that variables used in a variable assignment are defiends
-     * @param v VariableAssig representing a variable assignment
-     * @param global boolean if we should look globally or not
-     * @return True if the vairables in v are defiend, False otherwise
+     *
+     * @param v Variable to validate
+     * @param global boolean indicating if we should search in parent tables for v
+     * @return Symbol if v is found | null otherwise
      */
-    public Symbol validate(VariableAssig v, boolean global) {
-        // Get symbol with this name
+    public Symbol validate(Variable v, boolean global) {
         Symbol s = findID(v.getName(), global);
         if (s == null) {
             return null;
@@ -124,6 +122,7 @@ public class SymbolTable {
                 VariableDecl tmp = (VariableDecl) s.getDecl();
                 if(tmp.getSize().size() < v.getSize()) return null;
                 if(tmp.getSize().size() > 0 && v.getSize() == 0) return null;
+
             }
         }
 
@@ -138,48 +137,7 @@ public class SymbolTable {
                     return null;
                 }
                 // OK GOOD, we have a class
-                VariableAssig va = v.getAttribute();
-                // We can only do this because nothing is allowed to be declared before
-                // classes according to the grammar
-                if(classTable.validate(va, false) == null) return null;
-            } else {
-                return null;
-            }
-        }
-        return s;
-    }
-
-
-    public Symbol validate(VariableReference vr) {
-        return validate(vr, true);
-    }
-
-    public Symbol validate(VariableReference vr, boolean global) {
-        Symbol s = findID(vr.getName(), global);
-        if (s == null) {
-            return null;
-        } else {
-            // Match array size
-            if (s.getDecl() instanceof VariableDecl) {
-                VariableDecl tmp = (VariableDecl) s.getDecl();
-                if(tmp.getSize().size() < vr.getSize()) return null;
-                if(tmp.getSize().size() > 0 && vr.getSize() == 0) return null;
-
-            }
-        }
-
-        // So ID is a match and array size is a match, now check attributes
-        if(vr.getAttribute() != null) {
-            // We think we have a class
-            if(s.getDecl() instanceof VariableDecl) {
-                // Find that class name...
-                VariableDecl tmp = (VariableDecl) s.getDecl();
-                SymbolTable classTable = getClassSymbolTable(tmp.getType());
-                if(classTable == null) {
-                    return null;
-                }
-                // OK GOOD, we have a class
-                VariableReference vrAttr =  vr.getAttribute();
+                Variable vrAttr =  v.getAttribute();
                 // We can only do this because nothing is allowed to be declared before
                 // classes according to the grammar
                 if(classTable.validate(vrAttr, false) == null) return null;
@@ -188,9 +146,6 @@ public class SymbolTable {
                 return null;
             }
         }
-
-
-
         return s;
     }
 
@@ -269,6 +224,11 @@ public class SymbolTable {
         return false;
     }
 
+    /**
+     *
+     * @param decl Declation to be looked up
+     * @return SymbolTable at that decl | null if not found
+     */
     public SymbolTable get(Declaration decl) {
         String name = decl.getName();
         for(Symbol s: symbols) {
@@ -288,6 +248,10 @@ public class SymbolTable {
         return decl;
     }
 
+    /**
+     *
+     * @return List of Variables in this table
+     */
     public ArrayList<VariableDecl> getVariables() {
         ArrayList<VariableDecl> res = new ArrayList<>();
         for(Symbol s: symbols) {

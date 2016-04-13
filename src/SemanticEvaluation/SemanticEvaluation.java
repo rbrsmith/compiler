@@ -1,6 +1,7 @@
 package SemanticEvaluation;
 
 import CodeGeneration.CodeGenerator;
+import CodeGeneration.CompilerException;
 import LexicalAnalyzer.DFA.Token;
 import SemanticAnalyzer.*;
 
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 public class SemanticEvaluation {
 
 
-    // Rule in Grammar that is a trigger for semantic action
+    // Triggers used in this class
     public final static String VAR_REF = "SEMANTIC-12";
     public final static String EXPR_REF = "SEMANTIC-13";
     public final static String RETURN_REF = "SEMANTIC-14";
@@ -32,8 +33,6 @@ public class SemanticEvaluation {
     private CodeGenerator code;
 
 
-
-
     public void evaluate(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
         this.code = CodeGenerator.getInstance();
         variableGetReference(current, symbolTable, errors);
@@ -44,13 +43,28 @@ public class SemanticEvaluation {
         startProgram(current, symbolTable, errors);
     }
 
+    /**
+     * Write assembly for program start
+     *
+     * @param current Node
+     * @param symbolTable SymbolTable
+     * @param errors List of running errors
+     */
     private void startProgram(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
         if (!current.isLeaf() && current.getValue().equals(Analyzer.PROG_ACTION)) {
+            // Write the start of the program lable in the assembly
             code.writeStartProgram();
         }
     }
 
 
+    /**
+     * Write assembly for conditional statements
+     *
+     * @param current Node
+     * @param symbolTable SymbolTable
+     * @param errors List of running errors
+     */
     private void conditional(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
 
         if (!current.isLeaf() && current.getValue().equals(ELSE)) {
@@ -64,9 +78,16 @@ public class SemanticEvaluation {
     }
 
 
-    // GET
+
+    /**
+     * Semantic Evaluation on Gets
+     * // TODO Assembly code for get
+     *
+     * @param current Node
+     * @param symbolTable SymbolTable
+     * @param errors List of running errors
+     */
     private void variableGetReference(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
-        // TODO a return type of get?
         if (!current.isLeaf() && current.getValue().equals(VAR_REF)) {
             Node variable = current.getLeftSibling();
             try {
@@ -77,8 +98,11 @@ public class SemanticEvaluation {
                 } else {
                     symbol.initialize();
                 }
-            } catch(Exception e) {
+            } catch(CompilerException e) {
                 errors.add(e);
+            } catch (FatalCompilerException e) {
+                e.printStackTrace();
+                System.exit(-1);
             }
         }
     }
@@ -99,80 +123,104 @@ public class SemanticEvaluation {
             if(!current.isLeaf() && current.getValue().equals(ASSIG_ACTION_1)) {
                  va = new VariableAssig(current.getLeftSibling().getLeftSibling(), symbolTable);
             }
+
+            // We are not at an assignment...move on
             if(va == null) return;
 
+            // Make sure variable assignment exists
             Symbol symbol = symbolTable.validate(va);
-
-
-
-             // Check if this variable as been declared
             if(symbol == null) throw new UndeclardException(current.getPosition(), va);
             else {
+                // We can only have variables here
                 if(!(symbol.getDecl() instanceof VariableDecl)) throw new AlreadyDeclaredException(current.getPosition(), symbol.getDecl().getName());
+
+                // Get Left Hand Side
                 VariableDecl LHSVar = (VariableDecl) symbol.getDecl();
 
+                // Reference the appropriate variable foo vs foo.bar
                 if(va.getAttribute() != null) {
                     LHSVar = LHSVar.getAttribute(va.getAttribute());
                 }
 
-               LHSVar.initialize();
+                // Initialize variable
+                LHSVar.initialize();
 
                 // Now make sure return types match otherwise throw an exception
                 Node expr = current.getRightSibling();
+                // Get the assignment type: a = {expr}
                 String exprType = new Expression(symbolTable).evaluate(expr);
 
+                // Get the offset for assembly (this is the number the value is in the class object)
+                // ex class foo {int a; int b} - b is offset of 2
+                // If null, we are not in a class attribute
                 Integer attributeOffset = symbol.getOffset(LHSVar);
 
-
-
+                // Write assembly
                 code.write(symbol.getAddress(), va, attributeOffset);
-                if (!LHSVar.getType().equals(exprType)) {
+
+                // Make sure the types match
+                if (!LHSVar.getType().toLowerCase().equals(exprType.toLowerCase())) {
                     throw new InvalidTypesException(expr.getPosition(), exprType, LHSVar.getType(), symbol.getDecl().getName());
                 }
-
-
             }
-
-        } catch(Exception e){
+        } catch(CompilerException e){
             errors.add(e);
+        } catch (FatalCompilerException e) {
+            e.printStackTrace();
+            System.exit(-1);
         }
-
     }
 
+    /**
+     *
+     * @param current Node
+     * @param symbolTable SymbolTable
+     * @param errors List of exception
+     */
     private void expressionUse(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
         if(!current.isLeaf() && current.getValue().equals(EXPR_REF)) {
             try {
+                // Evaluate the expression - this pushes all variables to the code stack
                 new Expression(symbolTable).evaluate(current.getLeftSibling());
+
+                // Get action used before expression
                 Node action = current.getLeftSibling().getLeftSibling().getLeftSibling();
+
+                // Special actions
                 if(action.getValue().equals("put")) {
                     code.writePut();
                 } else if(action.getValue().equals("if")){
                     code.writeIf();
                 }
-
-
-            } catch(Exception e) {
+            } catch(CompilerException e) {
                 errors.add(e);
+            } catch (FatalCompilerException e) {
+                e.printStackTrace();
+                System.exit(-1);
             }
         }
+
+        // For loop
         if(!current.isLeaf() && current.getValue().equals(FOR_REL_EXPR)) {
             try {
-
+                // Write for label
                 code.writeStartFor();
 
-
+                // Evaluate expressions in for loop
                 Node relExpr = current.getLeftSibling();
                 Node arithExprLHS = relExpr.getFirstChild();
                 Node relOp = arithExprLHS.getRightSibling();
                 Node arithExprRHS = relOp.getRightSibling();
 
+                // Make sure types match
                 String LHSType = new Expression(symbolTable).arithExpr(arithExprLHS);
                 String RHSType = new Expression(symbolTable).arithExpr(arithExprRHS);
 
-                if (!LHSType.equals(RHSType)) {
+                if (!LHSType.toLowerCase().equals(RHSType.toLowerCase())) {
                     throw new InvalidTypesException(arithExprLHS.getPosition(), LHSType, RHSType);
                 }
 
+                // Write the relative operation
                 if(relOp.getFirstLeafType().equals(Token.EQUALS.toString())) {
                     code.writeEquals();
                 } else if(relOp.getFirstLeafType().equals(Token.GREATER_THAN.toString())) {
@@ -187,58 +235,77 @@ public class SemanticEvaluation {
                     code.writeNotEquals();
                 }
 
+                // Write the branching statement
                 code.writeForBranch();
 
-            } catch(Exception e) {
+            } catch(CompilerException e) {
                 errors.add(e);
+            } catch (FatalCompilerException e) {
+                e.printStackTrace();
+                System.exit(-1);
             }
-
-
         }
+
+        // Write label for FOR end of for loop
         if(!current.isLeaf() && current.getValue().equals(FOR_END)) {
             code.writeEndFor();
-
         }
+        // Write label for FOR start block
         if(!current.isLeaf() && current.getValue().equals(FOR_BLOCK)) {
             code.writeStartForBlock();
         }
 
+        // Write label for FOR assignment start
         if(!current.isLeaf() && current.getValue().equals(FOR_ASSIG)) {
             code.writeForAssig();
         }
 
+        // Write label for FOR end assignment
         if(!current.isLeaf() && current.getValue().equals(END_ASSIG)) {
             code.writeEndForAssig();
         }
     }
 
+    /**
+     *
+     * @param current Node
+     * @param symbolTable SymbolTable
+     * @param errors List of Exceptions
+     */
     private void returnUse(Node current, SymbolTable symbolTable, ArrayList<Exception> errors) {
         if(!current.isLeaf() && current.getValue().equals(RETURN_REF)) {
             try {
+                // Get return type by evaluating return expression
                 String returnType = new Expression(symbolTable).evaluate(current.getLeftSibling());
                 Declaration decl = symbolTable.getDecl();
+
+                // We have to be in a function to have a return
                 if(decl instanceof FunctionDecl) {
-                    FunctionDecl tmp = (FunctionDecl) decl;
-                    if(!tmp.getType().equals(returnType)) {
+                    // Get function
+                    FunctionDecl f = (FunctionDecl) decl;
+                    // Match types
+                    if(!f.getType().toLowerCase().equals(returnType.toLowerCase())) {
                         throw new InvalidTypesException(current.getPosition(), returnType,
-                                tmp.getType(), tmp.getName());
+                                f.getType(), f.getName());
                     }
+
+                    // Write end of function code
                     String address = "";
                     if(symbolTable.getParent().getDecl() instanceof ClassDecl) {
                         address += code.className + symbolTable.getParent().getName();
-                        address += code.functionName + tmp.getName();
+                        address += code.functionName + f.getName();
                     } else {
-                        address += code.functionName + tmp.getName();
+                        address += code.functionName + f.getName();
                     }
 
                     code.writeReturn(address);
                 }
-            } catch(Exception e) {
+            } catch(CompilerException e) {
                 errors.add(e);
+            } catch (FatalCompilerException e) {
+                e.printStackTrace();
+                System.exit(-1);
             }
         }
     }
-
-
-
 }

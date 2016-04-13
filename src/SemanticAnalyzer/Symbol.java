@@ -66,6 +66,9 @@ public class Symbol {
         return rtn;
     }
 
+    /**
+     * Set the variable declaration state to initialized
+     */
     public void initialize() {
         if(decl instanceof VariableDecl) {
             VariableDecl tmp = (VariableDecl) decl;
@@ -78,11 +81,16 @@ public class Symbol {
         return memroyAddress;
     }
 
-    public Integer getOffset(VariableDecl lhs) {
+    /**
+     *
+     * @param v VariableDecl
+     * @return int representing v's position in the class object | null if not found
+     */
+    public Integer getOffset(VariableDecl v) {
         if(decl instanceof VariableDecl){
             VariableDecl tmp = (VariableDecl) decl;
             for(int i=0;i<tmp.getAttributes().size();i++){
-                if(tmp.getAttributes().get(i).getName().equals(lhs.getName())) {
+                if(tmp.getAttributes().get(i).getName().equals(v.getName())) {
                     return i;
                 }
             }

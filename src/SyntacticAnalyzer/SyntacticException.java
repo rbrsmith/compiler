@@ -1,5 +1,6 @@
 package SyntacticAnalyzer;
 
+import CodeGeneration.CompilerException;
 import LexicalAnalyzer.DFA.Position;
 import LexicalAnalyzer.DFA.Token;
 
@@ -8,7 +9,7 @@ import java.util.HashMap;
 /**
  * Thrown when an error occurs during parsing
  */
-public class SyntacticException extends Exception {
+public class SyntacticException extends CompilerException {
     private String msg;
 
     /**

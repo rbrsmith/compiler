@@ -1,6 +1,7 @@
 package SemanticAnalyzer;
 
 
+import CodeGeneration.CodeException;
 import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.Position;
 import SemanticEvaluation.SemanticEvaluation;
@@ -121,7 +122,7 @@ public class Analyzer {
      * Main function used to traverse the parse tree
      * @param errors ArrayList of Exceptions from Syntactic phase, this will be added to as we parse
      */
-    public void analyze(ArrayList<Exception> errors, boolean eval) {
+    public void analyze(ArrayList<Exception> errors, boolean eval)  {
         this.eval = eval;
         analyze(root, errors);
 
@@ -134,7 +135,7 @@ public class Analyzer {
      * @param current Node that we are currently on
      * @param errors ArrayList of Exceptions from Syntactic phase, this will be added to as we parse
      */
-    private void analyze(Node current, ArrayList<Exception> errors) {
+    private void analyze(Node current, ArrayList<Exception> errors)  {
         // Perform any necessary actions
         classDeclaration(current, errors);
         functionDeclaration(current, errors);
@@ -176,7 +177,7 @@ public class Analyzer {
      * @param current Node
      * @param errors ArrayList of Exception to add to
      */
-    private void functionDeclaration(Node current, ArrayList<Exception> errors) {
+    private void functionDeclaration(Node current, ArrayList<Exception> errors)  {
         if (!current.isLeaf() && current.getValue().equals(FUNC_ACTION_1)) {
             Node id = current.getLeftSibling().getLeftSibling().getLeftSibling().getLeftSibling().getLeaf();
             Node type = id.getLeftSibling().getLeaf();
@@ -203,11 +204,13 @@ public class Analyzer {
                 if(symbolTable.getParent().getDecl() instanceof ClassDecl) {
                     address = code.className + symbolTable.getParent().getName();
                     address += code.functionName + f.getName();
-
-                    code.write(address, f, true);
+                    try {
+                        code.write(address, f, true);
+                    } catch(CodeException e) {errors.add(e);};
                 } else {
                     address += code.functionName + f.getName();
-                    code.write(address, f, false);
+                    try {code.write(address, f, false); }
+                    catch(CodeException e) {errors.add(e);};
                 }
             }
             if(!eval) {
@@ -339,7 +342,8 @@ public class Analyzer {
     private void endScope(Node current, ArrayList<Exception> errors) {
         if (!current.isLeaf() && current.getValue().equals(SCOPE_CHANGE_ACTION)) {
             if(eval) {
-                code.writeEnd(symbolTable.getDecl());
+                try { code.writeEnd(symbolTable.getDecl()); }
+                catch(CodeException e) {errors.add(e);}
             }
             symbolTable = symbolTable.getParent();
         }

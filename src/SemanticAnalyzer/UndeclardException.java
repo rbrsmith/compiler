@@ -1,12 +1,13 @@
 package SemanticAnalyzer;
 
+import CodeGeneration.CompilerException;
 import LexicalAnalyzer.DFA.Position;
 import SemanticEvaluation.VariableReference;
 
 /**
  * Thrown when we are assigning a variable that has not been declared
  */
-public class UndeclardException extends Exception {
+public class UndeclardException extends CompilerException {
 
     public UndeclardException(Position pos, VariableAssig va) {
         super("Semantic Error at: " + pos + ".  Undeclared element in '" + va + "'.");

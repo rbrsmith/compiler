@@ -1,0 +1,17 @@
+Table Name: Global
+-------
+PROGRAM
+FUNCTION		Type: int,	Name: random
+-------
+
+Table Name: PROGRAM
+-------
+UN-INITIALIZED VAR		Type: int,	Name: a
+INITIALIZED VAR		Type: int,	Name: c
+INITIALIZED VAR		Type: int,	Name: d
+-------
+
+Table Name: random
+-------
+-------
+

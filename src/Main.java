@@ -23,6 +23,7 @@ public class Main {
             String sourceCodePath = args[0];
             String grammarPath = args[1];
             String base = args[0].substring(0, args[0].lastIndexOf(File.separator));
+            String parseTableOut = base + File.separator + "parse.txt";
             String derivationOut = base + File.separator + "derivation.txt";
             String errorOut = base + File.separator + "errors.txt";
             String symbolsOut = base + File.separator + "symbols.txt";
@@ -36,6 +37,13 @@ public class Main {
                 // Parse the source code
                 Tuple<ArrayList<Exception>, ArrayList<ArrayList<String>>> result =
                         grammar.LL(new File(sourceCodePath));
+
+
+                // Save parse table and other items
+                PrintWriter parseWriter = new PrintWriter(parseTableOut, "UTF-8");
+                parseWriter.write(grammar.toString());
+                parseWriter.close();
+
 
                 // Save derivation to out file
                 PrintWriter derivationWriter = new PrintWriter(derivationOut, "UTF-8");
@@ -53,7 +61,6 @@ public class Main {
                 PrintWriter errorWriter = new PrintWriter(errorOut, "UTF-8");
                 for(Exception e : result.getX()) {
                     System.out.println(e);
-                    e.printStackTrace();
                     errorWriter.write(e + "\n");
                 }
                 errorWriter.close();

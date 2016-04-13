@@ -2,8 +2,10 @@ class foo {
 	int var1;
 	int var2;
 	int getSum(int a, int b) {
-		put(var1);
 		return (a+b);
+	};
+	int putVar() {
+		put(var1);
 	};
 
 };
@@ -20,6 +22,7 @@ class bar {
 program {
 	foo cls;
 	bar cls2;
+	int res;
 	put(cls.getSum(4,5));
 	put(cls2.getProduct(3,3));
 
@@ -31,6 +34,9 @@ program {
 
 	put(cls.var1 + cls.var2);
 	put(cls2.var1 + cls2.var2);
+
+	// TO FIX	
+	//res = cls.putVar();
 
 	
 };

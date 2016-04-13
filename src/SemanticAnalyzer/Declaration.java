@@ -1,8 +1,9 @@
 package SemanticAnalyzer;
 
-import CodeGeneration.CodeGenerator;
-
+/**
+ * Interfacec for Functions, Variables and Classes
+ */
 public interface Declaration {
-    public String getName();
+    String getName();
 
 }

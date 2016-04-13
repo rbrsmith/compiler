@@ -410,11 +410,8 @@ public class Grammar {
         buffer.close();
 
 
-        if(errors.size() == 0) {
-            semanticAnalyzer.analyze(errors, false);
-            semanticAnalyzer.analyze(errors, true);
-        }
-
+        semanticAnalyzer.analyze(errors, false);
+        semanticAnalyzer.analyze(errors, true);
 
         Tuple rtnTuple = new Tuple();
         rtnTuple.setX(errors);

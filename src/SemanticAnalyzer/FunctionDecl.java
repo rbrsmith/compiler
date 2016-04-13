@@ -1,6 +1,5 @@
 package SemanticAnalyzer;
 
-import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.Reserved;
 
 import java.util.ArrayList;

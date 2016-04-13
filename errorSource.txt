@@ -1,0 +1,23 @@
+program {
+
+
+	int a
+	int b;
+	int c;
+	int d;
+
+	b = 9.0;
+	put(b);
+	c = rand();
+
+	d = 5.0;
+	e = 4;
+
+	d = 4 + 9 + 2.0;
+	
+}; 
+
+int random() {
+
+};
+$

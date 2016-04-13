@@ -1,8 +1,6 @@
 package SemanticAnalyzer;
 
 
-import CodeGeneration.CodeGenerator;
-
 /**
  * Wrapper for a class declaration
  */

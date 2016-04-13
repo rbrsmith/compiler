@@ -1,18 +1,17 @@
 package SemanticAnalyzer;
 
+import CodeGeneration.CompilerException;
 import LexicalAnalyzer.DFA.Token;
-import SemanticEvaluation.VariableReference;
+import SemanticEvaluation.*;
 import SyntacticAnalyzer.Grammar;
-import SyntacticAnalyzer.SyntacticException;
 import SyntacticAnalyzer.Tuple;
 
-import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.ArrayList;
 
 /**
  * Class holding an assignment of a variable
  */
-public class VariableAssig {
+public class VariableAssig implements Variable{
 
 
     // ex a = 5;
@@ -30,7 +29,7 @@ public class VariableAssig {
      * Constructor
      * @param variable Node representing an ID, V1 or a Variable
      */
-    public VariableAssig(Node variable, SymbolTable symbolTable) throws Exception {
+    public VariableAssig(Node variable, SymbolTable symbolTable) throws CompilerException, FatalCompilerException {
         name = null;
         arraySize = 0;
         attributeName = null;
@@ -63,41 +62,16 @@ public class VariableAssig {
     }
 
 
-
     /**
-     * Analyze a V1
-     * @param V1 Node representing a V1 tree
+     *
+     * @param V1 Node
+     * @param va VariableAssignment to be updated with any information
+     * @throws Exception
      */
-//    private void V1(Node V1) {
-//        ArrayList<Tuple> tokens = V1.getTokens();
-//        if(tokens.size() == 0) {
-//            return;
-//        }
-//        VariableAssig current = this;
-//        for(Tuple t: tokens) {
-//            if(t.getX().equals(Token.DOT.toString())) {
-//                VariableAssig next = new VariableAssig();
-//                current.attributeName = next;
-//                current = next;
-//            } else if(t.getX().equals(Token.ID.toString())) {
-//                current.name = t.getY().toString();
-//            } else if(t.getX().equals(Token.INTEGER.toString())) {
-//                // This only works for simple arrays, any array that has an expression
-//                // As the index wont work
-//                // TODO - anaylze expr ex: indiceR
-//                current.arraySize += 1;
-//            }
-//        }
-//
-//    }
-
-    private void V1(Node V1, VariableAssig va) throws Exception {
-//        V1 -> indiceR V2
-//        V2 -> DOT variable
-//        V2 -> EPSILON
+    private void V1(Node V1, VariableAssig va) throws CompilerException, FatalCompilerException {
         Node indiceR = V1.getFirstChild();
-        // Kind of a hack here
         ArrayList<Tuple> tokens = indiceR.getTokens();
+        // Determine array dimension
         for(Tuple token: tokens) {
             if(token.getX().equals(Token.DOT.toString())) break;
             if(token.getX().equals(Token.ASSIGNMENT.toString())) break;
@@ -107,10 +81,11 @@ public class VariableAssig {
             }
         }
 
+        // Get access to indiceR function
         VariableReference vr = new VariableReference(symbolTable);
         vr.indiceR(indiceR);
 
-        // TODO VR in indiceR
+        // Continue evaluation down the tree
         Node V2 = indiceR.getRightSibling();
         if(V2.getFirstLeafType().equals(Grammar.EPSILON)) return;
         else {
@@ -127,7 +102,7 @@ public class VariableAssig {
      * @param variable Node representing a Variable tree
      * @return VariableAssig if we find a variable assignment | Null otherwise
      */
-    public VariableAssig variable(Node variable, VariableAssig va) throws Exception {
+    public VariableAssig variable(Node variable, VariableAssig va) throws CompilerException, FatalCompilerException {
         Node firstLeaf = variable.getFirstChild().getLeaf();
         Tuple tkn = firstLeaf.getLeafValue();
         if(tkn.getX().equals(Token.ID.toString())) {

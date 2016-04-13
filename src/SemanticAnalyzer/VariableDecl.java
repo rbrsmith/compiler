@@ -1,11 +1,10 @@
 package SemanticAnalyzer;
 
-import CodeGeneration.CodeGenerator;
 import LexicalAnalyzer.DFA.Reserved;
+import SemanticEvaluation.Variable;
 import SemanticEvaluation.VariableReference;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
 /**
@@ -70,7 +69,7 @@ public class VariableDecl implements Declaration {
         if(initialize) {
             rtn += "INITIALIZED ";
         } else {
-            rtn += "UN-INITIALIED ";
+            rtn += "UN-INITIALIZED ";
         }
         rtn += "VAR\t\tType: "+type+",\tName: "+name;
         if(sizes.size() != 0) rtn += ",\tSize: ";
@@ -115,7 +114,15 @@ public class VariableDecl implements Declaration {
         return initialize;
     }
 
-    public VariableDecl getAttribute(VariableAssig attribute) {
+    /**
+     *
+     * If this declared is complex (foo.bar)
+     * Check to see if bar is registered with this foo object
+     *
+     * @param attribute Variable we want to look up
+     * @return VariableDecl of attribute
+     */
+    public VariableDecl getAttribute(Variable attribute) {
         for(VariableDecl v : attributes) {
             if(v.getName().equals(attribute.getName())) {
                 return v;
@@ -125,21 +132,15 @@ public class VariableDecl implements Declaration {
     }
 
 
-    public VariableDecl getAttribute(VariableReference attribute) {
-        for(VariableDecl v : attributes) {
-        if(v.getName().equals(attribute.getName())) {
-            return v;
-        }
-    }
-        return null;
-    }
-
+    /**
+     *
+     * @param attributes List of VariableDecl to be set as attributes
+     */
     public void setAttributes(ArrayList<VariableDecl> attributes) {
         for(VariableDecl vd: attributes) {
             this.attributes.add(new VariableDecl(vd, false));
         }
     }
-
 
     public ArrayList<VariableDecl> getAttributes() {
         return attributes;

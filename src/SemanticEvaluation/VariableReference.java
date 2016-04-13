@@ -1,64 +1,64 @@
 package SemanticEvaluation;
 
 import CodeGeneration.CodeGenerator;
+import CodeGeneration.CompilerException;
 import LexicalAnalyzer.DFA.Token;
 import SemanticAnalyzer.*;
 import SyntacticAnalyzer.Grammar;
 
 import java.util.ArrayList;
 
-public class VariableReference {
+/**
+ * Class used whenever we encoutner a variable in the Right Hand Side (most often in an expression)
+ */
+public class VariableReference implements Variable {
 
-
-
-    // ex a = 5;
     private String name;
-    // ex a[2] = 5;
-    // We dont know if a[3] is out of bounds... but we can tell if a[2][3] is wrong dimension
     private int size;
-    // ex a.b = 5;
     private VariableReference attribute;
+
+    private String type;
+
+    // Variables used within this variable refernce
+    // Ex a = b(c(d)) - c and d are sub variables
     private ArrayList<VariableReference> subVariables;
 
+    // Parameters if this is a function
     private ArrayList<VariableReference> params;
 
     private SymbolTable symbolTable;
 
-    private boolean inParam;
-
     private CodeGenerator code;
 
-    private String type;
 
-    public VariableReference(Node id, SymbolTable symbolTable) throws Exception {
+    public VariableReference(Node id, SymbolTable symbolTable) throws CompilerException, FatalCompilerException {
         this.name = id.getFirstLeafValue();
         this.size = 0;
         this.attribute = null;
         this.subVariables = new ArrayList<>();
         this.params = new ArrayList<>();
         this.symbolTable = symbolTable;
-        this.inParam = false;
         this.code = CodeGenerator.getInstance();
         this.type = null;
+
         Node F1 = id.getRightSibling();
         Node F1First = F1.getFirstChild();
+
+        // Start evaluation
         if(F1First.getValue().equals("indiceR")) {
             indiceR(F1First);
             F2(F1First.getRightSibling());
         } else if(F1First.getValue().equals("F3")) {
             F3(F1First);
         }
-//        factor -> id F1
-//        F1 -> indiceR F2
-//        F1 -> F3
-//        F2 -> DOT factor
-//        F2 -> EPSILON
-//        F3 -> ORB aParams CRB
-
     }
 
 
-
+    /**
+     * Empty constructor - mostly used for parameter building on numbers
+     * Ex: a.b(3) - 3 would use this
+     * @param symbolTable
+     */
     public VariableReference(SymbolTable symbolTable) {
         this.name = null;
         this.size = 0;
@@ -78,59 +78,65 @@ public class VariableReference {
         return this.type;
     }
 
-
-
-    public void indiceR(Node indiceR) throws Exception {
-//
-//        indiceR -> indice indiceR
-//        indiceR -> EPSILON
+    /**
+     *
+     * @param indiceR Node
+     */
+    public void indiceR(Node indiceR) throws CompilerException, FatalCompilerException {
         if(indiceR.getFirstLeafType().equals(Grammar.EPSILON)) return;
         else {
             indice(indiceR.getFirstChild());
             indiceR(indiceR.getFirstChild().getRightSibling());
         }
-
     }
 
-    private void indice(Node indice) throws Exception {
-        //  OSB arithExpr CSB
+    /**
+     *
+     * @param indice Node
+     */
+    private void indice(Node indice) throws CompilerException, FatalCompilerException {
         this.size += 1;
         Node arithExpr = indice.getFirstChild().getRightSibling();
         arithExpr(arithExpr);
     }
 
-    private void arithExpr(Node arithExpr) throws Exception {
-        //term arithExprRight
+    /**
+     *
+     * @param arithExpr Node
+     */
+    private void arithExpr(Node arithExpr) throws CompilerException, FatalCompilerException {
         term(arithExpr.getFirstChild());
         arithExprRight(arithExpr.getFirstChild().getRightSibling());
     }
 
-    private void term(Node term) throws Exception {
-        //factor termRight
+    /**
+     *
+     * @param term Node
+     */
+    private void term(Node term) throws CompilerException, FatalCompilerException {
         factor(term.getFirstChild());
         termRight(term.getFirstChild().getRightSibling());
     }
 
 
-    private void factor(Node factor) throws Exception {
-//        factor -> id F1
-//        factor -> num
-//        factor -> ORB arithExpr CRB
-//        factor -> not factor
-//        factor -> sign factor
-
+    /**
+     *
+     * @param factor Node
+     */
+    private void factor(Node factor) throws CompilerException, FatalCompilerException {
         Node first = factor.getFirstChild();
         switch (first.getValue()) {
             case "id":
+                // We've got another variable inside this variable
                 subVariables.add(new VariableReference(first, symbolTable));
 
                 Symbol s;
                 VariableDecl tmp;
+                // Make sure all subvariables are initialized and valide
                 for(VariableReference vrS: subVariables) {
                     s = symbolTable.validate(vrS);
                     if(s == null) throw new UndeclardException(first.getPosition(), vrS);
                     tmp = (VariableDecl) s.getDecl();
-
 
                     if(vrS.getAttribute() != null) {
                         tmp = tmp.getAttribute(vrS.getAttribute());
@@ -141,19 +147,17 @@ public class VariableReference {
                         if (!tmp.isInitialized()) throw new UninitializedException(first.getPosition(), tmp);
                     }
                 }
-
                 break;
             case "num":
                 Node num = first;
                 String val = first.getFirstLeafType();
-                if(val.equals("INTEGER")) {
+                if(val.equals(Token.INTEGER.toString())) {
                     Node sign = num.getLeftSibling();
                     code.writeNum(num.getFirstLeafValue());
-
                     if(sign.getValue().equals("addOp")) {
+                        // Make sure negative numbers are negative
                         code.writeSign(sign.getFirstLeafType());
                     }
-
                 }
                 break;
             case "ORB":
@@ -169,16 +173,17 @@ public class VariableReference {
 
     }
 
-    private void F2(Node F2) throws Exception {
-//        F2 -> DOT factor
-//        F2 -> EPSILON
+    /**
+     *
+     * @param F2 Node
+     */
+    private void F2(Node F2) throws CompilerException, FatalCompilerException {
         if(F2.getFirstLeafType().equals(Grammar.EPSILON)) return;
         else {
-            // Dot - we have an attribute
             Node factor = F2.getFirstChild().getRightSibling();
             Node first = factor.getFirstChild();
             if(first.getValue().equals("id")) {
-                // Attribute
+                // We have an attribute
                 attribute = new VariableReference(first, symbolTable);
             } else {
                 factor(factor);
@@ -188,10 +193,11 @@ public class VariableReference {
     }
 
 
-    private void arithExprRight(Node arithExprRight) throws Exception {
-//
-//        arithExprRight -> EPSILON
-//        arithExprRight -> addOp term arithExprRight
+    /**
+     *
+     * @param arithExprRight Node
+     */
+    private void arithExprRight(Node arithExprRight) throws CompilerException, FatalCompilerException {
         if(arithExprRight.getFirstLeafType().equals(Grammar.EPSILON)) return;
         else {
             Node addOp = arithExprRight.getFirstChild();
@@ -200,7 +206,7 @@ public class VariableReference {
             term(term);
             arithExprRight(arithExprRight2);
 
-
+            // Write assembly
             if(addOp.getFirstLeafType().equals(Token.SUBTRACTION.toString())) {
                 code.writeSub();
             } else if(addOp.getFirstLeafType().equals(Token.ADDITION.toString())) {
@@ -211,10 +217,11 @@ public class VariableReference {
     }
 
 
-    private void termRight(Node termRight) throws Exception {
-//
-//        termRight -> EPSILON
-//        termRight -> multOp factor termRight
+    /**
+     *
+     * @param termRight Node
+     */
+    private void termRight(Node termRight) throws CompilerException, FatalCompilerException {
         if(termRight.getFirstLeafType().equals(Grammar.EPSILON)) return;
 
         Node factor = termRight.getFirstChild().getRightSibling();
@@ -224,24 +231,28 @@ public class VariableReference {
 
         Node multOp = termRight.getFirstChild();
 
+        // Write assembly
         if(multOp.getFirstLeafType().equals(Token.MULTIPLICATION.toString())) {
             code.writeMultiply();
         } else if(multOp.getFirstLeafType().equals(Token.DIVISION.toString())) {
             code.writeDivide();
         }
-
     }
 
-    private void F3(Node F3) throws Exception {
-        //ORB aParams CRB
+    /**
+     *
+     * @param F3 Node
+     */
+    private void F3(Node F3) throws CompilerException, FatalCompilerException {
         Node aParams = F3.getFirstChild().getRightSibling();
         aParams(aParams);
-
     }
 
-    private void aParams(Node aParams) throws Exception {
-//        aParams -> expr aParamsTailR
-//        aParams -> EPSILON
+    /**
+     *
+     * @param aParams Node
+     */
+    private void aParams(Node aParams) throws CompilerException, FatalCompilerException {
         if(aParams.getFirstLeafType().equals(Grammar.EPSILON)) return;
         Node expr = aParams.getFirstChild();
         Node aParamsTailR = expr.getRightSibling();
@@ -249,16 +260,23 @@ public class VariableReference {
         aParamsTailR(aParamsTailR);
     }
 
-    private void expr(Node expr) throws Exception {
+    /**
+     *
+     * @param expr Node
+     */
+    private void expr(Node expr) throws CompilerException, FatalCompilerException {
         Expression expression = new Expression(symbolTable);
-        // Makes sure verything initialized fine and dandy
         expression.evaluate(expr);
+        // Any variables encountered in the expression are treated as parameters
+        // Expression handles if a variable should or should not be a parameter
         params.addAll(expression.getReferencedVariables());
     }
 
-    private void aParamsTailR(Node aParamsTailR) throws Exception {
-//        aParamsTailR -> aParamsTail aParamsTailR
-//        aParamsTailR -> EPSILON
+    /**
+     *
+     * @param aParamsTailR Node
+     */
+    private void aParamsTailR(Node aParamsTailR) throws CompilerException, FatalCompilerException {
         if(aParamsTailR.getFirstLeafType().equals(Grammar.EPSILON)) return;
         Node aParamsTail = aParamsTailR.getFirstChild();
         Node aParamsTailR2 = aParamsTail.getRightSibling();
@@ -266,8 +284,11 @@ public class VariableReference {
         aParamsTailR(aParamsTailR2);
     }
 
-    private void aParamsTail(Node aParamsTail) throws Exception {
-        //COMMA expr
+    /**
+     *
+     * @param aParamsTail Node
+     */
+    private void aParamsTail(Node aParamsTail) throws CompilerException, FatalCompilerException {
         Node expr = aParamsTail.getFirstChild().getRightSibling();
         Expression expression = new Expression(symbolTable);
         expression.evaluate(expr);
@@ -294,10 +315,6 @@ public class VariableReference {
 
     public VariableReference getAttribute() {
         return attribute;
-    }
-
-    public ArrayList<VariableReference> getSubVariables() {
-        return subVariables;
     }
 
     public ArrayList<VariableReference> getParams() {

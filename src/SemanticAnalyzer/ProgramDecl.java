@@ -1,7 +1,8 @@
 package SemanticAnalyzer;
 
-import CodeGeneration.CodeGenerator;
-
+/**
+ * Program Declaration Object
+ */
 public class ProgramDecl implements Declaration {
 
     private String name;
