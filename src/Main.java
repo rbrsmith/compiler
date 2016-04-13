@@ -16,13 +16,13 @@ public class Main {
      */
     public static void main(String[] args) {
         if(args.length < 2) {
-            System.out.println("Error.  Unable to find source code or grammar.  " +
-                    "Make sure the program is called: java Main /path/to/source/code /path/to/grammar");
+            System.out.println("Error.  Unable to find source code.  " +
+                    "Make sure the program is called: java Main /path/to/source/code");
         } else {
             // Prepare inputs / outputs
             String sourceCodePath = args[0];
-            String grammarPath = args[1];
             String base = args[0].substring(0, args[0].lastIndexOf(File.separator));
+            String grammarPath = base + File.separator + "src" + File.separator + "grammar.txt";
             String parseTableOut = base + File.separator + "parse.txt";
             String derivationOut = base + File.separator + "derivation.txt";
             String errorOut = base + File.separator + "errors.txt";
