@@ -21,8 +21,10 @@ public class Main {
         } else {
             // Prepare inputs / outputs
             String sourceCodePath = args[0];
+            File currDir = new File(".");
             String base = args[0].substring(0, args[0].lastIndexOf(File.separator));
-            String grammarPath = base + File.separator + "src" + File.separator + "Grammar.txt";
+            String grammarPath = currDir.getAbsolutePath().substring(0, currDir.getAbsolutePath().length()-1);
+            grammarPath +=  File.separator + "src" + File.separator + "Grammar.txt";
             String parseTableOut = base + File.separator + "parse.txt";
             String derivationOut = base + File.separator + "derivation.txt";
             String errorOut = base + File.separator + "errors.txt";
