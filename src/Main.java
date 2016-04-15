@@ -15,14 +15,14 @@ public class Main {
      * @param args String Array, args[0] must be full path to the sourcec code
      */
     public static void main(String[] args) {
-        if(args.length < 2) {
+        if(args.length < 1) {
             System.out.println("Error.  Unable to find source code.  " +
                     "Make sure the program is called: java Main /path/to/source/code");
         } else {
             // Prepare inputs / outputs
             String sourceCodePath = args[0];
             String base = args[0].substring(0, args[0].lastIndexOf(File.separator));
-            String grammarPath = base + File.separator + "src" + File.separator + "grammar.txt";
+            String grammarPath = base + File.separator + "src" + File.separator + "Grammar.txt";
             String parseTableOut = base + File.separator + "parse.txt";
             String derivationOut = base + File.separator + "derivation.txt";
             String errorOut = base + File.separator + "errors.txt";
@@ -80,9 +80,9 @@ public class Main {
 
 
             } catch(FileNotFoundException e) {
-                System.out.println("Unable to find grammar or source code");
+                System.out.println("Unable to find source code");
             } catch(IOException ie){
-                System.out.println("Error reading grammar or source code");
+                System.out.println("Error reading source code");
             } catch(AmbiguousGrammarException ame) {
                 System.out.println("Error grammar contains ambiguities!");
             }
